@@ -19,6 +19,8 @@
 # License along with INGInious.  If not, see <http://www.gnu.org/licenses/>.
 """ Starts the frontend """
 
+import argparse
+
 import web
 
 from frontend import submission_manager
@@ -75,5 +77,10 @@ def get_app(config_file):
     return appli
 
 if __name__ == "__main__":
-    app = get_app("./configuration.json")
+    # parse args
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-c", "--configfile", default="./configuration.json", help="Configuration file to use. By default, it is ./configuration.json")
+    args = parser.parse_args()
+
+    app = get_app(args.configfile)
     app.run()

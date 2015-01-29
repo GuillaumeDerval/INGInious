@@ -19,11 +19,17 @@
 # License along with INGInious.  If not, see <http://www.gnu.org/licenses/>.
 """ Starts an agent """
 
+import argparse
 import logging
+import commentjson
 
 from backend_agent.agent import Agent
-
 if __name__ == "__main__":
+    # parse args
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-c", "--configfile", default="./configuration.json", help="Configuration file to use. By default, it is ./configuration.json")
+    args = parser.parse_args()
+
     # create logger
     logger = logging.getLogger("agent")
     logger.setLevel(logging.WARN)
@@ -33,5 +39,14 @@ if __name__ == "__main__":
     ch.setFormatter(formatter)
     logger.addHandler(ch)
 
+    # get config file
+    try:
+        config = commentjson.load(open(args.configfile))
+    except Exception as e:
+        logger.error("Cannot read configuration file! %s", str(e))
+        exit(1)
+
     # Start the agent
-    Agent(5001, {"default": "ingi/inginious-c-default", "sekexe": "ingi/inginious-c-sekexe"}, tmp_dir="/agent_tmp")
+    Agent(config.get('local_agent_port', 5001),
+          config.get('containers', {"default": "ingi/inginious-c-default", "sekexe": "ingi/inginious-c-sekexe"}),
+          tmp_dir=config.get("local_agent_tmp_dir", "/tmp/inginious_agent"))

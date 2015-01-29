@@ -1,11 +1,45 @@
+# This is an example of configuration file
+# for both the frontend and the agent.
+# you can put comments in this JSON file.
+
+# Some part of this file are common for the frontend and for the agent.
+# If you use both on the same machine, you can have a single configuration file
+# containing everything. If not, you can remove uneeded part from this file.
+
+# This file should be properly read and modified, then renamed as
+# configuration.json. If you wish to use a different name for this file,
+# use the -c switch when you start app_agent or app_frontend.
 {
+    ##############################################
+    # Part common to the frontend and the agents #
+    ##############################################
+    
+    # Location of the task directory
     "tasks_directory": "./tasks",
     
+    # Aliases for containers.
+    # Only containers listed here can be used by tasks
     "containers": {
     	"default": "ingi/inginious-c-default",
     	"sekexe": "ingi/inginious-c-sekexe"
     },
     
+    ##############################################
+    #        Part used only by the agents        #
+    ##############################################
+    
+    # Port on which the local agent will listen
+    "local_agent_port": 5001,
+    
+    # Tmp folder used by the agent.
+    "local_agent_tmp_dir": "/tmp/inginious_agent",
+    
+    ##############################################
+    #       Part used only by the frontend       #
+    ##############################################
+    
+    # List of the agents to which the backend will try
+    # to connect
     "agents": [
 		{
 			"host": "192.168.59.103",
@@ -13,8 +47,10 @@
 		}
 	],
     
+    # MongoDB options
     "mongo_opt": {"host": "localhost", "database":"INGInious"},
     
+    # Plugins that will be loaded by the frontend
     "plugins": [
         {
             "plugin_module": "frontend.plugins.git_repo",
@@ -26,5 +62,6 @@
         }
     ],
     
+    # Allow HTML in tasks? can be 1, 0 or "tidy" (to run HTMLTidy)
     "allow_html": "tidy"
 }
