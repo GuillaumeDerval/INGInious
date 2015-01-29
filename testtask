@@ -20,10 +20,10 @@
 import difflib
 import getopt
 import glob
-import json
 import os
 import sys
 
+import commentjson
 import docker
 
 import common.courses
@@ -54,7 +54,7 @@ def run_task(task, inputdata):
 
     # Start the container
     dock.start(container_id, binds={os.path.abspath(taskdir): {'ro': True, 'bind': '/ro/task'}})
-    dock.attach_socket(container_id, {'stdin': 1, 'stream': 1}).send(json.dumps(inputdata) + "\n")
+    dock.attach_socket(container_id, {'stdin': 1, 'stream': 1}).send(commentjson.dumps(inputdata) + "\n")
     dock.wait(container_id)
 
     # Get the std outputs
@@ -121,7 +121,7 @@ for filename in inputfiles:
     except IOError as e:
         print e
         exit(2)
-    data = json.load(inputfile)
+    data = commentjson.load(inputfile)
     data['limits'] = limits
 
     # Run the task
@@ -131,7 +131,7 @@ for filename in inputfiles:
         print '\x1b[31;1m' + stderr + '\033[0m'
 
     # Open freshly computed json
-    result = json.loads(stdout.strip('\0\n '))
+    result = commentjson.loads(stdout.strip('\0\n '))
 
     # Print stdout if verbose
     if verbose:

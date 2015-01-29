@@ -17,13 +17,15 @@
 # You should have received a copy of the GNU Affero General Public
 # License along with INGInious.  If not, see <http://www.gnu.org/licenses/>.
 """ A simple job manager for EDX """
-import json
+import commentjson
 
 import web
 
 from backend.job_manager_sync import JobManagerSync
 from common.courses import Course
 import frontend.submission_manager
+
+
 def init(plugin_manager, config):
     """
         Init the edx plugin.
@@ -73,30 +75,30 @@ def init(plugin_manager, config):
             post_input = web.data()
 
             try:
-                decoded_input = json.loads(post_input)
+                decoded_input = commentjson.loads(post_input)
             except:
-                return json.dumps({"correct": None, "score": 0, "msg": "<p>Internal grader error: cannot decode POST</p>"})
+                return commentjson.dumps({"correct": None, "score": 0, "msg": "<p>Internal grader error: cannot decode POST</p>"})
 
             if "xqueue_body" not in decoded_input:
-                return json.dumps({"correct": None, "score": 0, "msg": "<p>Internal grader error: no xqueue_body in POST</p>"})
+                return commentjson.dumps({"correct": None, "score": 0, "msg": "<p>Internal grader error: no xqueue_body in POST</p>"})
             try:
-                edx_input = json.loads(decoded_input["xqueue_body"])
-                taskid = json.loads(edx_input["grader_payload"])["tid"]
+                edx_input = commentjson.loads(decoded_input["xqueue_body"])
+                taskid = commentjson.loads(edx_input["grader_payload"])["tid"]
             except:
-                return json.dumps({"correct": None, "score": 0, "msg": "<p>Internal grader error: cannot decode JSON</p>"})
+                return commentjson.dumps({"correct": None, "score": 0, "msg": "<p>Internal grader error: cannot decode JSON</p>"})
 
             try:
                 task = course.get_task(taskid)
             except:
-                return json.dumps({"correct": None, "score": 0, "msg": "<p>Internal grader error: unknown task {}</p>".format(taskid)})
+                return commentjson.dumps({"correct": None, "score": 0, "msg": "<p>Internal grader error: unknown task {}</p>".format(taskid)})
 
             if not task.input_is_consistent(edx_input):
-                return json.dumps({"correct": None, "score": 0, "msg": "<p>Internal grader error: input not consistent with task</p>"})
+                return commentjson.dumps({"correct": None, "score": 0, "msg": "<p>Internal grader error: input not consistent with task</p>"})
 
             try:
                 job_return = job_manager_sync.new_job(task, edx_input, "Plugin - EDX")
             except:
-                return json.dumps({"correct": None, "score": 0, "msg": "<p>Internal grader error: error while grading submission</p>"})
+                return commentjson.dumps({"correct": None, "score": 0, "msg": "<p>Internal grader error: error while grading submission</p>"})
 
             try:
                 text = ""
@@ -111,9 +113,9 @@ def init(plugin_manager, config):
                     score = job_return["score"]
 
                 import tidylib
-                out, dummy = tidylib.tidy_fragment(text,options={'output-xhtml':1,'enclose-block-text':1,'enclose-text':1})
-                return json.dumps({"correct": (True if (job_return["result"] == "success") else None), "score": score, "msg": out})
+                out, dummy = tidylib.tidy_fragment(text, options={'output-xhtml': 1, 'enclose-block-text': 1, 'enclose-text': 1})
+                return commentjson.dumps({"correct": (True if (job_return["result"] == "success") else None), "score": score, "msg": out})
             except:
-                return json.dumps({"correct": None, "score": 0, "msg": "<p>Internal grader error: error converting submission result</p>"})
+                return commentjson.dumps({"correct": None, "score": 0, "msg": "<p>Internal grader error: error converting submission result</p>"})
 
     plugin_manager.add_page(page_pattern, EDX)

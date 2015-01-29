@@ -19,13 +19,13 @@
 """ Agent, managing docker """
 
 import copy
-import json
 import logging
 import os.path
 from shutil import rmtree
 import thread
 import threading
 
+import commentjson
 import docker
 from docker.utils import kwargs_from_env
 import rpyc
@@ -155,7 +155,7 @@ class Agent(object):
             container_input = {"input": inputdata, "limits": limits}
             if debug:
                 container_input["debug"] = True
-            docker_connection.attach_socket(container_id, {'stdin': 1, 'stream': 1}).send(json.dumps(container_input) + "\n")
+            docker_connection.attach_socket(container_id, {'stdin': 1, 'stream': 1}).send(commentjson.dumps(container_input) + "\n")
         except Exception as e:
             self.logger.warning("Cannot start container! %s", str(e))
             rmtree(container_path)
@@ -188,7 +188,7 @@ class Agent(object):
             # Get logs back
             try:
                 stdout = str(docker_connection.logs(container_id, stdout=True, stderr=False))
-                result = json.loads(stdout)
+                result = commentjson.loads(stdout)
             except:
                 self.logger.warning("Cannot get back stdout of container %s!", container_id)
                 result = {'result': 'crash', 'text': 'The grader did not return a readable output'}

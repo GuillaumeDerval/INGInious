@@ -19,7 +19,7 @@
 """ Modified boxes """
 from abc import ABCMeta, abstractmethod
 import base64
-import json
+import commentjson
 
 import web
 
@@ -78,7 +78,7 @@ class DisplayableFileBox(FileBox, DisplayableBox):
 
     def show(self):
         """ Show FileBox """
-        return str(web.template.render('templates/tasks/').box_file(self.get_complete_id(), self._max_size, self._allowed_exts, json))
+        return str(web.template.render('templates/tasks/').box_file(self.get_complete_id(), self._max_size, self._allowed_exts, commentjson))
 
 
 class DisplayableInputBox(InputBox, DisplayableBox):

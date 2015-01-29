@@ -22,7 +22,7 @@ import codecs
 from collections import OrderedDict
 import copy
 from datetime import datetime, timedelta
-import json
+import commentjson
 
 import pymongo
 import web
@@ -68,7 +68,7 @@ def save_contest_data(course, contest_data):
     course_content = course.get_original_content()
     course_content["contest_settings"] = contest_data
     with codecs.open(course.get_course_descriptor_path(course.get_id()), "w", 'utf-8') as course_file:
-        course_file.write(json.dumps(course_content, sort_keys=False, indent=4, separators=(',', ': ')))
+        course_file.write(commentjson.dumps(course_content, sort_keys=False, indent=4, separators=(',', ': ')))
 
 
 def course_menu(course):

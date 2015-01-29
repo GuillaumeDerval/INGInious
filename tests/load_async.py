@@ -17,22 +17,21 @@
 # You should have received a copy of the GNU Affero General Public
 # License along with INGInious.  If not, see <http://www.gnu.org/licenses/>.
 import Queue
-import json
-import json
 import threading
 import time
 import unittest
 import uuid
 
-import webtest
+import commentjson
 
-from tests import *
 import app_frontend
 import backend
 import common.base
 import frontend
 import frontend.session
 import frontend.submission_manager
+from tests import *
+import webtest
 
 
 class AsyncSubmitter(threading.Thread):
@@ -51,15 +50,15 @@ class AsyncSubmitter(threading.Thread):
         print "\033[1;34m--> STARTING THREAD " + str(self.tid) + "\033[0m"
         t0 = time.time()
 
-        resp = appt.post('/cnp3', {"taskid": "HelloWorld", "input": json.dumps({"student_response": "{Browse \'Hello World!\'}"}), "async": ''})
-        js = json.loads(resp.body)
+        resp = appt.post('/cnp3', {"taskid": "HelloWorld", "input": commentjson.dumps({"student_response": "{Browse \'Hello World!\'}"}), "async": ''})
+        js = commentjson.loads(resp.body)
         assert "status" in js and "jobid" in js and js["status"] == "done"
         sub_id = js["jobid"]
 
         for tries in range(0, 1000):
             time.sleep(1)
             resp = appt.post('/cnp3', {"jobid": sub_id})
-            js = json.loads(resp.body)
+            js = commentjson.loads(resp.body)
             assert "status" in js and "status" != "error"
             if js["status"] == "done":
                 if "result" not in js or js["result"] != "success":

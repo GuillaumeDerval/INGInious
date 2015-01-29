@@ -16,31 +16,34 @@
 #
 # You should have received a copy of the GNU Affero General Public
 # License along with INGInious.  If not, see <http://www.gnu.org/licenses/>.
-import json
 import time
 import unittest
 
-import webtest
+import commentjson
 
-from tests import *
 import app_frontend
 import common.base
 import frontend
 import frontend.session
+from tests import *
+import webtest
+
+
 class web_tasks(unittest.TestCase):
+
     def setUp(self):
-        frontend.session.init(app, {'loggedin':True, 'username':"test", "realname":"Test", "email":"mail@test.com"})
-        
+        frontend.session.init(app, {'loggedin': True, 'username': "test", "realname": "Test", "email": "mail@test.com"})
+
     def test_basic_tasks_list(self):
         '''Tests if a basic course list is correct'''
         print "\033[1m-> web-tasks: course tasks list\033[0m"
         resp = appt.get('/course/test')
-        self.assertEqual(resp.status_int,200)
+        self.assertEqual(resp.status_int, 200)
         resp.mustcontain('Task 1')
         resp.mustcontain('Task 2')
         resp.mustcontain('Task 3')
         resp.mustcontain('Task 4')
-    
+
     def test_decimal_rendering(self):
         '''Tests rendering of a decimal question '''
         print "\033[1m-> web-tasks: decimal-input task rendering\033[0m"
@@ -48,7 +51,7 @@ class web_tasks(unittest.TestCase):
         resp.mustcontain('Header 1')
         resp.mustcontain('input type="number" name="unittest/decimal')
         resp.mustcontain('Here should go some introductory text.')
-    
+
     def test_integer_rendering(self):
         '''Tests rendering of a decimal question '''
         print "\033[1m-> web-tasks: integer-input task rendering\033[0m"
@@ -57,7 +60,7 @@ class web_tasks(unittest.TestCase):
         resp.mustcontain('Header 2')
         resp.mustcontain('input type="number" name="unittest/int')
         resp.mustcontain('Here should go some introductory text.')
-    
+
     def test_multichoice_rendering(self):
         '''Tests rendering of a multichoice question '''
         print "\033[1m-> web-tasks: multichoice-input task rendering\033[0m"
@@ -66,18 +69,18 @@ class web_tasks(unittest.TestCase):
         resp.mustcontain('Header 3')
         resp.mustcontain('type="checkbox" name="unittest"')
         form = resp.form
-        
-        #Check the values of checkbox are logic
+
+        # Check the values of checkbox are logic
         values = ['0', '1', '2', '3']
         form['unittest'] = values
         self.assertIn(form.get('unittest', index=0).value, values)
         self.assertIn(form.get('unittest', index=1).value, values)
         self.assertIn(form.get('unittest', index=2).value, values)
-        
-        resp.mustcontain('Choice 1') # Choices are valid
+
+        resp.mustcontain('Choice 1')  # Choices are valid
         resp.mustcontain('Choice 2')
         resp.mustcontain('Here should go some introductory text.')
-    
+
     def test_multiline_rendering(self):
         '''Tests rendering of a multiline code question '''
         print "\033[1m-> web-tasks: multiline-input task rendering\033[0m"
@@ -85,20 +88,20 @@ class web_tasks(unittest.TestCase):
         resp.mustcontain('Question 4')
         resp.mustcontain('Header 4')
         resp.mustcontain('div id="unittest" class="aceEditor"')
-    
+
     def test_accessibility(self):
         '''Tests accessibility of different tasks '''
         print "\033[1m-> web-tasks: task accessibility\033[0m"
         resp = appt.get('/course/test2')
         resp.mustcontain('Task 1')
-        resp.mustcontain('Task 3') # 1970 - 2033
-        resp.mustcontain('Task 2 (task currently unavailable)') # Accesibility 1970-1970
-    
+        resp.mustcontain('Task 3')  # 1970 - 2033
+        resp.mustcontain('Task 2 (task currently unavailable)')  # Accesibility 1970-1970
+
     def tearDown(self):
         pass
 
 if __name__ == "__main__":
-    if not frontend.configuration.INGIniousConfiguration.get('tests',{}).get('host_url', ''):
+    if not frontend.configuration.INGIniousConfiguration.get('tests', {}).get('host_url', ''):
         unittest.main()
     else:
         print "\033[31;1m-> web-tasks: tests cannot be run remotely\033[0m"

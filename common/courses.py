@@ -17,8 +17,9 @@
 # You should have received a copy of the GNU Affero General Public
 # License along with INGInious.  If not, see <http://www.gnu.org/licenses/>.
 """ Contains the class Course and utility functions """
-import json
 import os.path
+
+import commentjson
 
 from common.base import get_tasks_directory, id_checker
 from common.task_file_managers.tasks_file_manager import TaskFileManager
@@ -53,7 +54,7 @@ class Course(object):
     def __init__(self, courseid):
         """Constructor. courseid is the name of the the folder containing the file course.json"""
 
-        self._content = json.load(open(self.get_course_descriptor_path(courseid), "r"))
+        self._content = commentjson.load(open(self.get_course_descriptor_path(courseid), "r"))
         self._id = courseid
         self._tasks_cache = None
 

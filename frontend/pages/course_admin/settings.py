@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU Affero General Public
 # License along with INGInious.  If not, see <http://www.gnu.org/licenses/>.
 import codecs
-import json
+import commentjson
 
 import web
 
@@ -43,7 +43,7 @@ class CourseSettings(object):
         errors = []
         try:
             data = web.input()
-            course_content = json.load(open(course.get_course_descriptor_path(courseid), "r"))
+            course_content = commentjson.load(open(course.get_course_descriptor_path(courseid), "r"))
             course_content['name'] = data['name']
             if course_content['name'] == "":
                 errors.append('Invalid name')
@@ -84,7 +84,7 @@ class CourseSettings(object):
 
         if len(errors) == 0:
             with codecs.open(course.get_course_descriptor_path(courseid), "w", 'utf-8') as course_file:
-                course_file.write(json.dumps(course_content, sort_keys=False, indent=4, separators=(',', ': ')))
+                course_file.write(commentjson.dumps(course_content, sort_keys=False, indent=4, separators=(',', ': ')))
             errors = None
             course = get_course_and_check_rights(courseid)  # don't forget to reload the modified course
 

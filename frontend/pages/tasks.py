@@ -18,12 +18,12 @@
 # License along with INGInious.  If not, see <http://www.gnu.org/licenses/>.
 """ Task page """
 import base64
-import json
 import mimetypes
 import os
 import posixpath
 import urllib
 
+import commentjson
 import web
 
 from common.base import get_tasks_directory
@@ -105,7 +105,7 @@ class TaskPage(object):
 
                     if not task.input_is_consistent(userinput):
                         web.header('Content-Type', 'application/json')
-                        return json.dumps({"status": "error", "text": "Please answer to all the questions. Your responses were not tested."})
+                        return commentjson.dumps({"status": "error", "text": "Please answer to all the questions. Your responses were not tested."})
                     del userinput['@action']
 
                     # Get debug info if the current user is an admin
@@ -115,7 +115,7 @@ class TaskPage(object):
                     submissionid = submission_manager.add_job(task, userinput, debug)
 
                     web.header('Content-Type', 'application/json')
-                    return json.dumps({"status": "ok", "submissionid": str(submissionid)})
+                    return commentjson.dumps({"status": "ok", "submissionid": str(submissionid)})
                 elif "@action" in userinput and userinput["@action"] == "check" and "submissionid" in userinput:
                     if submission_manager.is_done(userinput['submissionid']):
                         web.header('Content-Type', 'application/json')
@@ -124,7 +124,7 @@ class TaskPage(object):
                         return self.submission_to_json(result, User.get_username() in course.get_admins())
                     else:
                         web.header('Content-Type', 'application/json')
-                        return json.dumps({'status': "waiting"})
+                        return commentjson.dumps({'status': "waiting"})
                 elif "@action" in userinput and userinput["@action"] == "load_submission_input" and "submissionid" in userinput:
                     submission = submission_manager.get_submission(userinput["submissionid"])
                     submission = submission_manager.get_input_from_submission(submission)
@@ -159,7 +159,7 @@ class TaskPage(object):
 
         if debug:
             tojson["debug"] = data
-        return json.dumps(tojson, default=str)
+        return commentjson.dumps(tojson, default=str)
 
     def list_multiple_multiple_choices_and_files(self, task):
         """ List problems in task that expect and array as input """

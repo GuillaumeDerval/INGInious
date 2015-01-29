@@ -19,9 +19,9 @@
 """ Manages submissions """
 import base64
 from datetime import datetime
-import json
 
 from bson.objectid import ObjectId
+import commentjson
 
 from backend.job_manager import JobManager
 from frontend.base import get_database, get_gridfs
@@ -114,7 +114,7 @@ def add_job(task, inputdata, debug=False):
         "courseid": task.get_course_id(),
         "taskid": task.get_id(),
         "input": get_gridfs().put(
-            json.dumps(inputdata)),
+            commentjson.dumps(inputdata)),
         "status": "waiting",
         "jobid": jobid,
         "submitted_on": datetime.now()}
@@ -135,7 +135,7 @@ def get_input_from_submission(submission, only_input=False):
         else:
             return submission
     else:
-        inp = json.load(get_gridfs().get(submission['input']))
+        inp = commentjson.load(get_gridfs().get(submission['input']))
         if only_input:
             return inp
         else:

@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU Affero General Public
 # License along with INGInious.  If not, see <http://www.gnu.org/licenses/>.
 """ Configuration for the frontend. Initialize the common libraries. """
-import json
+import commentjson
 import common.base
 
 
@@ -27,7 +27,7 @@ class Configuration(dict):
 
     def load(self, path):
         """ Load the config from a json file """
-        self.update(json.load(open(path, "r")))
+        self.update(commentjson.load(open(path, "r")))
         common.base.init_common_lib(self["tasks_directory"],
                                     self.get('allowed_file_extensions', [".c", ".cpp", ".java", ".oz", ".zip", ".tar.gz", ".tar.bz2", ".txt"]),
                                     self.get('max_file_size', 1024 * 1024))

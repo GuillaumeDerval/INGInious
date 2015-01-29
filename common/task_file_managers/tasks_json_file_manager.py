@@ -18,7 +18,7 @@
 # License along with INGInious.  If not, see <http://www.gnu.org/licenses/>.
 """ JSON task file manager """
 import collections
-import json
+import commentjson
 
 from common.task_file_managers.tasks_file_manager import TaskFileManager
 
@@ -28,11 +28,11 @@ class TaskJSONFileManager(TaskFileManager):
     """ Read and write task descriptions in JSON """
 
     def _get_content(self, content):
-        return json.loads(content, object_pairs_hook=collections.OrderedDict)
+        return commentjson.loads(content, object_pairs_hook=collections.OrderedDict)
 
     @classmethod
     def get_ext(cls):
         return "json"
 
     def _generate_content(self, data):
-        return json.dumps(data, sort_keys=False, indent=4, separators=(',', ': '))
+        return commentjson.dumps(data, sort_keys=False, indent=4, separators=(',', ': '))

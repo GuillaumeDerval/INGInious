@@ -18,11 +18,11 @@
 # License along with INGInious.  If not, see <http://www.gnu.org/licenses/>.
 """ Pages that allow editing of tasks """
 from collections import OrderedDict
-import json
 import os.path
 import re
 from zipfile import ZipFile
 
+import commentjson
 import web
 
 from common.base import id_checker, get_tasks_directory
@@ -66,7 +66,7 @@ class CourseEditTask(object):
             taskid,
             task_data,
             environments,
-            json.dumps(
+            commentjson.dumps(
                 task_data.get(
                     'problems',
                     {})),
@@ -157,7 +157,7 @@ class CourseEditTask(object):
 
         if problem_content["type"] == "custom":
             try:
-                custom_content = json.loads(problem_content["custom"])
+                custom_content = commentjson.loads(problem_content["custom"])
             except:
                 raise Exception("Invalid JSON in custom content")
             problem_content.update(custom_content)
@@ -191,11 +191,11 @@ class CourseEditTask(object):
             try:
                 file_manager = TaskFileManager.get_available_file_managers()[data["@filetype"]](courseid, taskid)
             except Exception as inst:
-                return json.dumps({"status": "error", "message": "Invalid file type: {}".format(str(inst))})
+                return commentjson.dumps({"status": "error", "message": "Invalid file type: {}".format(str(inst))})
             del data["@filetype"]
 
             if problems is None:
-                return json.dumps({"status": "error", "message": "You cannot create a task without subproblems"})
+                return commentjson.dumps({"status": "error", "message": "You cannot create a task without subproblems"})
 
             # Order the problems (this line also deletes @order from the result)
             data["problems"] = OrderedDict([(key, self.parse_problem(val))
@@ -218,13 +218,13 @@ class CourseEditTask(object):
             if data.get("contextIsHTML"):
                 data["contextIsHTML"] = True
         except Exception as message:
-            return json.dumps({"status": "error", "message": "Your browser returned an invalid form ({})".format(str(message))})
+            return commentjson.dumps({"status": "error", "message": "Your browser returned an invalid form ({})".format(str(message))})
 
         # Get the course
         try:
             course = FrontendCourse(courseid)
         except:
-            return json.dumps({"status": "error", "message": "Error while reading course's informations"})
+            return commentjson.dumps({"status": "error", "message": "Error while reading course's informations"})
 
         # Get original data
         try:
@@ -236,7 +236,7 @@ class CourseEditTask(object):
         try:
             FrontendTask(course, taskid, data)
         except Exception as message:
-            return json.dumps({"status": "error", "message": "Invalid data: {}".format(str(message))})
+            return commentjson.dumps({"status": "error", "message": "Invalid data: {}".format(str(message))})
 
         if not os.path.exists(os.path.join(get_tasks_directory(), courseid, taskid)):
             os.mkdir(os.path.join(get_tasks_directory(), courseid, taskid))
@@ -245,14 +245,14 @@ class CourseEditTask(object):
             try:
                 zipfile = ZipFile(task_zip)
             except Exception as message:
-                return json.dumps({"status": "error", "message": "Cannot read zip file. Files were not modified"})
+                return commentjson.dumps({"status": "error", "message": "Cannot read zip file. Files were not modified"})
 
             try:
                 zipfile.extractall(os.path.join(get_tasks_directory(), courseid, taskid))
             except Exception as message:
-                return json.dumps({"status": "error", "message": "There was a problem while extracting the zip archive. Some files may have been modified"})
+                return commentjson.dumps({"status": "error", "message": "There was a problem while extracting the zip archive. Some files may have been modified"})
 
         TaskFileManager.delete_all_possible_task_files(courseid, taskid)
         file_manager.write(data)
 
-        return json.dumps({"status": "ok"})
+        return commentjson.dumps({"status": "ok"})

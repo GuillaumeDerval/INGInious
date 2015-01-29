@@ -18,7 +18,6 @@
 # License along with INGInious.  If not, see <http://www.gnu.org/licenses/>.
 import StringIO
 import base64
-import json
 import os.path
 import tarfile
 import tempfile
@@ -26,6 +25,7 @@ import time
 
 from bson import json_util
 from bson.objectid import ObjectId
+import commentjson
 import web
 
 from frontend.base import get_database, get_gridfs
@@ -77,7 +77,7 @@ class DownloadSubmissionFiles(object):
                     elif sub_folder == 'username':
                         base_path = submission['username'] + '/' + base_path
 
-                submission_json = StringIO.StringIO(json.dumps(submission, default=json_util.default, indent=4, separators=(',', ': ')))
+                submission_json = StringIO.StringIO(commentjson.dumps(submission, default=json_util.default, indent=4, separators=(',', ': ')))
                 submission_json_fname = base_path + str(submission["_id"]) + '.test'
                 info = tarfile.TarInfo(name=submission_json_fname)
                 info.size = submission_json.len

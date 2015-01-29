@@ -17,9 +17,9 @@
 # You should have received a copy of the GNU Affero General Public
 # License along with INGInious.  If not, see <http://www.gnu.org/licenses/>.
 """ Allow the frontend to act as a simple POST grader """
-import json
 import re
 
+import commentjson
 import web
 
 from backend.job_manager_buffer import JobManagerBuffer
@@ -160,47 +160,47 @@ def init(plugin_manager, config):
 
         def POST(self):
             """ POST request """
-            web.header('Access-Control-Allow-Origin','*')
+            web.header('Access-Control-Allow-Origin', '*')
             web.header('Content-Type', 'application/json')
             post_input = web.input()
 
             if "input" in post_input and "taskid" in post_input:
                 # New job
                 try:
-                    task_input = json.loads(post_input.input)
+                    task_input = commentjson.loads(post_input.input)
                 except:
-                    return json.dumps({"status": "error", "status_message": "Cannot decode input"})
+                    return commentjson.dumps({"status": "error", "status_message": "Cannot decode input"})
 
                 try:
                     task = course.get_task(post_input.taskid)
                 except:
-                    return json.dumps({"status": "error", "status_message": "Cannot open task"})
+                    return commentjson.dumps({"status": "error", "status_message": "Cannot open task"})
 
                 if not task.input_is_consistent(task_input):
-                    return json.dumps({"status": "error", "status_message": "Input is not consistent with the task"})
-                
+                    return commentjson.dumps({"status": "error", "status_message": "Input is not consistent with the task"})
+
                 if post_input.get("async") is None:
                     # New sync job
                     try:
                         job_return = job_manager_sync.new_job(task, task_input, "Plugin - Simple Grader")
                     except:
-                        return json.dumps({"status": "error", "status_message": "An internal error occured"})
+                        return commentjson.dumps({"status": "error", "status_message": "An internal error occured"})
 
-                    return json.dumps(dict({"status": "done"}.items() + self.keep_only_config_return_values(job_return).items()))
+                    return commentjson.dumps(dict({"status": "done"}.items() + self.keep_only_config_return_values(job_return).items()))
                 else:
                     # New async job
                     jobid = job_manager_buffer.new_job(task, task_input, "Plugin - Simple Grader")
-                    return json.dumps({"status": "done", "jobid": str(jobid)})
+                    return commentjson.dumps({"status": "done", "jobid": str(jobid)})
             elif "jobid" in post_input:
                 # Get status of async job
                 if job_manager_buffer.is_waiting(post_input["jobid"]):
-                    return json.dumps({"status": "waiting"})
+                    return commentjson.dumps({"status": "waiting"})
                 elif job_manager_buffer.is_done(post_input["jobid"]):
                     job_return = job_manager_buffer.get_result(post_input["jobid"])
-                    return json.dumps(dict({"status": "done"}.items() + self.keep_only_config_return_values(job_return).items()))
+                    return commentjson.dumps(dict({"status": "done"}.items() + self.keep_only_config_return_values(job_return).items()))
                 else:
-                    return json.dumps({"status": "error", "status_message": "There is no job with jobid {}".format(post_input["jobid"])})
+                    return commentjson.dumps({"status": "error", "status_message": "There is no job with jobid {}".format(post_input["jobid"])})
             else:
-                return json.dumps({"status": "error", "status_message": "Unknown request type"})
+                return commentjson.dumps({"status": "error", "status_message": "Unknown request type"})
 
     plugin_manager.add_page(page_pattern, ExternalGrader)
