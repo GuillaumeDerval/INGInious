@@ -8,7 +8,7 @@ then echo "Agent dependencies already installed, skipping installation."
 else
     boot2docker ssh sudo tce-load -wi python-distribute python-dev openssl-1.0.0 compiletc
     boot2docker ssh sudo easy_install pip
-    boot2docker ssh sudo pip install docker-py rpyc cgroup-utils docutils
+    boot2docker ssh sudo pip install docker-py rpyc cgroup-utils docutils commentjson
     boot2docker ssh sudo mkdir /inginious
     boot2docker ssh sudo touch /inginious/agent.installed
     docker pull ingi/inginious-c-default
