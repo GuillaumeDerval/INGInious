@@ -62,6 +62,6 @@
         }
     ],
     
-    # Allow HTML in tasks? can be 1, 0 or "tidy" (to run HTMLTidy)
+    # Allow HTML in tasks? can be true, false or "tidy" (to run HTMLTidy)
     "allow_html": "tidy"
 }

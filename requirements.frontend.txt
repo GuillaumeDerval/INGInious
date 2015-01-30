@@ -1,0 +1,8 @@
+rpyc
+docutils
+commentjson
+pymongo
+pytidylib
+sh
+web.py
+simpleldap

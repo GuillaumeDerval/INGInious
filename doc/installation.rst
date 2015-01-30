@@ -4,19 +4,36 @@ Installation and deployment
 Supported platforms
 -------------------
 
-INGInious is tested under OS X 10.9 and CentOS 7 but will probably run without problems on any
-other Linux distribution and even on Microsoft Windows® (with some adjustments to the
-configuration of Boot2Docker).
+INGInious is tested under OS X 10.10 (using Boot2Docker) and CentOS 7 but will probably run without problems on any
+other Linux distribution and even on Microsoft Windows®.
+
+Simplified architecture
+-----------------------
+
+INGInious is composed of two softwares, the ```frontend``` and the ```agents```, which relies on a library called the ```backend```.
+There are then two component to install in order to run the frontend of INGInious:
+- The frontend itself, which will need a web server like Lighttpd or Apache to handle requests
+- One or more agents, which will handle the grading
+
+The frontend can be located on any machine, as it only needs a web server (you can use the web server included, but it is not
+advised in production environment).
+
+Each agent need to be on a machine running Docker locally, as it needs to access CGroups. It may also need root access.
+The backend (runned by the frontend) and the agents communicate via TCP, the default port being 5001.
+
+Plugins
+-------
+
+The frontend can run plugins. Most of them are shipped with the sources of INGInious but are not activated by default.
 
 Dependencies
 ------------
 
-The backend needs:
+The backend (library used by the frontend and by plugin developers) needs:
 
-- Docker_ 0.11+
 - Python_ 2.7+
-- Docker-py_
 - Docutils
+- RPyC_
 
 The frontend needs:
 
@@ -27,6 +44,15 @@ The frontend needs:
 - PyTidyLib_
 - Python's SH_ lib
 - Web.py_
+- There are also some additional dependencies for some plugins.
+
+The agents need:
+- Docker_ 0.11+
+- Docker-py_
+- RPyC_
+- cgroup-utils_
+- Commentjson_
+- Docutils
 
 .. _Docker: https://www.docker.com
 .. _Docker-py: https://github.com/dotcloud/docker-py
@@ -37,6 +63,9 @@ The frontend needs:
 .. _PyTidyLib: http://countergram.com/open-source/pytidylib/docs/index.html
 .. _SH: http://amoffat.github.io/sh/
 .. _Web.py: http://webpy.org/
+.. _Commentjson: https://pypi.python.org/pypi/commentjson/0.4
+.. _RPyC: http://rpyc.readthedocs.org/en/latest/index.html
+.. _cgroup-utils: https://github.com/peo3/cgroup-utils
 
 Installation of the dependencies
 --------------------------------
@@ -44,24 +73,15 @@ Installation of the dependencies
 Centos 7.0+
 ```````````
 
-Don't forget to enable EPEL_.
+We describe here the installation of the dependencies of both the agent and the frontend,
+as most user will use them on the same server.
 
 ::
 
+    $ sudo yum install epel-release
 	$ sudo yum install git mongodb mongodb-server docker python-pip gcc python-devel
-	$ sudo pip install pymongo pytidylib docker-py sh web.py docutils simpleldap
-
-Some remarks:
-
-- GCC and python-devel are not needed, but allows pymongo to compile C extensions which result in speed improvements.
-
-- python-ldap is only needed if you use the ldap authentication plugin
-
-- (python-)sh and git are dependencies of the submission_repo plugin
-
-- libtidy and pytidylib are only needed if you use htmltidy to check tasks' output
-
-.. _EPEL: https://fedoraproject.org/wiki/EPEL
+	$ sudo pip install -r requirements.agent.txt
+	$ sudo pip install -r requirements.frontend.txt
 
 You can then start the services *mongod* and *docker*.
 
@@ -77,44 +97,57 @@ To start them on system startup, use these commands:
 	$ sudo chkconfig mongod on
 	$ sudo chkconfig docker on
 
-OS X 10.9+
-``````````
+OS X 10.10+
+```````````
 
 We use brew_ to install some packages. Packages are certainly available too via macPorts.
-We also use docker-osx_ instead of the official Boot2Docker because it allows to mount
-local directory flawlessly.
+We also use Boot2Docker_, that allows to run Docker on OS X.
 
 .. _brew: http://brew.sh/
-.. _docker-osx: https://github.com/noplay/docker-osx
+.. _Boot2Docker: http://boot2docker.io/
 
 ::
 
 	$ brew install mongodb
 	$ brew install python
-	$ sudo curl https://raw.githubusercontent.com/noplay/docker-osx/1.0.0/docker-osx > /usr/local/bin/docker-osx
-	$ sudo chmod +x /usr/local/bin/docker-osx
-	$ sudo pip install pymongo pytidylib docker-py sh web.py docutils
-
-Follow the instruction of brew to enable mongodb.
-Each time you have to run INGInious, don't forget to start docker-osx by running
-
-::
-
-	$ docker-osx start
+	$ pip install -r requirements.frontend.txt
 
 Installation of INGInious
 -------------------------
 
-The installation consist on cloning the github repository of INGInious
-and to provide configuration option in ``/configuration.json``.
+Clone the source and create the configuration file:
 
 ::
 
-	$ git clone https://github.com/INGInious/INGInious.git
-	$ cd INGInious
-	$ cp configuration.example.json configuration.json
+    $ git clone https://github.com/INGInious/INGInious.git
+    $ cd INGInious
+    $ cp configuration.example.json configuration.json
 
 You should now review and tune configuration options in ``configuration.json`` according to `Configuring INGInious`_.
+
+
+Installation of the agent
+`````````````````````````
+
+Centos 7
+^^^^^^^^
+
+Simply run the agent:
+
+::
+    $ python app_agent.py
+    
+OS X
+^^^^
+
+As the agent need to be run directly on the machine running Docker, you need to run it on the VM used by Boot2Docker.
+We have a script that do everything for you:
+
+::
+    $ ./utils/boot2docker/start_agent.sh
+
+Installation of the frontend
+````````````````````````````
 
 Finally, you can start a demo server with the following command.
 If you want a robust webserver for production, see :ref:`production`.
@@ -124,7 +157,6 @@ If you want a robust webserver for production, see :ref:`production`.
 	$ python app_frontend.py
 
 The server will be running on localhost:8080.
-
 
 .. _tasks folder:
 
@@ -137,41 +169,68 @@ It content is :
 
 ::
 
-	{
-	    "tasks_directory": "./tasks",
+    {
+        ##############################################
+        # Part common to the frontend and the agents #
+        ##############################################
+        
+        # Location of the task directory
+        "tasks_directory": "./tasks",
+        
+        # Aliases for containers.
+        # Only containers listed here can be used by tasks
+        "containers": {
+            "default": "ingi/inginious-c-default",
+            "sekexe": "ingi/inginious-c-sekexe"
+        },
+        
+        ##############################################
+        #        Part used only by the agents        #
+        ##############################################
+        
+        # Port on which the local agent will listen
+        "local_agent_port": 5001,
+        
+        # Tmp folder used by the agent.
+        "local_agent_tmp_dir": "/tmp/inginious_agent",
+        
+        ##############################################
+        #       Part used only by the frontend       #
+        ##############################################
+        
+        # List of the agents to which the backend will try
+        # to connect
+        "agents": [
+            {
+                "host": "192.168.59.103",
+                "port": 5001
+            }
+        ],
+        
+        # MongoDB options
+        "mongo_opt": {"host": "localhost", "database":"INGInious"},
+        
+        # Plugins that will be loaded by the frontend
+        "plugins": [
+            {
+                "plugin_module": "frontend.plugins.git_repo",
+                "repo_directory": "./repo_submissions"
+            },
+            {
+                "plugin_module": "frontend.plugins.auth.demo_auth",
+                "users": {"test":"test"}
+            }
+        ],
+        
+        # Allow HTML in tasks? can be 1, 0 or "tidy" (to run HTMLTidy)
+        "allow_html": "tidy"
+    }
 
-	    "containers": {
-			"default": "ingi/inginious-c-default",
-			"sekexe": "ingi/inginious-c-sekexe"
-	    },
+As you can see, INGInious uses a variation of JSON that allows comments with # or //.
+This file contains entries that are used by both the frontend and the agents. This is clearly indicated in the comments of the JSON file.
 
-	    "docker_instances": [
-			{
-				"server_url": "tcp://172.16.42.43:4243"
-			}
-		],
-
-	    "callback_managers_threads": 2,
-	    "submitters_processes": 2,
-
-	    "mongo_opt": {"host": "localhost", "database":"INGInious"},
-
-	    "plugins": [
-	        {
-	            "plugin_module": "frontend.plugins.git_repo",
-	            "repo_directory": "./repo_submissions"
-	        },
-	        {
-	            "plugin_module": "frontend.plugins.auth.demo_auth",
-	            "users": {"test":"test"}
-	        }
-	    ],
-
-	    "allow_html": "tidy"
-	}
-
-The different entries are :
-
+Common part for the frontend and the agents
+```````````````````````````````````````````
 
 ``tasks_directory``
     The path to the directory that contains all the task definitions, grouped by courses.
@@ -182,29 +241,22 @@ The different entries are :
     The key will be used in the task definition to identify the container, and the value must be a valid Docker container identifier.
     The some `pre-built containers`_ are available on Docker's hub.
 
+Part used only by the agents
+````````````````````````````
 
-``docker_instances``
-    A list of dictionnaries containing the configuration of docker instances.
-    Allowed entries are :
+```local_agent_port```
+        Port to which the agent will listen. 5001 by default.
 
-    ``server_url``
-        The *base_url* of a docker instance. If you run a local instance, you will probably want to change the default value to ``'unix://var/run/docker.sock'``.
-        See `docker-py API`_ for detailed information.
-
-    ``max_concurent_jobs``
-        Undocumented
-
-    ``max_concurent-hard-jobs``
-        Undocumented
-
-``callback_managers_threads``
-    Undocumented. ``1`` is certainly a good default for a local server.
-
-``submitters_processes``
-    Undocumented. ``1`` is certainly a good default for a local server.
-
+```local_agent_tmp_dir```
+    Directory used by the agent to stored temporary information used by the containers. By default it is "/tmp/inginious_agent".
+    
+Part used only by the frontend
+``````````````````````````````
+``agents``
+    List of agents to which the frontend will try to connect.
+    
 ``mongo_opt``
-    Quite self-explanatory. You can change the database name if you want multiple instances of in the iprobable case of conflict.
+    Quite self-explanatory. You can change the database name if you want multiple instances of in the non-probable case of conflict.
 
 ``plugins``
     A list of plugin modules together with configuration options.
