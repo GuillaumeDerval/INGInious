@@ -1,0 +1,12 @@
+languages:
+  JavaScript: true
+  Python: true
+exclude_paths:
+- "*.min.js"
+- "static/js/bootstrap*"
+- "static/js/jquery*"
+- "static/js/codemirror/*"
+- "static/css/bootstrap*"
+- "static/css/codemirror*"
+- "static/plugins/contests/jquery.countdown.min.js"
+- "*/tests/*"
