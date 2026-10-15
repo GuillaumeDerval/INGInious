@@ -89,11 +89,16 @@ export async function createSessionCookie(username: string): Promise<string> {
 /**
  * Waits for the hydration of the page loaded by `response` when it is an application
  * page. Pages that already went on (auto-submitted LTI forms, script redirects) have
- * no body anymore and are not waited for; neither is a page that never hydrates.
+ * no body anymore (or one that never arrives) and are not waited for; neither is a page
+ * that never hydrates.
  */
 async function waitForHydration(page: Page, response: Response | null): Promise<void> {
 	if (!response?.headers()['content-type']?.startsWith('text/html')) return;
-	const body = await response.text().catch(() => '');
+	// The body of a page that navigated away while it was read is never delivered: give up.
+	const body = await Promise.race([
+		response.text().catch(() => ''),
+		new Promise<string>((resolve) => setTimeout(() => resolve(''), 5_000))
+	]);
 	if (!body.includes('__sveltekit_')) return;
 	await page
 		.locator('html[data-hydrated]')
