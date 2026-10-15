@@ -36,7 +36,7 @@ const show = (v: unknown) =>
 export const load: PageServerLoad = async (event) => {
 	const { course, task, sub, admin } = await context(event);
 	const lang = event.locals.lang;
-	const input = await services().db.getInput(sub.input);
+	const input = await services().db.getInput(sub.input, { orEmpty: true });
 	const defined = task.problems.map((p) => ({
 		id: p.id,
 		name: task.tr(lang, String(p.content.name ?? '')) || p.id,

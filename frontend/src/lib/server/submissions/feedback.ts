@@ -137,7 +137,7 @@ export function debugDump(doc: unknown): unknown {
 
 /** Input of a submission for the browser: file contents are removed (TASK-04/10). */
 export async function publicInput(sub: Submission): Promise<Record<string, unknown>> {
-	const input = await services().db.getInput(sub.input);
+	const input = await services().db.getInput(sub.input, { orEmpty: true });
 	for (const [key, value] of Object.entries(input))
 		if (value && typeof value === 'object' && 'filename' in value) input[key] = { filename: value.filename, value: '' };
 	return input;

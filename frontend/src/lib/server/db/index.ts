@@ -161,13 +161,15 @@ export class Database {
 
 	/**
 	 * Reads a submission input dict (legacy `Submission.get_input`). Binary values become Uint8Array.
-	 * A missing or unreadable input file is logged and read as an empty input, so that the pages
-	 * showing the submission still work.
+	 * A missing or unreadable input file throws (exports and replays must not lose it silently),
+	 * unless `orEmpty`: then it is logged and read as an empty input, so that the pages showing the
+	 * submission still work.
 	 */
-	async getInput(id: ObjectId): Promise<Record<string, unknown>> {
+	async getInput(id: ObjectId, { orEmpty = false } = {}): Promise<Record<string, unknown>> {
 		try {
 			return BSON.deserialize(await this.getFile(id), { promoteBuffers: true }) as Record<string, unknown>;
 		} catch (e) {
+			if (!orEmpty) throw e;
 			console.error(`Cannot read the input ${id} of a submission:`, e);
 			return {};
 		}

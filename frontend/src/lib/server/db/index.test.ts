@@ -68,10 +68,13 @@ describe('Database', () => {
 		expect(await t.database.getFile(id)).toEqual(Buffer.from(BSON.serialize(input)));
 	});
 
-	it('reads a missing or empty input file as an empty input', async () => {
+	it('reads a missing or empty input file as an error, or as an empty input when asked', async () => {
+		const empty = await t.database.putFile(new Uint8Array());
+		await expect(t.database.getInput(new ObjectId())).rejects.toThrow();
+		await expect(t.database.getInput(empty)).rejects.toThrow();
 		const error = vi.spyOn(console, 'error').mockImplementation(() => {});
-		expect(await t.database.getInput(new ObjectId())).toEqual({});
-		expect(await t.database.getInput(await t.database.putFile(new Uint8Array()))).toEqual({});
+		expect(await t.database.getInput(new ObjectId(), { orEmpty: true })).toEqual({});
+		expect(await t.database.getInput(empty, { orEmpty: true })).toEqual({});
 		expect(error).toHaveBeenCalledTimes(2);
 		error.mockRestore();
 	});
