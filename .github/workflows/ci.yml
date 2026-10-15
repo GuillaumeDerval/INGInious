@@ -181,6 +181,19 @@ jobs:
       - name: Install dependencies and Chromium
         run: npm ci && npx playwright install --with-deps chromium
 
+      # The docker agent grades only when the containers' memory.oom.group cgroup flag is set:
+      # systemd cgroup driver, and OOMPolicy=kill for the scopes of the containers.
+      - name: Configure Docker for the grading containers
+        working-directory: .
+        run: |
+          sudo mkdir -p /etc/systemd/system/docker-.scope.d
+          printf '[Scope]\nOOMPolicy=kill\n' | sudo tee /etc/systemd/system/docker-.scope.d/99-inginious.conf
+          config=$( (sudo cat /etc/docker/daemon.json 2>/dev/null || echo '{}') | jq '.["exec-opts"] = ["native.cgroupdriver=systemd"] | del(.["cgroup-parent"])')
+          echo "$config" | sudo tee /etc/docker/daemon.json
+          sudo systemctl daemon-reload
+          sudo systemctl restart docker
+          docker info --format 'cgroup driver: {{.CgroupDriver}}, cgroup version: {{.CgroupVersion}}'
+
       - name: Start MongoDB, backend, agents and Mailpit
         run: |
           mkdir -p e2e/.tasks /tmp/agent_data
