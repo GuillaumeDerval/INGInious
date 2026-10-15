@@ -1,0 +1,34 @@
+name: Task information and public files
+author: Ada Lovelace & Alan Turing
+contact_url: https://example.org/contact?course={course_id}&task={task_id}&user={username}
+context: |
+    This task shows the information column (author, contact link, deadline, categories) and
+    serves **public files** from ``task_info/public/`` at ``/course/task_showcase/task_info/<path>``:
+
+    * `hello.txt <task_info/hello.txt>`_ (text/plain)
+    * `sub/data.json <task_info/sub/data.json>`_ (sub-folder)
+    * `common.txt <$common/common.txt>`_ (course-wide ``$common/public``)
+
+    .. image:: task_info/pixel.svg
+        :alt: an inline SVG image served from the public folder
+
+    The JavaScript variable ``input`` is available to the context:
+
+    .. raw:: html
+
+        <p>Username seen by JS: <code id="js-username"></code>, language: <code id="js-lang"></code></p>
+        <script>
+        document.getElementById("js-username").textContent = input["@username"];
+        document.getElementById("js-lang").textContent = input["@lang"];
+        </script>
+environment_type: mcq
+environment_id: mcq
+problems:
+    q:
+        type: multiple_choice
+        name: Did you open the files?
+        unshuffle: true
+        choices:
+        -   text: 'Yes'
+            valid: true
+        -   text: 'No'

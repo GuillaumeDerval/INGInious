@@ -1,0 +1,15 @@
+#!/bin/bash
+# Grading script of task_showcase/outcomes
+MODE=$(getinput mode)
+echo "stdout: mode=$MODE"
+echo "stderr: mode=$MODE" >&2
+case "$MODE" in
+    success) feedback-result success; feedback-grade 100; feedback-msg -m "Success mode." ;;
+    failed) feedback-result failed; feedback-grade 0; feedback-msg -m "Failed mode." ;;
+    partial) feedback-result failed; feedback-grade 37.5; feedback-msg -m "Partial mode." ;;
+    timeout) feedback-result failed; while true; do :; done ;;
+    overflow) feedback-result failed; python3 -c "x = bytearray(512*1024*1024); print(len(x))" ;;
+    crash) exit 1 ;;
+    sleep) feedback-result failed; sleep 20 ;;
+    *) feedback-result failed; feedback-msg -m "Unknown mode \`\`$MODE\`\`." ;;
+esac

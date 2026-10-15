@@ -1,0 +1,377 @@
+[
+	{
+		"name": "paragraph",
+		"rst": "Hello world.\n\nSecond paragraph with <b>html</b> & entities.",
+		"html": "<p>Hello world.</p>\n<p>Second paragraph with &lt;b&gt;html&lt;/b&gt; &amp; entities.</p>"
+	},
+	{
+		"name": "bold_italics",
+		"rst": "This is **bold**, *italic* and ``literal --opt``. Also `interpreted`.",
+		"html": "<p>This is <strong>bold</strong>, <em>italic</em> and <code class=\"docutils literal\">literal <span class=\"pre\">--opt</span></code>. Also <cite>interpreted</cite>.</p>"
+	},
+	{
+		"name": "inline_literal_spaces",
+		"rst": "``a  b   c``",
+		"html": "<p><code class=\"docutils literal\">a&nbsp; b&nbsp;&nbsp; c</code></p>"
+	},
+	{
+		"name": "code_role",
+		"rst": ".. role:: python(code)\n   :language: python\n\nInline :python:`print(1)` and :code:`x = 1`.",
+		"html": "<p>Inline <code class=\"python\">print(1)</code> and <code>x = 1</code>.</p>"
+	},
+	{
+		"name": "code_block_lang",
+		"rst": ".. code-block:: python\n\n    def f(x):\n        return x < 2",
+		"html": "<pre class=\"code python literal-block\">\ndef f(x):\n    return x &lt; 2\n</pre>"
+	},
+	{
+		"name": "code_block_nolang",
+		"rst": ".. code-block::\n\n    plain code",
+		"html": "<pre class=\"code literal-block\">\nplain code\n</pre>"
+	},
+	{
+		"name": "code_block_empty",
+		"rst": ".. code-block:: java",
+		"html": "<pre class=\"code java literal-block\">\n[no content]\n</pre>"
+	},
+	{
+		"name": "code_directive",
+		"rst": ".. code:: c\n\n    int main() { return 0; }",
+		"html": "<pre class=\"code c literal-block\">\nint main() { return 0; }\n</pre>"
+	},
+	{
+		"name": "sourcecode_directive",
+		"rst": ".. sourcecode:: python\n\n    x = 1",
+		"html": "<pre class=\"code python literal-block\">\nx = 1\n</pre>"
+	},
+	{
+		"name": "literal_block",
+		"rst": "Example::\n\n    for i in range(3):\n        print(i)",
+		"html": "<p>Example:</p>\n<pre class=\"literal-block\">\nfor i in range(3):\n    print(i)\n</pre>"
+	},
+	{
+		"name": "bullet_list",
+		"rst": "- one\n- two\n\n  - nested",
+		"html": "<ul class=\"simple\">\n<li>one</li>\n<li>two<ul>\n<li>nested</li>\n</ul>\n</li>\n</ul>"
+	},
+	{
+		"name": "enum_list",
+		"rst": "1. first\n2. second\n\n#. auto",
+		"html": "<ol class=\"arabic simple\">\n<li>first</li>\n<li>second</li>\n<li>auto</li>\n</ol>"
+	},
+	{
+		"name": "grid_table",
+		"rst": "+-----+-----+\n| A   | B   |\n+=====+=====+\n| 1   | 2   |\n+-----+-----+",
+		"html": "<table class=\"docutils table table-bordered\">\n<colgroup>\n<col width=\"50%\" />\n<col width=\"50%\" />\n</colgroup>\n<thead class=\"thead-light\">\n<tr><th class=\"head\">A</th>\n<th class=\"head\">B</th>\n</tr>\n</thead>\n<tbody>\n<tr><td>1</td>\n<td>2</td>\n</tr>\n</tbody>\n</table>"
+	},
+	{
+		"name": "simple_table",
+		"rst": "===  ===\nA    B\n===  ===\n1    2\n===  ===",
+		"html": "<table class=\"docutils table table-bordered\">\n<colgroup>\n<col width=\"50%\" />\n<col width=\"50%\" />\n</colgroup>\n<thead class=\"thead-light\">\n<tr><th class=\"head\">A</th>\n<th class=\"head\">B</th>\n</tr>\n</thead>\n<tbody>\n<tr><td>1</td>\n<td>2</td>\n</tr>\n</tbody>\n</table>"
+	},
+	{
+		"name": "list_table",
+		"rst": ".. list-table:: Title\n   :header-rows: 1\n\n   * - A\n     - B\n   * - 1\n     - 2",
+		"html": "<table class=\"docutils table table-bordered\">\n<caption>Title</caption>\n<colgroup>\n<col width=\"50%\" />\n<col width=\"50%\" />\n</colgroup>\n<thead class=\"thead-light\">\n<tr><th class=\"head\">A</th>\n<th class=\"head\">B</th>\n</tr>\n</thead>\n<tbody>\n<tr><td>1</td>\n<td>2</td>\n</tr>\n</tbody>\n</table>"
+	},
+	{
+		"name": "note",
+		"rst": ".. note::\n\n    This is a note.",
+		"html": "<div class=\"admonition note alert alert-light\">\nThis is a note.</div>"
+	},
+	{
+		"name": "warning",
+		"rst": ".. warning:: Be careful.",
+		"html": "<div class=\"admonition warning alert alert-warning\">\nBe careful.</div>"
+	},
+	{
+		"name": "tip_titled",
+		"rst": ".. tip::\n    :title: My title\n\n    Tip body.",
+		"html": "<div class=\"admonition tip card mb-3 border-info\">\n<div class=\"admonition tip card-header bg-info text-white\">\nMy title</div>\n<div class=\"admonition tip card-body\">\nTip body.</div>\n</div>"
+	},
+	{
+		"name": "danger_titled",
+		"rst": ".. danger::\n    :title: Danger!\n\n    Body.",
+		"html": "<div class=\"admonition danger card mb-3 border-danger\">\n<div class=\"admonition danger card-header bg-danger text-white\">\nDanger!</div>\n<div class=\"admonition danger card-body\">\nBody.</div>\n</div>"
+	},
+	{
+		"name": "generic_admonition",
+		"rst": ".. admonition:: Custom Title\n    :class: success\n\n    Body text.",
+		"html": "<div class=\"admonition success alert alert-success\">\nBody text.</div>"
+	},
+	{
+		"name": "generic_admonition_title_opt",
+		"rst": ".. admonition:: ignored\n    :title: Shown title\n    :class: success\n\n    Body text.",
+		"html": "<div class=\"admonition success card mb-3 border-success\">\n<div class=\"admonition success card-header bg-success text-white\">\nShown title</div>\n<div class=\"admonition success card-body\">\nBody text.</div>\n</div>"
+	},
+	{
+		"name": "hint",
+		"rst": ".. hint:: hint text",
+		"html": "<div class=\"admonition hint alert alert-info\">\nhint text</div>"
+	},
+	{
+		"name": "error_adm",
+		"rst": ".. error:: err text",
+		"html": "<div class=\"admonition error alert alert-danger\">\nerr text</div>"
+	},
+	{
+		"name": "external_link",
+		"rst": "See `INGInious <https://inginious.org>`_ and https://example.com and `anchor`_.\n\n.. _anchor:\n\nTarget para.",
+		"html": "<p>See <a class=\"reference external\" href=\"https://inginious.org\" target=\"_blank\">INGInious</a> and <a class=\"reference external\" href=\"https://example.com\" target=\"_blank\">https://example.com</a> and <a class=\"reference internal\" href=\"#anchor\">anchor</a>.</p>\n<p id=\"anchor\">Target para.</p>"
+	},
+	{
+		"name": "relative_link",
+		"rst": "`file <files/a.txt>`_",
+		"html": "<p><a class=\"reference external\" href=\"files/a.txt\" target=\"_blank\">file</a></p>"
+	},
+	{
+		"name": "image",
+		"rst": ".. image:: img.png\n   :alt: an image\n   :width: 100px",
+		"html": "<img alt=\"an image\" src=\"img.png\" style=\"width: 100px;\" />"
+	},
+	{
+		"name": "figure",
+		"rst": ".. figure:: img.png\n\n   Caption text.",
+		"html": "<div class=\"figure\">\n<img alt=\"img.png\" src=\"img.png\" />\n<p class=\"caption\">Caption text.</p>\n</div>"
+	},
+	{
+		"name": "math_role",
+		"rst": "Inline :math:`a^2 + b^2 = c^2`.",
+		"html": "<p>Inline <span class=\"math\">\\(a^2 + b^2 = c^2\\)</span>.</p>"
+	},
+	{
+		"name": "math_directive",
+		"rst": ".. math::\n\n    \\int_0^1 x\\,dx",
+		"html": "<div class=\"math\">\n\\begin{equation*}\n\\int_0^1 x\\,dx\n\\end{equation*}\n</div>"
+	},
+	{
+		"name": "raw_html",
+		"rst": ".. raw:: html\n\n    <div class=\"x\"><script>alert(1)</script></div>",
+		"html": "<div class=\"x\"><script>alert(1)</script></div>"
+	},
+	{
+		"name": "inline_html_escaped",
+		"rst": "<script>alert(1)</script>",
+		"html": "<p>&lt;script&gt;alert(1)&lt;/script&gt;</p>"
+	},
+	{
+		"name": "headings",
+		"rst": "Title\n=====\n\nSub\n---\n\ntext\n\nSub2\n----\n\nmore",
+		"html": "<div class=\"section\" id=\"title\">\n<h3>Title</h3>\n<div class=\"section\" id=\"sub\">\n<h4>Sub</h4>\n<p>text</p>\n</div>\n<div class=\"section\" id=\"sub2\">\n<h4>Sub2</h4>\n<p>more</p>\n</div>\n</div>"
+	},
+	{
+		"name": "single_title_doc",
+		"rst": "Only Title\n==========\n\ntext",
+		"html": "<div class=\"section\" id=\"only-title\">\n<h3>Only Title</h3>\n<p>text</p>\n</div>"
+	},
+	{
+		"name": "container",
+		"rst": ".. container:: myclass\n\n    inside",
+		"html": "<div class=\"myclass\">\ninside</div>"
+	},
+	{
+		"name": "time_role",
+		"rst": "Due :time:`2024-01-01T10:00:00+00:00`.",
+		"html": "<p>Due <time datetime=\"2024-01-01T10:00:00+00:00\">\n2024-01-01T10:00:00+00:00</time>.</p>"
+	},
+	{
+		"name": "hidden_until_past",
+		"rst": ".. hidden-until:: 2000-01-01 10:00:00\n\n    Secret visible.",
+		"html": "<div class=\"compound\">\n<p>Secret visible.</p>\n</div>"
+	},
+	{
+		"name": "hidden_until_future",
+		"rst": ".. hidden-until:: 2999-01-01 10:00:00\n\n    Secret hidden.",
+		"html": "<div class=\"admonition caution alert alert-warning\">\nA part of this feedback is hidden until 2999-01-01T10:00:00+00:00. Please come back later and reload the submission to see the full feedback.</div>"
+	},
+	{
+		"name": "syntax_error_title_underline",
+		"rst": "Title\n==\n\ntext",
+		"html": "<p>Title\n==</p>\n<p>text</p>"
+	},
+	{
+		"name": "syntax_error_unknown_directive",
+		"rst": ".. foo:: bar\n\n    baz",
+		"html": "<div class=\"system-message\">\n<p class=\"system-message-title\">System Message: ERROR/3 (<tt class=\"docutils\">&lt;string&gt;</tt>, line 1)</p>\n<p>Unknown directive type &quot;foo&quot;.</p>\n<pre class=\"literal-block\">\n.. foo:: bar\n\n    baz\n</pre>\n</div>"
+	},
+	{
+		"name": "syntax_error_inline",
+		"rst": "*unclosed emphasis",
+		"html": "<p><a href=\"#system-message-1\"><span class=\"problematic\" id=\"problematic-1\">*</span></a>unclosed emphasis</p>\n<div class=\"system-message\" id=\"system-message-1\">\n<p class=\"system-message-title\">System Message: WARNING/2 (<tt class=\"docutils\">&lt;string&gt;</tt>, line 1); <em><a href=\"#problematic-1\">backlink</a></em></p>\nInline emphasis start-string without end-string.</div>"
+	},
+	{
+		"name": "syntax_error_bad_table",
+		"rst": "+---+\n| a |\n+--",
+		"html": "<div class=\"system-message\">\n<p class=\"system-message-title\">System Message: ERROR/3 (<tt class=\"docutils\">&lt;string&gt;</tt>, line 1)</p>\n<p>Malformed table.</p>\n<pre class=\"literal-block\">\n+---+\n| a |\n+--\n</pre>\n</div>\n<div class=\"system-message\">\n<p class=\"system-message-title\">System Message: WARNING/2 (<tt class=\"docutils\">&lt;string&gt;</tt>, line 4)</p>\nBlank line required after table.</div>"
+	},
+	{
+		"name": "include_disabled",
+		"rst": ".. include:: /etc/passwd",
+		"html": "<div class=\"system-message\">\n<p class=\"system-message-title\">System Message: WARNING/2 (<tt class=\"docutils\">&lt;string&gt;</tt>, line 1)</p>\n<p>&quot;include&quot; directive disabled.</p>\n<pre class=\"literal-block\">\n.. include:: /etc/passwd\n</pre>\n</div>"
+	},
+	{
+		"name": "line_block",
+		"rst": "| line one\n| line two",
+		"html": "<div class=\"line-block\">\n<div class=\"line\">line one</div>\n<div class=\"line\">line two</div>\n</div>"
+	},
+	{
+		"name": "definition_list",
+		"rst": "term\n    definition",
+		"html": "<dl class=\"docutils\">\n<dt>term</dt>\n<dd>definition</dd>\n</dl>"
+	},
+	{
+		"name": "field_list_docinfo",
+		"rst": ":author: me\n\ntext",
+		"html": "<p>text</p>"
+	},
+	{
+		"name": "block_quote",
+		"rst": "para\n\n    quoted",
+		"html": "<p>para</p>\n<blockquote>\nquoted</blockquote>"
+	},
+	{
+		"name": "footnote",
+		"rst": "Text [#]_.\n\n.. [#] Note.",
+		"html": "<p>Text <a class=\"footnote-reference\" href=\"#footnote-1\" id=\"footnote-reference-1\">[1]</a>.</p>\n<table class=\"docutils footnote\" frame=\"void\" id=\"footnote-1\" rules=\"none\">\n<colgroup><col class=\"label\" /><col /></colgroup>\n<tbody valign=\"top\">\n<tr><td class=\"label\"><a class=\"fn-backref\" href=\"#footnote-reference-1\">[1]</a></td><td>Note.</td></tr>\n</tbody>\n</table>"
+	},
+	{
+		"name": "csv_table",
+		"rst": ".. csv-table::\n   :header: a, b\n\n   1, 2",
+		"html": "<table class=\"docutils table table-bordered\">\n<colgroup>\n<col width=\"50%\" />\n<col width=\"50%\" />\n</colgroup>\n<thead class=\"thead-light\">\n<tr><th class=\"head\">a</th>\n<th class=\"head\">b</th>\n</tr>\n</thead>\n<tbody>\n<tr><td>1</td>\n<td>2</td>\n</tr>\n</tbody>\n</table>"
+	},
+	{
+		"name": "substitution",
+		"rst": "|x| here\n\n.. |x| replace:: replaced",
+		"html": "<p>replaced here</p>"
+	},
+	{
+		"name": "empty",
+		"rst": "",
+		"html": ""
+	},
+	{
+		"name": "doctest",
+		"rst": ">>> 1+1\n2",
+		"html": "<pre class=\"doctest-block\">\n&gt;&gt;&gt; 1+1\n2\n</pre>"
+	},
+	{
+		"name": "hidden_until_future_show_everything",
+		"rst": ".. hidden-until:: 2999-01-01 10:00:00\n\n    Secret hidden.",
+		"html": "<div class=\"admonition caution alert alert-warning\">\nThe feedback below will be hidden to the students until <time datetime=\"2999-01-01T10:00:00+00:00\">\n2999-01-01T10:00:00+00:00</time>.</div>\n<div class=\"compound\">\n<p>Secret hidden.</p>\n</div>"
+	},
+	{
+		"name": "lti_rewrite",
+		"rst": "`rel <files/a.txt>`_ and `abs <https://x.org/>`_\n\n.. image:: img.png",
+		"html": "<p><a class=\"reference external\" href=\"asset/files/a.txt?session_id=abc123\" target=\"_blank\">rel</a> and <a class=\"reference external\" href=\"https://x.org/\" target=\"_blank\">abs</a></p>\n<img alt=\"img.png\" src=\"asset/img.png?session_id=abc123\" />"
+	},
+	{
+		"name": "html_mode: <p>unclosed <b>bold",
+		"rst": "<p>unclosed <b>bold",
+		"html": "<b>Parsing failed</b>: <pre>&lt;p&gt;unclosed &lt;b&gt;bold</pre>"
+	},
+	{
+		"name": "html_mode: <script>alert(1)</script><p onclick='x()'>hi</p>",
+		"rst": "<script>alert(1)</script><p onclick='x()'>hi</p>",
+		"html": "<b>Parsing failed</b>: <pre>&lt;script&gt;alert(1)&lt;/script&gt;&lt;p onclick=&#x27;x()&#x27;&gt;hi&lt;/p&gt;</pre>"
+	},
+	{
+		"name": "html_mode: <non existing tag></...>",
+		"rst": "<non existing tag></...>",
+		"html": "<b>Parsing failed</b>: <pre>&lt;non existing tag&gt;&lt;/...&gt;</pre>"
+	},
+	{
+		"name": "html_mode: plain text",
+		"rst": "plain text",
+		"html": "<b>Parsing failed</b>: <pre>plain text</pre>"
+	},
+	{
+		"name": "static_page_level2",
+		"rst": "Title\n=====\n\ntext\n\nSub\n---\n\nx",
+		"html": "<div class=\"section\" id=\"title\">\n<h2>Title</h2>\n<p>text</p>\n<div class=\"section\" id=\"sub\">\n<h3>Sub</h3>\n<p>x</p>\n</div>\n</div>"
+	},
+	{
+		"name": "note_two_paras",
+		"rst": ".. note::\n\n    First para.\n\n    Second para.",
+		"html": "<div class=\"admonition note alert alert-light\">\n<p>First para.</p>\n<p class=\"last\">Second para.</p>\n</div>"
+	},
+	{
+		"name": "rst-msgblock with title, class danger (container API get_admonition)",
+		"rst": "\n\n.. admonition:: Oops\n\t:class: alert alert-danger\n\n\tSomething failed",
+		"html": "<div class=\"admonition alert alert-danger alert-info\">\nSomething failed</div>"
+	},
+	{
+		"name": "rst-msgblock without title, class success (container API get_admonition)",
+		"rst": "\n\n.. note:: \n\t:class: alert alert-success\n\n\tAll good",
+		"html": "<div class=\"admonition alert alert-success note alert-light\">\nAll good</div>"
+	},
+	{
+		"name": "rst-code (container API get_codeblock, tab-indented)",
+		"rst": "\n\n.. code-block:: python\n\n\tprint(1)\n\tif x:\n\t    y",
+		"html": "<pre class=\"code python literal-block\">\nprint(1)\nif x:\n    y\n</pre>"
+	},
+	{
+		"name": "rst-image (container API get_imageblock)",
+		"rst": "\n\n.. raw:: html\n\n\t<img src=\"data:image/png;base64,iVBORw0KGgo=\">",
+		"html": "<img src=\"data:image/png;base64,iVBORw0KGgo=\">"
+	},
+	{
+		"name": "class_directive",
+		"rst": ".. class:: text-muted\n\n    A paragraph with a custom class.",
+		"html": "<p class=\"text-muted\">A paragraph with a custom class.</p>"
+	},
+	{
+		"name": "admonition_class_danger",
+		"rst": ".. admonition:: T\n    :class: danger\n\n    body",
+		"html": "<div class=\"admonition danger alert alert-danger\">\nbody</div>"
+	},
+	{
+		"name": "note_custom_class",
+		"rst": ".. note::\n    :class: success\n\n    body",
+		"html": "<div class=\"admonition success note alert alert-success\">\nbody</div>"
+	},
+	{
+		"name": "anchor_link",
+		"rst": "`anchor <#task_alert>`_",
+		"html": "<p><a class=\"reference external\" href=\"#task_alert\">anchor</a></p>"
+	},
+	{
+		"name": "mailto",
+		"rst": "Contact me@example.com",
+		"html": "<p>Contact <a class=\"reference external\" href=\"mailto:me&#64;example.com\" target=\"_blank\">me&#64;example.com</a></p>"
+	},
+	{
+		"name": "image_target",
+		"rst": ".. image:: a.png\n   :target: https://x.org",
+		"html": "<a class=\"reference external image-reference\" href=\"https://x.org\" target=\"_blank\">\n<img alt=\"a.png\" src=\"a.png\" />\n</a>"
+	},
+	{
+		"name": "raw_role",
+		"rst": ".. role:: raw-html(raw)\n   :format: html\n\nX :raw-html:`<br/>` Y",
+		"html": "<p>X <span class=\"raw-html\"><br/></span> Y</p>"
+	},
+	{
+		"name": "transition",
+		"rst": "a\n\n----\n\nb",
+		"html": "<p>a</p>\n<hr class=\"docutils\" />\n<p>b</p>"
+	},
+	{
+		"name": "javascript_link",
+		"rst": "`x <javascript:alert(1)>`_",
+		"html": "<p><a class=\"reference external\" href=\"javascript:alert(1)\" target=\"_blank\">x</a></p>"
+	},
+	{
+		"name": "severe_error_inconsistent_titles (exception -> fallback)",
+		"rst": "A\n=====\n\nB\n-----\n\nC\n=====\n\nD\n~~~~~",
+		"html": "<b>Parsing failed</b>: <pre>A\n=====\n\nB\n-----\n\nC\n=====\n\nD\n~~~~~\n</pre>"
+	},
+	{
+		"name": "hidden_until_bad_date",
+		"rst": "x\n\n.. hidden-until:: notadate\n\n    secret",
+		"html": "<p>x</p>\n<div class=\"system-message\">\n<p class=\"system-message-title\">System Message: ERROR/3 (<tt class=\"docutils\">&lt;string&gt;</tt>, line 3)</p>\n<p>Unknown date format in the &quot;hidden-until&quot; directive; notadate</p>\n<pre class=\"literal-block\">\n.. hidden-until:: notadate\n</pre>\n</div>"
+	},
+	{
+		"name": "note_without_content",
+		"rst": ".. note::",
+		"html": "<div class=\"system-message\">\n<p class=\"system-message-title\">System Message: ERROR/3 (<tt class=\"docutils\">&lt;string&gt;</tt>, line 1)</p>\n<p>Content block expected for the &quot;note&quot; directive; none found.</p>\n<pre class=\"literal-block\">\n.. note::\n</pre>\n</div>"
+	}
+]

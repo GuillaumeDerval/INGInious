@@ -29,3 +29,13 @@ db
 # Build files
 build/lib
 build/scripts-*
+
+# Web frontend (frontend/, see frontend/.gitignore): re-include what the patterns above would hide
+!.dockerignore
+!frontend/.gitignore
+!frontend/.npmrc
+!frontend/.prettierignore
+!frontend/.dockerignore
+!frontend/package-lock.json
+!frontend/src/lib/server/db/
+!frontend/e2e/fixtures/**/.testignore

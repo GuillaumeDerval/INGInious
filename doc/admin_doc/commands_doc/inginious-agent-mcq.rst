@@ -3,8 +3,8 @@
 inginious-agent-mcq
 ===================
 
-Start a MCQ grading agent. This is typically only used when running the INGInious backend remotely. If you configured
-INGInious to use a local backend, it is automatically run by ``inginious-webapp`` or ``inginious-lti``.
+Start a MCQ grading agent. It connects to the agent address of :ref:`inginious-backend`. The web frontend does not start agents: at least one
+Docker agent (and an MCQ agent for multiple-choice tasks) must be running.
 
 .. program:: inginious-agent-mcq
 

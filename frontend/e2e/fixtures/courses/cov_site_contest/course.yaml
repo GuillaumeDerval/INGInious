@@ -1,0 +1,24 @@
+# Contest course of the coverage tests (e2e/coverage/site.e2e.ts).
+name: COV contest course
+admins:
+  - e2e_admin
+accessible: true
+registration: true
+groups_student_choice: true
+task_dispenser: contest
+dispenser_data:
+  contest_settings:
+    enabled: true
+    start: '2020-01-01 00:00:00+00:00'
+    end: '2099-01-01 00:00:00+00:00'
+    blackout: 0
+    penalty: 20
+  toc_data:
+    config:
+      code1: {}
+      mcq1: {}
+    toc:
+      - tasks_list:
+          - mcq1
+          - code1
+        title: Problems

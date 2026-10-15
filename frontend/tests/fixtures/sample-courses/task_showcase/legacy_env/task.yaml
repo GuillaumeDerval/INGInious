@@ -1,0 +1,16 @@
+# Legacy (v0.6) format: "environment" instead of environment_type/environment_id.
+# Task._migrate_from_v_0_6 converts it to environment_type=mcq, environment_id=mcq.
+name: Legacy environment key
+author: INGInious test-suite
+context: "Uses the legacy ``environment: mcq`` key (v0.6 format)."
+environment: mcq
+limits:
+    time: 10
+problems:
+    legacy_q:
+        type: multiple_choice
+        name: Is this a legacy task?
+        choices:
+        -   text: 'Yes'
+            valid: true
+        -   text: 'No'

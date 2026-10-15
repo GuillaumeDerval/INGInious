@@ -1,0 +1,18 @@
+name: Group submission
+author: INGInious test-suite
+context: |
+    Course config: ``group_submission: true``. Students must belong to a group (collection ``groups``); one submission is shared by all members (``submissions.username`` lists all of them).
+
+    Correct answer: **Yes**.
+environment_type: mcq
+environment_id: mcq
+problems:
+    q:
+        type: multiple_choice
+        name: Simple question
+        header: Answer *Yes* to succeed, *No* to fail.
+        unshuffle: true
+        choices:
+        -   text: 'Yes'
+            valid: true
+        -   text: 'No'

@@ -1,0 +1,7 @@
+environment_type: docker
+environment_id: default
+environment_parameters:
+  ssh_allowed: true
+  limits:
+    time: 5
+problems: {}

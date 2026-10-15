@@ -17,7 +17,5 @@ Subpackages
 
     inginious.agent
     inginious.backend
-    inginious.client
     inginious.common
-    inginious.frontend
 

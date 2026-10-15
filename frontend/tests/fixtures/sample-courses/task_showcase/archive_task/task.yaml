@@ -1,0 +1,15 @@
+name: Archive
+author: INGInious test-suite
+context: |
+    The grading script writes ``/archive/report.txt`` (and a sub-folder). The resulting tgz
+    is stored in GridFS (``submissions.archive``) and included when staff download
+    submissions. Type any text: it is copied into the report.
+environment_type: docker
+environment_id: default
+environment_parameters:
+    limits: {time: 10, memory: 128}
+problems:
+    text:
+        type: code
+        name: Text
+        language: plain

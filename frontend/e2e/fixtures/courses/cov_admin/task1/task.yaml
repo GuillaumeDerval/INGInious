@@ -1,0 +1,13 @@
+name: Task one
+context: A task.
+environment_type: mcq
+environment_id: mcq
+problems:
+  mc1:
+    type: multiple_choice
+    name: Question
+    header: Pick
+    choices:
+      - text: 'Yes'
+        valid: true
+      - text: 'No'

@@ -1,0 +1,33 @@
+name: CADM course
+description: Course of the course-administration integration tests
+admins:
+  - e2e_admin
+tutors:
+  - e2e_tutor
+accessible: true
+registration: true
+custom_key: kept
+tags:
+  skill1:
+    name: Skill one
+    description: desc 1
+    visible: true
+    type: 0
+  cat1:
+    name: Category one
+    type: 2
+task_dispenser: toc
+dispenser_data:
+  toc:
+    - title: Week 1
+      config:
+        closed: false
+      tasks_list:
+        - task1
+        - code1
+  config:
+    task1:
+      accessibility: true
+    code1:
+      weight: 2
+      accessibility: true

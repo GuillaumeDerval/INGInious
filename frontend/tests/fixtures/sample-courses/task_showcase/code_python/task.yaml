@@ -1,0 +1,32 @@
+name: Python code - count to n
+author: INGInious test-suite
+contact_url: mailto:teacher@example.org?subject={course_id}/{task_id}/{username}
+context: |
+    Write a Python function ``count_to(n)`` returning the list ``[1, 2, ..., n]``.
+
+    The grading script runs 4 tests; grade = 25% per passing test. It sets the course
+    tags ``skill_loop`` (visible skill), ``skill_hidden`` (staff-only skill),
+    ``misc_off_by_one`` (misconception) and an auto-tag, a ``custom`` value and the
+    task ``state``. A correct answer is::
+
+        def count_to(n):
+            result = []
+            for i in range(1, n + 1):
+                result.append(i)
+            return result
+environment_type: docker
+environment_id: default
+environment_parameters:
+    limits: {time: 10, hard_time: 30, memory: 256, disk: 100}
+    run_cmd: ''
+    network_grading: false
+problems:
+    code:
+        type: code
+        name: Your function
+        header: Implement ``count_to(n)``.
+        language: python
+        offset: 3
+        default: |
+            def count_to(n):
+                pass

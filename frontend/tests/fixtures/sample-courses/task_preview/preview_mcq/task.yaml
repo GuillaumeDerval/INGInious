@@ -1,0 +1,16 @@
+name: Previewable MCQ
+author: INGInious test-suite
+context: |
+    The course ``task_preview`` has ``allow_preview: true``: non-registered users can see the
+    task (the submit button is replaced by *Please enroll in the course to submit.*).
+environment_type: mcq
+environment_id: mcq
+problems:
+    q:
+        type: multiple_choice
+        name: Simple question
+        unshuffle: true
+        choices:
+        -   text: 'Yes'
+            valid: true
+        -   text: 'No'

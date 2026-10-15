@@ -1,0 +1,26 @@
+name: Random inputs (stable per user)
+author: INGInious test-suite
+context: |
+  This task has ``input_random: 2``: two random floats in [0,1) are generated per user
+  (seed = username + taskid + courseid), stored in ``user_tasks.random`` and exposed to the
+  page as ``input["@random"]``.
+
+  .. raw:: html
+
+      <p>Your values: <b id="rnd-a"></b> and <b id="rnd-b"></b>.</p>
+      <script>
+      document.getElementById("rnd-a").textContent = Math.floor(input["@random"][0] * 100);
+      document.getElementById("rnd-b").textContent = Math.floor(input["@random"][1] * 100);
+      </script>
+
+  Enter the **sum** of the two integers shown above.
+environment_type: docker
+environment_id: default
+environment_parameters:
+  limits: { time: 10, memory: 128 }
+input_random: 2
+problems:
+  sum:
+    type: code_single_line
+    name: Sum
+    header: Sum of the two values.

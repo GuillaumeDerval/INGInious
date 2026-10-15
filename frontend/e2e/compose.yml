@@ -1,0 +1,91 @@
+# Services needed by the frontend tests (unit tests that grade through the backend,
+# integration tests `npm run test:e2e`, scale suite `npm run test:perf`): MongoDB, the
+# backend, the grading agents with their environments, and Mailpit (mails of the tests).
+# The frontend itself runs on the host, started by the tests.
+#
+#   cd frontend && docker compose -f e2e/compose.yml up -d --build
+#   E2E_TASKS_DIR=$PWD/e2e/.tasks npm run test:e2e
+#
+# The agents grade the course fixtures that the tests install into e2e/.tasks (mounted
+# below); the tests find that folder through E2E_TASKS_DIR. /tmp/agent_data must be the
+# same path on the host and in the docker agent (it starts the grading containers).
+name: inginious-tests
+
+x-build: &build
+  context: ../..
+  dockerfile: deploy/Containerfile
+
+services:
+  env-default:
+    image: inginious-test/env-default:latest
+    build:
+      context: ../../base-containers/base/
+      target: env-default
+    command: /bin/true
+
+  env-python3:
+    image: inginious-test/env-python3:latest
+    build:
+      context: ../../base-containers/base/
+      target: env-python3
+    command: /bin/true
+
+  db:
+    image: mongo:6.0.2
+    # Every unit test file uses its own throw-away database.
+    ulimits:
+      nofile: { soft: 64000, hard: 64000 }
+    ports:
+      - '127.0.0.1:27017:27017'
+
+  backend:
+    image: inginious-test/core-backend:latest
+    build:
+      <<: *build
+      target: backend
+    environment:
+      AGENT: 'tcp://0.0.0.0:2001'
+      CLIENT: 'tcp://0.0.0.0:2000'
+    ports:
+      - '127.0.0.1:2000:2000'
+
+  agent-docker:
+    image: inginious-test/core-agent_docker:latest
+    depends_on:
+      backend:
+        condition: service_started
+      env-default:
+        condition: service_completed_successfully
+      env-python3:
+        condition: service_completed_successfully
+    build:
+      <<: *build
+      target: agent_docker
+    environment:
+      BACKEND: 'tcp://backend:2001'
+    security_opt:
+      - 'label=disable'
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./.tasks:/inginious/tasks
+      - /tmp/agent_data:/tmp/agent_data
+
+  agent-mcq:
+    image: inginious-test/core-agent_mcq:latest
+    depends_on:
+      backend:
+        condition: service_started
+    build:
+      <<: *build
+      target: agent_mcq
+    environment:
+      BACKEND: 'tcp://backend:2001'
+    volumes:
+      - ./.tasks:/inginious/tasks
+      - /tmp/agent_data:/tmp/agent_data
+
+  mailpit:
+    image: axllent/mailpit:v1.27
+    ports:
+      - '127.0.0.1:8025:8025'
+      - '127.0.0.1:1025:1025'

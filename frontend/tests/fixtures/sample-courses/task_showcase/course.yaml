@@ -1,0 +1,78 @@
+# Showcase course for the "Task page / problem types / submission lifecycle" spec (TASK-xx).
+# Reused by the test-suite of the rewrite: keep task ids and answers stable.
+name: '[TASK] Task & submission showcase'
+description: |
+    Every problem type and every task/submission option of INGInious, one task each.
+    See docs/features/task/ for the specification.
+admins:
+- superadmin
+tutors:
+- task_tutor
+accessible: true
+registration: true
+registration_password: null
+registration_ac: null
+registration_ac_list: []
+allow_unregister: true
+allow_preview: false
+groups_student_choice: true
+is_lti: false
+lti_send_back_grade: false
+tags:
+    skill_loop:
+        name: Loops
+        description: You used a loop correctly
+        type: 0
+        visible: true
+    skill_hidden:
+        name: Hidden skill
+        description: Only visible to staff
+        type: 0
+        visible: false
+    misc_off_by_one:
+        name: Off-by-one
+        description: Classic off-by-one misconception
+        type: 1
+        visible: true
+    cat_basics:
+        name: Basics
+        description: Category tag (never displayed on the task page)
+        type: 2
+        visible: true
+task_dispenser: toc
+dispenser_data:
+    toc:
+    -   title: Multiple choice and match (mcq environment)
+        tasks_list: [mcq_single, mcq_multiple, mcq_centralize, match_answer, legacy_env]
+    -   title: Code, single-line code and files (docker environment)
+        tasks_list: [code_python, single_line, file_upload, random_inputs, random_regen]
+    -   title: Feedback and grading outcomes
+        tasks_list: [rich_feedback, outcomes, archive_task]
+    -   title: Submission policies
+        tasks_list: [limited_amount, limited_period, eval_last, stored_two, group_task]
+    -   title: Accessibility and task information
+        tasks_list: [task_info, soft_deadline, closed_task, future_task, never_task]
+    config:
+        mcq_single: {accessibility: true, categories: [cat_basics], weight: 1}
+        mcq_multiple: {accessibility: true}
+        mcq_centralize: {accessibility: true}
+        match_answer: {accessibility: true}
+        legacy_env: {accessibility: true}
+        code_python: {accessibility: true, categories: [cat_basics], weight: 2}
+        single_line: {accessibility: true}
+        file_upload: {accessibility: true}
+        random_inputs: {accessibility: true}
+        random_regen: {accessibility: true}
+        rich_feedback: {accessibility: true}
+        outcomes: {accessibility: true}
+        archive_task: {accessibility: true}
+        limited_amount: {accessibility: true, submission_limit: {amount: 2, period: -1}}
+        limited_period: {accessibility: true, submission_limit: {amount: 1, period: 1}}
+        eval_last: {accessibility: true, evaluation_mode: last}
+        stored_two: {accessibility: true, no_stored_submissions: 2}
+        group_task: {accessibility: true, group_submission: true}
+        task_info: {accessibility: true, categories: [cat_basics]}
+        soft_deadline: {accessibility: '2020-01-01 00:00:00 / 2021-01-01 00:00:00 / 2099-12-31 23:59:59'}
+        closed_task: {accessibility: '2020-01-01 00:00:00 / 2021-01-01 00:00:00'}
+        future_task: {accessibility: '2099-01-01 00:00:00'}
+        never_task: {accessibility: false}

@@ -1,0 +1,13 @@
+# Local outputs of the web frontend (frontend/) never go into the images (built in the container).
+frontend/node_modules
+frontend/build
+frontend/build-*
+frontend/.svelte-kit
+frontend/.svelte-kit-*
+frontend/coverage
+frontend/test-results
+frontend/test-results-*
+frontend/perf/.data
+frontend/perf/results
+frontend/e2e/.tasks
+frontend/e2e/.generated

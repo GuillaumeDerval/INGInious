@@ -1,0 +1,68 @@
+name: CSTU test course
+admins:
+- superadmin
+- cstu_admin
+tutors:
+- cstu_tutor
+description: 'course for CSTU docs'
+groups_student_choice: true
+use_classrooms: true
+accessible: true
+allow_unregister: true
+allow_preview: false
+registration: true
+registration_password: null
+registration_ac: null
+registration_ac_list: []
+is_lti: false
+lti_keys: {}
+lti_send_back_grade: false
+task_dispenser: toc
+dispenser_data:
+    toc:
+    -   config:
+            closed: false
+        id: sec1
+        rank: 0
+        tasks_list:
+            02_courses: 0
+            03_tasks: 1
+            answer: 2
+            05_fetching_input: 3
+            grp_mcq: 4
+        title: Section 1
+    config:
+        05_fetching_input:
+            accessibility: true
+        02_courses:
+            accessibility: true
+            categories: [catA]
+            evaluation_mode: best
+        03_tasks:
+            accessibility: true
+            categories: [catB]
+            evaluation_mode: last
+        answer:
+            accessibility: true
+            categories: [catA, catB]
+            evaluation_mode: best
+        grp_mcq:
+            accessibility: true
+            group_submission: true
+lti_url: ''
+tags:
+    good:
+        type: 0
+        visible: true
+        name: Good answer
+        description: The answer was right
+    misc:
+        type: 1
+        visible: false
+        name: Misconception
+        description: Some misconception
+    org1:
+        type: 2
+        visible: true
+        name: Org tag
+        description: organisational

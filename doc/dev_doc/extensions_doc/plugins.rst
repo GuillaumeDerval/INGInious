@@ -1,307 +1,151 @@
 Plugins
 =======
 
-INGInious provides a simple plugin system that allow to register some hooks to extend existing features, create new
-frontend pages and features, and add new authentication methods.
+The web frontend provides a plugin system that allows to register hooks to extend existing features, to add new
+pages and to add new authentication methods. The plugins available to administrators are described in
+:ref:`plugins`.
 
-Hooks actually call callback functions that you indicated with the ``add_hook`` method from ``PluginManager``. Please
-note that all hooks may be called by another thread, so all actions done into a hook have to be thread-safe.
+Plugins are TypeScript modules bundled with the frontend (``frontend/src/lib/server/plugins/bundled/``). The former
+Python plugins (package ``inginious.frontend.plugins`` of the Python frontend) cannot be loaded: an entry of the
+``plugins`` configuration list whose ``plugin_module`` is not a bundled plugin is ignored, with a warning in the log.
+The plugins of the former frontend were ported and keep their ``plugin_module`` names, so that existing configuration
+files keep working.
 
-Tutorial
---------
+Writing a plugin
+----------------
 
-The following code adds a new page displaying ``This is a simple demo plugin`` on the ``/plugindemo`` location.
+A plugin is a file ``frontend/src/lib/server/plugins/bundled/<module name>.ts``, where ``<module name>`` is the value
+of ``plugin_module`` used in the configuration (e.g. ``inginious.frontend.plugins.scoreboard.ts``). Every such file is
+discovered automatically at build time: there is no central list to edit. It must export an ``init`` function:
 
-.. code-block:: python
+.. code-block:: typescript
 
-    from inginious.frontend.pages.utils import INGIniousPage
+    import type { PluginRegistry } from '../index.js';
+    import type { PluginConfig } from '../../config.js';
 
+    /** Called once at start-up, in the order of the `plugins` list of the configuration. */
+    export function init(registry: PluginRegistry, options: PluginConfig): void {
+        // options is the whole entry of the configuration, e.g.
+        // {plugin_module: "inginious.frontend.plugins.myplugin", param1: "value1"}
+        registry.addHook('submission_done', ({ submission }) => {
+            console.log(`Submission ${String(submission._id)} done.`);
+        });
+    }
 
-    class DemoPage(INGIniousPage):
-        """ A simple demo page showing how to add a new page """
+``init`` may be asynchronous. An exception thrown by ``init`` stops the start-up of the frontend.
 
-        def GET(self):
-            """ GET request """
-            return "This is a simple demo plugin"
+The ``PluginRegistry`` (``frontend/src/lib/server/plugins/index.ts``) offers:
 
+``addHook(name, callback, prio = 0)``
+    Registers ``callback`` for the hook ``name``. Callbacks are called by decreasing priority, then in registration
+    order. A callback receives one object with the hook arguments and may be asynchronous. An exception thrown by a
+    callback is logged and ignored: the page is still rendered.
 
-    def init(plugin_manager, client, plugin_config):
-        """ Init the plugin """
-        plugin_manager.add_page("/plugindemo", DemoPage.as_view('demopage'))
+``callHook(name, args)``
+    Calls every callback of a hook and returns the list of their non-null results.
 
+``callHookRecursive(name, args)``
+    Chains the callbacks: each one receives the result of the previous one (``null`` keeps the previous value)
+    and the final value is returned.
 
-The plugin is initialized by the plugin manager, which is the frontend-extended hook manager, by calling method ``init``.
-This method takes four arguments:
+``isEnabled(module)``
+    Whether a plugin is enabled in the configuration.
 
-- ``plugin_manager`` which is the plugin manager singleton object. The detailed API is available at
-  :ref:`inginious.frontend.plugins.plugin_manager`.
+The process-wide registry is returned by ``plugins()``.
 
-- ``client`` which is the INGInious client singleton object, giving you access to the backend features, as launching
-  a new job. The detailed API is available at :ref:`inginious.client.client`.
+Pages
+-----
 
-- ``plugin_config`` which is a dictionary containing the plugin configuration fields set in your ``configuration.yaml``
-  file. For instance, configuration:
-  ::
+A plugin page is an ordinary SvelteKit route in ``frontend/src/routes/`` (a ``+server.ts`` endpoint, or a
+``+page.server.ts`` and a ``+page.svelte`` page). It starts by calling ``requirePlugin(module)``, which answers
+*404 Not found* when the plugin is not enabled, then checks the permissions of the user with the guards of
+``frontend/src/lib/server/security/guards.ts``. For instance, the page of the ``demo`` plugin
+(``frontend/src/routes/plugindemo/+server.ts``):
 
-        plugins:
-            - plugin_module: inginious.frontend.plugins.demo
-              param1: "value1"
+.. code-block:: typescript
 
-  will generate the following ``plugin_config`` dictionary :
-  ::
+    import { requirePlugin } from '#lib/server/plugins/index.js';
+    import type { RequestHandler } from './$types';
 
-        {"plugin_module": "inginious.frontend.plugins.demo", "param1": "value1"}
+    export const GET: RequestHandler = () => {
+        requirePlugin('inginious.frontend.plugins.demo');
+        return new Response('This is a simple demo plugin', { headers: { 'Content-Type': 'text/html; charset=utf-8' } });
+    };
 
+Other extension points
+----------------------
 
-The remaining INGInious classes can be used from your plugins using correct imports. The ``init`` method gives you access
-to the different singletons used by INGInious which are instantiated at boot time. For instance, ``LTIPage`` class can
-be used as base for a new LTI page.
-
-The ``plugin_module`` configuration parameter corresponds to the Python package in which the ``init`` method is found.
-A demonstration plugin is found in the ``inginious.frontend.plugins.demo``. You do not need to include your plugin
-in the INGInious sources. As long as your plugin is found in the Python path, it will remain usable by INGInious.
+- Authentication methods: OAuth providers are registered with ``registerOAuth`` (``frontend/src/lib/server/auth/oauth.ts``),
+  other methods with the ``authMethods`` registry (``frontend/src/lib/server/auth/external.ts``); see the ``auth``
+  plugins for examples.
+- Problem types: ``registerProblemType`` (``frontend/src/lib/server/courses/problems.ts``) registers how the answer
+  of a problem type is read, validated and stored. Its display is a Svelte component of
+  ``frontend/src/lib/components/task/``.
+- Grading jobs: the backend client (``services().backend``, ``frontend/src/lib/server/backend/client.ts``) runs jobs,
+  including jobs that belong to no task (see :doc:`taskless_jobs`).
 
 List of hooks
 -------------
 
-You may be interested to generate some actions useful for your plugins before or after some INGInious events. You
-would therefore need to add a hook method. This can be done using the ``add_hook`` method of package
-:ref:`inginious.frontend.plugins.plugin_manager`. For instance, the following plugin :
+Each hook available in the frontend is described here, with its arguments. The hooks return data (links, fields),
+never HTML: the frontend renders them.
 
-.. code-block:: python
-
-    import logging
-
-    def submission_done(submission, archive, newsub):
-        logging.getLogger("inginious.frontend.plugins.demo").info("Submission " + str(submission['_id']) + " done.")
-
-    def init(plugin_manager, client, plugin_config):
-        """ Init the plugin """
-        plugin_manager.add_hook("submission_done", submission_done)
-
-will log each submission id that has been returning from the backend.
-
-Each hook available in INGInious is described here, starting with its name and parameters. Please refer to the complete
-:ref:`inginious.frontend` package documentation for more information on the data returned by those hooks.
-
-``css``
-    Returns : List of path to CSS files.
-
-    Used to add CSS files in the header. 
-    Should return the path to a CSS file (relative to the root of INGInious).
-``course_admin_menu`` (``course``)
-    ``course`` : :ref:`inginious.frontend.courses.Course`
-
-    Returns : Tuple (link, name) or None.
-
-    Used to add links to the administration menu. This hook should return a tuple (link,name) 
-    where link is the relative link from the index of the course administration.
-    You can also return None.
-``submission_admin_menu`` (``course``, ``task``, ``submission``)
-    ``course`` : :ref:`inginious.frontend.courses.Course`
-    
-    ``task`` : :ref:`inginious.frontend.tasks.Task`
-
-    ``submission`` : OrderedDict
-
-    Returns : HTML or None.
-
-    Used to add HTML to the administration menu displayed at the top of a submission. 
-    ``course`` is the course the submission was made for.
-    ``task`` is the task the submission was made for.
-    ``submission`` is the submission's data.
-``task_list_item`` (``course``, ``task``, ``tasks_data``)
-    ``course`` : :ref:`inginious.frontend.courses.Course`
-    
-    ``task`` : :ref:`inginious.frontend.tasks.Task`
-
-    ``tasks_data`` : dict
-
-    Returns : HTML or None.
-
-    Used to add HTML underneath each item's progress bar in a course's task list (``/course/<courseid>``).
-    This hook is called once for each task the course has. 
-    If a course has 20 tasks, the hook is then called 20 times each time the task list is rendered.
-    ``course`` is the course the submission was made for.
-    ``task`` is the task the submission was made for.
-    ``tasks_data`` is a dictionary used by INGInious which contains the grade and completion status of each of the course's tasks for the visiting user.
 ``main_menu`` ()
-    Returns : HTML or None.
+    Returns : ``NavItem`` (``{label, href}``) or null.
 
-    Allows to add HTML to the menu displayed on the main (course list) page.
-``course_menu`` (``course``)
-    ``course`` : :ref:`inginious.frontend.courses.Course`
+    Adds a link to the main menu (e.g. the ``upcoming_tasks`` plugin).
 
-    Returns : HTML or None.
+``course_menu`` (``course``, ``username``)
+    Returns : a ``NavItem`` or a list of ``NavItem``, or null.
 
-    Allows to add HTML to the menu displayed on the course page. Course is the course object related to the page.
+    Adds links to the menu of a course (e.g. scoreboards, contests).
+
 ``task_menu`` (``course``, ``task``)
-    ``course`` : :ref:`inginious.frontend.courses.Course`
+    Returns : ``{label, href}`` or null.
 
-    ``task`` : :ref:`inginious.frontend.tasks.Task`
+    Adds a link to the menu of a task page.
 
-    Returns: HTML or None.
+``course_admin_menu`` (``course``)
+    Returns : ``NavItem`` or null.
 
-    Allows to add HTML to the menu displayed on the course page. ``course`` is the course object related to the page. ``task``
-    is the task object related to the page.
-``javascript_header``
-    Returns : List of path to Javascript files.
-
-    Used to add Javascript files in the header. 
-    Should return the path to a Javascript file (relative to the root of INGInious).
-``javascript_footer``
-    Returns : List of path to Javascript files.
-
-    Used to add Javascript files in the footer. 
-    Should return the path to a Javascript file (relative to the root of INGInious).
-``course_accessibility`` (``course``, ``default``)
-    Returns: inginious.frontend.accessible_time.AccessibleTime
-
-    ``course`` : inginious.frontend.courses.Course
-
-    ``default`` : Default value as specified in the configuration
-
-    Overrides the course accessibility.
-
-    Overrides the task accessibility
-``task_limits`` (``course``, ``taskid``, ``default``)
-    Returns: Task limits dictionary
-
-    ``course`` : inginious.frontend.courses.Course
-
-    ``task`` : inginious.frontend.tasks.Task
-
-    ``default`` : Default value as specified in the configuration
-
-    Overrides the task limits
-``task_context`` (``task``, ``default``)
-    Returns: inginious.frontend.parsable_text.ParsableText
-
-    ``task`` : inginious.frontend.tasks.Task
-
-    ``default`` : Default value as specified in the configuration
-
-    Overrides the task context
-``task_network_grading`` (``course``, ``taskid``, ``default``)
-    Returns: True or False
-
-    ``course`` : inginious.frontend.courses.Course
-
-    ``task`` : inginious.frontend.tasks.Task
-
-    ``default`` : Default value as specified in the configuration
-
-    Overrides the task network-enable option
-``new_submission`` (``submission``, ``inputdata``)
-    ``submissionid`` : ObjectId corresponding to the submission recently saved in database.
-
-    ``submission`` : Dictionary containing the submission metadata without ``input`` field.
-
-    ``inputdata`` : Dictionary containing the raw input data entered by the student. Each key corresponding to the
-    problem id.
-
-    Called when a new submission is received.
-    Please note that the job is not yet send to the backend when this hook is called,
-    pay also attention that a submission is the name given to a job that was made through the frontend.
-    It implies that jobs created by plugins will not call ``new_submission`` nor ``submission_done``.
-``submission_done`` (``submission``, ``archive``, ``newsub``)
-    ``submission`` : Dictionary containing the submission metadata.
-
-    ``archive`` : Bytes containing the archive file generated by the job execution. This can be ``None`` if no archive
-    is generated (for einstance, in MCQ).
-
-    ``newsub`` : Boolean indicating if the submission is a new one or a replay.
-
-    Called when a submission has ended. The submissionid is contained in the dictionary submission, under the field ``_id``.
-``template_helper`` ()
-    Returns : Tuple (name,func)
-
-    Adds a new helper to the Jinja global environment. Should return a tuple (name,func) where name is the name that will
-    be used in Jinja templates and func is the function that will be called.
-``feedback_text`` (``task``, ``submission``, ``text``)
-    Returns : {"task": ``task``, "submission": ``submission``, "text": ``modified_text``}
-
-    Modifies the feedback to be displayed. This hook is called each time a submission is displayed. You have to return
-    the origin ``task`` and ``submission`` objects in the return value. ``text`` is in HTML format.
-``feedback_script`` (``task``, ``submission``)
-    Return : javascript as an ``str``.
-
-    Javascript returned by this hook will be executed by the distant web browser when the submission is loaded.
-    This hook is called each time a submission is displayed. Pay attention to output correct javascript, as it may
-    break the webpage.
+    Adds a link to the course administration menu.
 
 ``task_editor_tab`` (``course``, ``taskid``, ``task_data``)
-    ``course`` : inginious.frontend.courses.Course
+    Returns : ``{id, label, text?, fields}`` or null.
 
-    ``task_data`` : OrderedDict
-    
-    This hook allows to add additional tabs on the task editor.
-    
-    ``course`` is the course object related to task, ``task_data`` is the task descriptor content.
+    Adds a tab to the task editor. ``fields`` is a list of field descriptions (``FieldSpec``, see
+    ``frontend/src/lib/components/course-admin/specs.ts``): their values are stored as top-level keys of ``task.yaml``.
+    See the ``task_editor_hook_example`` plugin.
 
-``task_editor_submit`` (``course``, ``taskid``, ``task_data``, ``task_fs``)
-    ``course`` : inginious.frontend.courses.Course
+``task_editor_submit`` (``course``, ``taskid``, ``task_data``)
+    Returns : an error message, or null.
 
-    ``task_data`` : OrderedDict
-    
-    ``task_fs`` : inginious.common.filesystems.local.LocalFSProvider
-    
-    This hook allows to process form data located in the added tabs.
-    
-    ``course`` is the course object related to task, ``task_data`` is the task descriptor content and ``task_fs`` is an
-    object of type LocalFSProvider.    
+    Called when a task is saved from the editor, before it is validated and written. Callbacks may modify
+    ``task_data``; the first error message cancels the save and is shown to the user.
 
-Other useful methods for plugins
---------------------------------
+``new_submission`` (``submission``, ``inputdata``)
+    Returns : nothing.
 
-These functions are meant to be called by plugins.
+    Called when a submission is created, before it is stored and sent to the backend. Callbacks may modify
+    ``submission`` and ``inputdata`` (for instance, to add ``@``-prefixed input fields).
 
-``inginious.frontend.envrionment_types.register_env_type(env_obj)``
+``submission_done`` (``submission``, ``course``, ``archive``, ``newsub``)
+    Returns : nothing.
 
-    ``env_obj`` a ``FrontendEnvType`` object to be registered (to be displayed in the frontend and made accessible both
-    in the studio and for submitting tasks).
+    Called when a submission has been graded and stored. ``archive`` is the archive returned by the grading container
+    (or null) and ``newsub`` is false when the submission was replayed in place. See the ``git_repo`` plugin.
 
-Additional subproblems
-----------------------
+``feedback_title`` (``submission``, ``title``) -- recursive
+    Returns : the object received, with a possibly modified ``title``.
 
-Additional subproblems can be defined and added via plugins. A basic example is available on GitHub repo
-`INGInious/problems-demo <https://github.com/INGInious/problems-demo>`_.
+    Changes the title of the feedback of a graded submission.
 
-Subproblems are defined at both the backend and frontend side. At the backend side, it consists of a class inheriting
-from ``inginious.common.tasks_problems.Problem`` and implementing the following abstract methods:
+The other hooks of the former Python frontend (``css``, ``javascript_header``, ``javascript_footer``,
+``header_html``, ``template_helper``, ``task_list_item``, ``submission_admin_menu``, ``prefs_menu``,
+``task_context``, ``course_accessibility``, ``course_allow_unregister``, ``feedback_text``, ``feedback_script``)
+are not called by the frontend. The complete reference, with the call sites of the former frontend, is
+`frontend/docs/reference/plugin-hooks.md`_; the conventions to follow when adding code to the frontend are described in
+`frontend/docs/implementation-guide.md`_.
 
-   - ``get_type(cls)`` returning an alphanumerical string representing the problem type.
-   - ``input_is_consistent(self, task_input, default_allowed_extension, default_max_size`` returning ``True`` if the
-     ``task_input`` dictionary provided by the INGInious client is consistent and correct for the agent.
-   - ``input_type(self)`` returning ``str``, ``dict`` or ``list`` according to the actual data sent to the agent.
-   - ``check_answer(self, task_input, language)`` returning a tuple whose items are:
-
-        #. either ``True``, ``False`` or ``None``, indicating respectively that the answer is valid, invalid,
-           or need to be sent to VM
-        #. the second is the error message assigned to the task, if any (unused for now)
-        #. the third is the error message assigned to this problem, if any
-        #. the fourth is the number of errors.
-
-     This method should be called via a compatible agent, as for MCQs. The Docker
-     agent will not call this method. ``task_input`` is the dictionary provided
-     by the INGInious client after its consistency was checked. ``language`` is the gettext 2-letter language code.
-   - ``get_text_fields(cls)`` returns a dictionary whose keys are the problem YAML fields that require translation and values
-     are always True.
-   - ``parse_problem(self, problem_content)`` returns the modified `problem_content`` returned by the INGInious studio.
-     For instance, strings-encoded int values can be cast to int here.
-
-At the frontend side, it consists of a class inheriting from ``inginious.frontend.tasks_problems.DisplayableProblem``
-and implementing the following abstract methods:
-
-  - ``get_type_name(cls, language)`` returning a human-readable transleted string representing the problem type.
-    ``language`` is the gettext 2-letter language code.
-  - ``show_input(self, language, seed)`` returning a HTML code displayed after the subproblem context to the
-    student. ``language`` is the gettext 2-letter language
-    code. ``seed`` is a seed to be used in the random number generator. For simplicity, it should be a string and the usage
-    of the username is recommended, as the seed is made to ensure that a user always see the same exercise.
-    Classes inheriting from DisplayableProblem should prepend/append a salt to the seed and then create a new
-    instance of Random from it. See ``inginious.frontend.tasks_problems.DisplayableMultipleChoiceProblem``
-    for an example.
-  - ``show_editbox(cls, key, language)`` returning a HTML code corresponding to the subproblem edition box.
-    ``language`` is the gettext 2-letter language code.
-    ``key`` is the problem type sent by the frontend.
+.. _frontend/docs/reference/plugin-hooks.md: https://github.com/INGInious/INGInious/blob/main/frontend/docs/reference/plugin-hooks.md
+.. _frontend/docs/implementation-guide.md: https://github.com/INGInious/INGInious/blob/main/frontend/docs/implementation-guide.md

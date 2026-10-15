@@ -1,0 +1,17 @@
+courseid: e2e_cli
+taskid: mcq
+input:
+  q1: '1'
+  q2: 'no'
+  '@lang': en
+  '@username': anonymized
+  '@random': []
+  '@state': ''
+result: failed
+grade: 0.0
+problems:
+  q1: [failed, Wrong answer]
+  q2: [failed, Wrong answer]
+tests: {}
+custom: {}
+state: '{"q1": "", "q2": ""}'

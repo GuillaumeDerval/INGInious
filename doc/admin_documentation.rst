@@ -21,12 +21,15 @@ Commands reference
 Frontend commands
 `````````````````
 
+The web frontend itself is started with ``node build`` (see :doc:`admin_doc/install_doc/installation`).
+The following tools are shipped with it, in the ``frontend/`` directory (``npm run build:cli``).
+
 .. toctree::
     :maxdepth: 2
 
-    admin_doc/commands_doc/inginious-install
-    admin_doc/commands_doc/inginious-webapp
-    admin_doc/commands_doc/inginious-webdav
+    admin_doc/commands_doc/inginious-setup
+    admin_doc/commands_doc/inginious-autotest
+    admin_doc/commands_doc/inginious-test-task
 
 Backend commands
 ````````````````
@@ -44,9 +47,7 @@ Utilities
 .. toctree::
     :maxdepth: 2
 
-    admin_doc/commands_doc/inginious-autotest
     admin_doc/commands_doc/inginious-synchronize
     admin_doc/commands_doc/inginious-container-update
     admin_doc/commands_doc/inginious-database-update
-    admin_doc/commands_doc/inginious-task-test
     admin_doc/commands_doc/inginious-submission-anonymizer

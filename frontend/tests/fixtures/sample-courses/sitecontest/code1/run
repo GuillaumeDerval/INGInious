@@ -1,0 +1,13 @@
+#!/usr/bin/python3
+from inginious_container_api import feedback, input
+code = input.get_input("answer").strip()
+try:
+    v = float(code)
+    feedback.set_custom_value("score", v)
+    # The grade follows the score (clamped to 0-100); without set_grade the agent gives 100 on success.
+    feedback.set_grade(min(max(v, 0.0), 100.0))
+    feedback.set_global_result("success")
+    feedback.set_global_feedback("Score: %s" % v)
+except Exception:
+    feedback.set_global_result("failed")
+    feedback.set_global_feedback("Not a number")

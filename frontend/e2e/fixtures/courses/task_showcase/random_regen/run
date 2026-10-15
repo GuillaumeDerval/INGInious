@@ -1,0 +1,8 @@
+#!/usr/bin/env python3
+# Grading script of task_showcase/random_regen
+from inginious_container_api import feedback, input
+expected = int(input.get_input("@random")[0] * 1000)
+answer = input.get_input("value").strip()
+ok = answer == str(expected)
+feedback.set_global_result("success" if ok else "failed")
+feedback.set_global_feedback("Expected %d, got ``%s``." % (expected, answer))

@@ -1,0 +1,16 @@
+{
+  'name': 'NAV Password course',
+  'admins': ['superadmin'],
+  'tutors': [],
+  'description': 'Course NAV Password course',
+  'accessible': true,
+  'registration': true,
+  'allow_unregister': false,
+  'task_dispenser': 'toc',
+  'dispenser_data':
+    {
+      'toc': [{ 'title': 'Tasks', 'tasks_list': ['t1', 't2'] }],
+      'config': { 't1': { 'accessibility': true }, 't2': { 'accessibility': true } }
+    },
+  'registration_password': 's3cret'
+}

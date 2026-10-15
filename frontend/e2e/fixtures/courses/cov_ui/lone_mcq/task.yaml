@@ -1,0 +1,17 @@
+# A lone unnamed multiple-answer MCQ (its card has no title).
+name: Lone MCQ
+author: INGInious test-suite
+context: Pick some.
+environment_type: mcq
+environment_id: mcq
+problems:
+  pick:
+    type: multiple_choice
+    header: Pick the right ones.
+    multiple: true
+    choices:
+      - text: Alpha
+        valid: true
+      - text: Beta
+        valid: true
+      - text: Gamma

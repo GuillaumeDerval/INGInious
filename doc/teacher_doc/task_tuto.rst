@@ -6,7 +6,7 @@ In this document we will describe how to create a simple task, that checks that 
 .. note::
 
     Demonstration tasks are made available for download on the `INGInious-demo-tasks repository <https://github.com/INGInious/demo-tasks>`_. They
-    can also be downloaded and installed automatically via the :ref:`inginious-install` script. You can also download courses examples on the marketplace page which allows to easily import courses files. The list of these open source courses is also available on the `INGInious-courses repository <https://github.com/INGInious/courses>`_
+    can be copied in the tasks directory of your instance. You can also download courses examples on the marketplace page which allows to easily import courses files. The list of these open source courses is also available on the `INGInious-courses repository <https://github.com/INGInious/courses>`_
 	
 
 Creating the task description
@@ -17,12 +17,12 @@ Using the webapp
 
 If you are using the webapp, this procedure can be done using the graphical interface:
 
-#. Go to the *Course administration/Tasks* page, enter ``helloworld`` as a new task id and click on *Create new task*.
-#. In the *Basic settings* tab, set the task name to ``Hello World!`` and put some context and author name. Container
-   setup can be left with default parameters.
-#. In the *Subproblems* tab, add a new *code*-type problem with problem id ``question1``.
+#. In the course administration, open the *Task list* page and add a new task with ``helloworld`` as task id.
+#. Edit the task. In the *General* section, set the task name to ``Hello World!`` and put some context and author
+   name. The *Grading environment* section can be left with default parameters.
+#. In the *Problems* section, add a new *code*-type problem with problem id ``question1``.
 #. Set some problem name and context, and set language to ``python``.
-#. Save changes and go to *Task files* tab.
+#. Save changes and go to the *Task files* of the task.
 
 Manually
 ````````
@@ -59,7 +59,7 @@ Most of the fields are self-explanatory. Some remarks:
   ``output`` are in MB.
 - The ``environment`` field is intended to change the environment where the tasks run. The available environments are
   those you downloaded during installation or those you created by creating a grading container.
-  Please see :doc:`create_container`.
+  Please see :doc:`/admin_doc/install_doc/create_container`.
 
 More documentation is available here: :doc:`task_file`.
 
@@ -67,7 +67,7 @@ Creating the run file
 ---------------------
 
 In your task folder, you will put every file needed to test the input of the student. This folder content can be shown
-in the webapp in the *Task files* tab of the *Edit task* page.
+in the webapp in the *Task files* of the task editor.
 
 #. Create a template file ``template.py``, where we will put the code of the student.
    ::

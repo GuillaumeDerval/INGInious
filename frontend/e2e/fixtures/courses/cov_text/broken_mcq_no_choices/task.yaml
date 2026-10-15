@@ -1,0 +1,7 @@
+# Generated from tests/fixtures/rst (golden examples): one problem header per example.
+name: mcq_no_choices
+environment_type: mcq
+environment_id: mcq
+problems:
+  p:
+    type: multiple_choice

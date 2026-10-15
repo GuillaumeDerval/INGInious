@@ -1,0 +1,36 @@
+name: 'SITE test course (dav)'
+admins:
+- site_admin
+tutors:
+- site_tutor
+description: 'Course used by SITE documentation'
+accessible: true
+registration: true
+registration_password: null
+allow_unregister: true
+allow_preview: false
+is_lti: false
+task_dispenser: toc
+dispenser_data:
+  toc:
+  - id: s1
+    title: Exercises
+    rank: 0
+    tasks_list:
+      mcq1: 0
+      code1: 1
+      code2: 2
+      file1: 3
+  config:
+    mcq1: {accessibility: true}
+    code1: {accessibility: true}
+    code2: {accessibility: true}
+    file1: {accessibility: true}
+scoreboard:
+- name: Code 1 only
+  content: code1
+- name: Both code tasks
+  content: [code1, code2]
+- name: Weighted reverse
+  content: {code1: 2, code2: -1}
+  reverse: true

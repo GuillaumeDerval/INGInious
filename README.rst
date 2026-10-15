@@ -16,9 +16,9 @@ INGInious
 
 INGInious is an intelligent grader that allows secured and automated testing of code made by students.
 
-It is written in Python and uses Docker_ to run student's code inside a secured environment.
+It uses Docker_ to run student's code inside a secured environment.
 
-INGInious provides a backend which manages interaction with Docker and grade code, and a frontend which allows students to submit their code in a simple and beautiful interface. The frontend also includes a simple administration interface that allows teachers to check the progression of their students and to modify exercices in a simple way.
+INGInious provides a backend which manages interaction with Docker and grade code (Python package ``inginious``), and a web frontend which allows students to submit their code (SvelteKit application in the ``frontend/`` directory, running on Node.js). The frontend also includes an administration interface that allows teachers to check the progression of their students and to modify exercices in a simple way.
 
 INGInious can be used as an external grader for Moodle or edX. The course `Constraint Programming`_ uses INGInious to correct students' code.
 
@@ -97,6 +97,8 @@ For example, the INGInious tutorial course is installed with the following comma
 *This can happen when the tasks directory is created by docker-compose.*
 
 Note that the ``configuration.deploy.yaml`` file provided is a sample configuration, the secret key **must** be changed by administrators in production deployments.
+Set also ``base_url`` and ``webdav_host`` in that file to the public URL of your instance (the frontend gets that URL from Caddy's ``X-Forwarded-*`` headers).
+WebDAV access to the course files is served by the frontend under ``/dav``.
 
 .. _env-base: https://github.com/INGInious/INGInious/tree/main/base-containers/base
 .. _env-default: https://github.com/INGInious/INGInious/tree/main/base-containers/default
@@ -109,7 +111,15 @@ Administrators can add grading environments to their instance either by adding t
 
 .. _Manual installation: https://docs.inginious.org/en/latest/admin_doc/install_doc/installation.html
 
-`Manual installation`_ is also possible with pip.
+`Manual installation`_ is also possible: the backend and the agents are installed with pip, and the frontend is built with npm:
+
+.. code-block::
+
+   $ cd frontend
+   $ npm ci && npm run build
+   $ INGINIOUS_CONFIG=/path/to/configuration.yaml PORT=8000 PROTOCOL_HEADER=x-forwarded-proto HOST_HEADER=x-forwarded-host node build   # behind a reverse proxy
+
+The frontend uses the same ``configuration.yaml`` and the same MongoDB database as the former Python frontend (``inginious-webapp``), which it replaces.
 
 Documentation
 -------------
@@ -120,6 +130,7 @@ The documentation is available on Read the Docs:
 - For the master (dev) branch (not always up to date) : http://docs.inginious.org/en/latest/index.html
 
 On Linux, run ``make html`` in the directory ``/doc`` to create a html version of the documentation.
+The developer documentation of the frontend is in ``frontend/docs``.
 
 Roadmap
 -------

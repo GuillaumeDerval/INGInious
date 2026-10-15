@@ -1,0 +1,12 @@
+# Group task without any submission token (blocked-reason messages).
+name: Limited group task
+author: INGInious test-suite
+context: Nothing to submit.
+environment_type: mcq
+environment_id: mcq
+problems:
+  q:
+    type: match
+    name: Q
+    header: Anything.
+    answer: x

@@ -1,0 +1,15 @@
+{
+  'name': 'NAV Registration closed',
+  'admins': ['superadmin'],
+  'tutors': [],
+  'description': 'Course NAV Registration closed',
+  'accessible': true,
+  'registration': '2020-01-01 / 2021-01-01',
+  'allow_unregister': true,
+  'task_dispenser': 'toc',
+  'dispenser_data':
+    {
+      'toc': [{ 'title': 'Tasks', 'tasks_list': ['t1', 't2'] }],
+      'config': { 't1': { 'accessibility': true }, 't2': { 'accessibility': true } }
+    }
+}

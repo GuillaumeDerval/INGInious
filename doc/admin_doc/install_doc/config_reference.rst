@@ -4,82 +4,111 @@ Configuration reference
 =======================
 
 .. HINT::
-    The best way to configure INGInious is to use :ref:`inginious-install`. See :ref:`config`.
+    A first configuration file can be generated with :ref:`inginious-setup`. See :ref:`config`.
 
-Configuring INGInious is done via a file named ``configuration.yaml``.
-To get started, a file named ``configuration.example.yaml`` is provided.
+The web frontend is configured via a YAML file named ``configuration.yaml`` (path given by the ``INGINIOUS_CONFIG``
+environment variable, ``./configuration.yaml`` by default). The file format is the one of the former Python
+frontend: an existing file keeps working. Unknown keys are ignored. The file is read at start-up.
 
-.. literalinclude:: ../../../configuration.example.yaml
-    :language: yaml
-    :linenos:
+A minimal configuration looks like:
+
+.. code-block:: yaml
+
+    backend: tcp://127.0.0.1:2000
+    mongo_opt:
+        host: localhost
+        database: INGInious
+    tasks_directory: /var/www/inginious/tasks
+    superadmins:
+        - superadmin
+    base_url: https://inginious.example.org
+    webdav_host: https://inginious.example.org/dav
+    session_parameters:
+        secret_key: "<a long random string>"
+        secure: true
+    smtp:
+        sendername: 'INGInious <no-reply@inginious.example.org>'
+        host: smtp.example.org
+        port: 587
+        username: inginious
+        password: secret
+        starttls: true
+    plugins: []
+
+The ``configuration.deploy.yaml`` file of the repository is the configuration used by the ``docker compose``
+deployment.
+
+The backend and the agents do not read this file: they are configured by their command-line options
+(see :ref:`inginious-backend`, :ref:`inginious-agent-docker` and :ref:`inginious-agent-mcq`).
 
 The different entries are :
 
 ``allow_deletion``
     ``false`` if users cannot delete their accounts (and all related data from database), ``true`` otherwise.
+    Defaults to ``true``.
 
 ``allow_registration``
     ``false`` if database registration should be disabled. In this mode no password can be set and accounts
-    are only created via the external authentication systems. ``true`` otherwise.
+    are only created via the external authentication systems. ``true`` otherwise (default).
+
+``allowed_file_extensions``
+    Default list of the file extensions accepted by *file* problems (a problem can override it).
+    Defaults to ``[".c", ".cpp", ".java", ".oz", ".zip", ".tar.gz", ".tar.bz2", ".txt"]``.
 
 ``backend``
-    The link to the backend used. You can either set it to ``local`` or indicate the address of your manually-managed backend.
+    Address of the backend (its *client* address, see :ref:`inginious-backend`), in the form
+    ``tcp://xxx.yyy.zzz.aaa:bbbb`` or ``ipc:///path/to/your/sock``. **Required**: the frontend refuses to start with
+    ``backend: local`` (the former Python frontend could start a backend and a Docker agent in its own process; the
+    backend and the agents now always run as separate processes).
 
-    - ``local``. In this mode, which is the default, you have to ensure the docker daemon is local to your machine, or, at least, share the same
-      directory structure. This is typically the case if you use Linux and have a local Docker daemon, or if you use Docker for Mac/Windows, or even
-      docker-machine with local machines. This is the configuration described in this tutorial. You will need a running docker daemon on your machine
-      for this to work. If you can use any Docker client command, like ``docker info``, INGInious should run flawlessly.
+``base_url``
+    Public URL of the instance, e.g. ``https://inginious.example.org``. Used to build the links sent by e-mail
+    (account activation, password reset) and the callback URLs of the OAuth and SAML authentication plugins.
+    When absent, the ``APP_ORIGIN`` environment variable is used; if neither is set, these actions are
+    refused (except when the instance is accessed on ``localhost``) and an error is logged.
 
-      In this mode, a supplementary config option is available, ``local-config``.
-
-    - ``tcp://xxx.yyy.zzz.aaa:bbbb``, ``udp://xxx.yyy.zzz.aaa:bbbb`` or ``ipc:///path/to/your/sock``, where the adresses are the ip/socket path of
-      the backend you started manually. This is for advanced users only. See commands ``inginious-backend`` and ``inginious-agent`` for more
-      information.
-
-``local-config``
-    These configuration options are available only if you set ``backend:local``.
-
-    ``concurrency``
-        Number of concurrent task that can be run by INGInious. By default, it is the number of CPU in your host.
-
-    ``debug_host``
-        Host to which the users should connect in order to access to the debug ssh for containers. Most of the time, just do not indicate this
-        option: the address will be automatically guessed.
-
-    ``debug_ports``
-        Range of port, in the form ``64100-64200``, to which INGInious can bind SSH debug containers, to allow remote debugging. By default, it is
-        ``64100-64200``.
-
-    ``tmp_dir``
-        A directory whose absolute path must be available by the docker daemon and INGInious at the same time. By default, it is ``./agent_tmp``.
-
-    ``debugger``
-        Enables container debugging if set to ``true``. It is available only for Pycharm's debugging with a python debug server using port 5678. It is disabled by default.
-
-``log_level``
-    Can be set to ``INFO``, ``WARN``, or ``DEBUG``. Specifies the logging verbosity.
+``lti_allow_private_urls``
+    The frontend calls the LTI platforms (LTI 1.1 outcome service, LTI 1.3 key set, access token and score URLs) only
+    over HTTPS and only on public addresses, with a 10 s timeout and without following redirects. Set to ``true`` to
+    also allow ``http`` and loopback/private addresses (development, tests with a local platform). Defaults to
+    ``false``.
 
 ``lti_config``
     A dictionary containing the LTI v1.3 tool consumers configuration.
     See :ref:`lti13` for configuration details.
 
+``lti_frame_ancestors``
+    List of extra origins allowed to display the LTI pages in a frame, on top of the configured LTI 1.3 platforms and
+    of the LTI 1.1 consumer of the session. Needed when a platform serves its pages from other hosts than its
+    configured URLs, e.g. ``["https://*.instructure.com"]`` for Canvas.
+
 ``maintenance``
-    Set to ``true`` if the webapp must be disabled.
+    Set to ``true`` to replace every page by a maintenance message.
+
+``max_file_size``
+    Maximum size, in bytes, of each file uploaded in a submission. Defaults to ``1048576`` (1 MiB).
 
 ``mongo_opt``
     MongoDB client configuration.
 
     ``host``
-        MongoDB server address. If your database is user/password-protected, use the following syntax:
-        ``mongodb://USER:PASSWORD@HOSTNAME/DB_NAME``
+        MongoDB server address (defaults to ``localhost``). If your database is user/password-protected, use the
+        following syntax: ``mongodb://USER:PASSWORD@HOSTNAME/DB_NAME``
 
     ``database``
-        You can change the database name if you want multiple instances or in the case of conflict.
+        You can change the database name (defaults to ``INGInious``) if you want multiple instances or in the case
+        of conflict.
+
+    The frontend refuses to start when the database version does not match the one it expects: run
+    :ref:`inginious-database-update` first.
+
+``password_min_length``
+    Minimum length of new passwords (registration, reset, change, accounts created by a superadmin). Defaults to
+    ``10``. Passwords longer than 1024 characters are always refused.
 
 ``plugins``
     A list of plugin modules together with configuration options.
     See :ref:`plugins` for detailed information on available plugins, including their configuration.
-    Please note that the usage of at least one authentication plugin is mandatory for the webapp.
 
 ``privacy_page``
     Static page id of the Privacy Policy.  If not specified, users won't have to accept anything
@@ -112,93 +141,117 @@ The different entries are :
         Set to ``true`` if SSL is needed.
 
 ``static_directory``
-    Path to the directory where YAML-defined static pages are located.
+    Path to the directory where YAML-defined static pages are located. Defaults to ``./static``.
+
+``submissions_export_limit``
+    Maximum number of submissions of one archive download or bulk replay in the course administration (the CSV
+    export allows 20 times more). Larger selections are refused with a message asking to narrow the filters.
+    Defaults to ``10000``.
 
 ``superadmins``
     A list of super-administrators who have admin access on the whole stored content.
 
 ``tasks_directory``
     The path to the directory that contains all the task definitions, grouped by courses.
-    (see :ref:`task`)
+    (see :ref:`task`). Defaults to ``./tasks``.
 
 ``terms_page``
     Static page id of the Terms of Service page. If not specified, users won't have to
     accept anything before using INGInious. (see :ref:`StaticPages`)
-
-``use_minified_js``
-    Set to ``true`` to use the minified version of Javascript scripts, ``false`` otherwise.
 
 ``webterm``
     Link to the INGInious xterm app with the following syntax: ``http[s]://host:port``.
     If set, it allows to use in-browser task debug via ssh. (See :ref:`webterm_setup` for
     more information)
 
+``webdav_allow_http``
+    WebDAV access requires HTTPS (credentials are sent with HTTP Basic authentication), except on ``localhost``.
+    Set to ``true`` to allow it over plain HTTP. Defaults to ``false``.
+
 ``webdav_host``
-   Link to the INGInious webdav app with the following syntax: ``http[s]://host:port``.
-   If set, a new page displays a WebDAV URL and login/password for administrators to access
-   the course filesystem.
-   For newer `compose`-based deployments, it must reflect the configuration of the reverse-proxy.
-   It also supports sub-paths in a URL, e.g., given that the INGInious frontend lies at ``https://inginious.org``,
-   the webdav may be served under ``https://inginious.org/dav``.
+    Public URL of the WebDAV access, served by the frontend under ``/dav``, e.g.
+    ``https://inginious.example.org/dav``. If set, the course administration displays this URL and the
+    credentials to use to access the course files (see :ref:`webdav_setup`).
 
 ``welcome_page``
     Static page id to serve instead of the course list as home page. (see :ref:`StaticPages`)
 
 ``sentry_io_url``
-    The Sentry.io *Data Source Name* to use for error reporting in the frontend. If not set, sentry.io is not loaded.
+    The Sentry.io *Data Source Name* to use for error reporting in the browser. If not set, sentry.io is not loaded.
 
 ``session_parameters``
     A dictionnary containing information about the management of sessions in the app.
-    Its default value is:
+    ``secret_key`` is required; the other values default to:
 
     ::
 
         session_parameters:
             cookie_name: "inginious_session_id"
             cookie_domain: null
-            cookie_path: null
+            cookie_path: "/"
             samesite: "Lax"
-            timeout: 86400  # 24 * 60 * 60, # 24 hours in seconds
-            httponly: True
-            secret_key: "fLjUfxqXtfNoIldA0A0G"
-            secure: False
+            timeout: 86400  # 24 * 60 * 60, # 24 hours in seconds, extended at each visit
+            max_lifetime: 604800  # 7 days: sign in again after this time (0: no limit)
+            httponly: true
 
-    Most value are as defined in standard HTTP cookies. The ``secret_key`` should be a long sequence of random characters.
+    Most value are as defined in standard HTTP cookies. The ``secret_key`` should be a long sequence of random
+    characters. Without an explicit ``secure`` value, the cookie gets the ``Secure`` flag when ``base_url`` is
+    ``https`` and on every request served over HTTPS; set ``secure: false`` to disable it.
 
 ``reverse-proxy-config``
     A dictionary for reverse proxy configuration.
 
     ``enable``
-        ``false`` if INGInious is not running benind a reverse proxy, ``true`` otherwise. Its default value is ``false``
-        
-    ``x_for``
-        Number of values to trust for X-Forwarded-For. Its default value is 1
+        ``true`` if INGInious runs behind a reverse proxy and is only reachable through it, ``false`` otherwise
+        (default). When enabled, the client IP address (used by the login rate limits) is read from the
+        ``X-Forwarded-For`` header, and the public URL used to check LTI signatures from the ``X-Forwarded-Proto`` and
+        ``X-Forwarded-Host`` headers. Do not enable it when clients can reach the frontend directly.
 
-    ``x_host``
-        Number of values to trust for X-Forwarded-Host. Its default value is 1
+    ``x-for``
+        Number of proxies in front of the frontend: the client address is the one added by the
+        ``x-for``-th proxy, counting from the right of the ``X-Forwarded-For`` header. Defaults to 1. The
+        spelling ``x_for`` is also accepted.
 
+Keys of the former Python frontend that are ignored
+---------------------------------------------------
+
+The following keys may be present in existing files; the frontend ignores them:
+
+- ``use_minified_js``, ``web_debug``, ``debug_asyncio``, ``log_level``: specific to the Python web application
+  (the frontend logs on its standard output);
+- ``local-config``: options of the local backend and agent, which are not started by the frontend anymore. Use the
+  options of :ref:`inginious-agent-docker` (``--debug-host``, ``--debug-ports``, ``--tmpdir``, ...) instead;
+- ``fs``: only the local filesystem (``tasks_directory``) is supported;
+- ``backup_directory``: accepted, but not used;
+- ``reverse-proxy-config.x-host`` (``x_host``): the first value of the ``X-Forwarded-Host`` header is used.
 
 .. _configuration.example.yaml: https://github.com/INGInious/INGInious/blob/master/configuration.example.yaml
-.. _docker-py API: https://github.com/docker/docker-py/blob/master/docs/api.md#client-api
 
 .. _plugins:
 
 Plugins
 -------
 
-Several plugins are available to complete the INGInious feature set.
+Several plugins are available to complete the INGInious feature set. They are part of the frontend and are enabled
+by listing them under ``plugins`` in the configuration file, with the same ``plugin_module`` names as in the former
+Python frontend; every other key of an entry is an option of the plugin. Plugins are loaded in the order of the list.
+
+An entry whose ``plugin_module`` is not one of the plugins below (for instance a third-party Python plugin) is
+ignored, with a warning in the log: Python plugins cannot be loaded by the frontend. See :doc:`/dev_doc/extensions_doc/plugins`
+to write a new plugin.
 
 External authentication plugins
 ```````````````````````````````
 
 You can allow account creation from an external authentication source. This will link the external credentials to the
 INGInious account so that the user can log in INGInious using these credentials in the future. Several authentication
-plugins are available.
+plugins are available. Every authentication plugin has an ``id`` option (the authentication method id, alphanumerical
+and different from the other external authentication methods) and a ``name`` option (the label of the sign-in button).
 
 LDAP
 !!!!
 
-Uses an LDAP server to authenticate users.
+Uses an LDAP server to authenticate users. The user types its login and password in a form hosted by INGInious.
 
 To enable this plugin, add to your configuration file:
 ::
@@ -207,32 +260,32 @@ To enable this plugin, add to your configuration file:
         - plugin_module: inginious.frontend.plugins.auth.ldap_auth
           id: <some_id_for_ldap>
           host: "your.ldap.server.com"
-          encryption: "ssl" #can be tls or none
+          encryption: "ssl" # can be tls or none
           base_dn: "ou=People,dc=info,dc=ucl,dc=ac,dc=be"
-          request: "(uid={})",
+          request: "(uid={})"
           name: "LDAP Login"
 
 Most of the parameters are self-explaining, but:
 
-``id``
-    is the authentication method id. It must be alphanumerical and different from other external authentication methods.
-
 ``request``
     is the request made to the LDAP server to search the user to authentify. "{}" is replaced by the username indicated by the user.
 
+``encryption``
+    ``none`` (default), ``ssl`` (LDAPS) or ``tls`` (StartTLS).
+
 Additional parameters to fine tune ldap authentication -- normally not necessary:
 
+``port``
+    the port of the LDAP server, if it is not the default one.
+
+``imlink``
+    URL of an image to display on the sign-in button.
+
 ``cn``
-    the ldap attribute with the real name
+    the ldap attribute with the real name (default: ``cn``)
 
 ``mail``
-    the ldap attribute with the email address
-
-``auto_bind``
-    see auto_bind at https://ldap3.readthedocs.io/en/latest/connection.html
-
-    possible values: 'NO_TLS', 'TLS_AFTER_BIND', 'TLS_BEFORE_BIND', False  (same as 'NONE'),
-    default: True (same as 'NO_TLS')
+    the ldap attribute with the email address (default: ``mail``)
 
 ``bind_dn``
     some ldap server do not allow access without authentication.
@@ -240,6 +293,8 @@ Additional parameters to fine tune ldap authentication -- normally not necessary
     "{}" is replaced by the login name.
 
         bind_dn: "cn={},ou=People,dc=info,dc=ucl,dc=ac,dc=be"
+
+The ``auto_bind`` option of the former Python plugin is not used.
 
 SAML2/Shibboleth
 !!!!!!!!!!!!!!!!
@@ -251,36 +306,37 @@ To enable this plugin, add to your configuration file:
 
     plugins:
         - plugin_module: inginious.frontend.plugins.auth.saml2_auth
-            id: <some_id_for_saml2>
-            strict: true
-            sp:
-                entityId: "<your_entity_id>"
-                x509cert: "<your_cert>"
-                privateKey: "<your_private_key>"
-            idp:
-                entityId: "https://idp.testshib.org/idp/shibboleth"
-                singleSignOnService:
-                    url: "https://idp.testshib.org/idp/profile/SAML2/Redirect/SSO"
-                    binding: "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
-                x509cert: "<idp_cert>"
-                additionalX509certs:
-                    - "<idp_cert>"
-            security:
-                 metadataValidUntil: ""
-                 metadataCacheDuration: ""
-            attributes:
-                 cn: "urn:oid:2.5.4.3"
-                 email: "urn:oid:1.3.6.1.4.1.5923.1.1.1.6"
-                 uid: "urn:oid:0.9.2342.19200300.100.1.1"
+          id: <some_id_for_saml2>
+          strict: true
+          sp:
+              entityId: "<your_entity_id>"
+              x509cert: "<your_cert>"
+              privateKey: "<your_private_key>"
+          idp:
+              entityId: "https://idp.testshib.org/idp/shibboleth"
+              singleSignOnService:
+                  url: "https://idp.testshib.org/idp/profile/SAML2/Redirect/SSO"
+                  binding: "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
+              x509cert: "<idp_cert>"
+              additionalX509certs:
+                  - "<idp_cert>"
+          security:
+               metadataValidUntil: ""
+               metadataCacheDuration: ""
+          attributes:
+               cn: "urn:oid:2.5.4.3"
+               email: "urn:oid:1.3.6.1.4.1.5923.1.1.1.6"
+               uid: "urn:oid:0.9.2342.19200300.100.1.1"
 
-``id`` is the authentication method id. It must be alphanumerical and different from other external authentication methods.
 Your IdP is required to provide at least attributes corresponding to the username, the complete name and the email address.
 Use the ``attributes`` entry for the mapping. The ``additionalX509certs`` is a plugin-specific entry to specify several
 certificates in case your IdP is able to use more than one.
 
-This plugin mainly relies on python3-saml_ package and configuration parameters are interoperable.
-Please refer to the package documentation for more detailed configuration parameters. The SP Attribute Consuming Service (ACS)
-is automatically configured by the plugin.
+The configuration format is the one of the python3-saml_ package used by the former Python plugin. The frontend reads
+``sp.entityId``, ``sp.x509cert``, ``sp.privateKey``, ``sp.NameIDFormat``, ``idp.singleSignOnService.url``,
+``idp.x509cert``, ``idp.additionalX509certs``, ``security.wantAssertionsSigned``, ``security.wantMessagesSigned``,
+``attributes`` and ``additional``; other keys are ignored. The Assertion Consumer Service (ACS) URL is
+``<base_url>/auth/callback/<id>`` and the SP metadata are served at ``<base_url>/auth/<id>/metadata``.
 
 .. _python3-saml: https://github.com/onelogin/python3-saml/
 
@@ -288,7 +344,7 @@ is automatically configured by the plugin.
 Facebook/LinkedIn/GitHub/Google
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-Uses a Facebook/LinkedIn/GitHub/Google application to allow authentication (and possibly sharing) via the network.
+Uses a Facebook/LinkedIn/GitHub/Google application to allow authentication via the network.
 You need to create an app on the appropriate developer platform in order to use this plugin.
 
 To enable this plugin, add to your configuration file:
@@ -296,15 +352,17 @@ To enable this plugin, add to your configuration file:
 
     plugins:
         - plugin_module: inginious.frontend.plugins.auth.facebook_auth
-            id: <some_id_for_facebook>
-            debug: false
-            client_id: <your_app_id>
-            client_secret: <your_app_secret>
+          id: <some_id_for_facebook>
+          client_id: <your_app_id>
+          client_secret: <your_app_secret>
 
 ``id`` is the authentication method id. ``client_id`` and ``client_secret`` are the OAuth identifier and secret of the
 created app. Replace ``facebook_auth`` by ``linkedin_auth``, ``github_auth`` or ``google_auth`` according to your case.
+The redirect (callback) URL to declare in the app is ``<base_url>/auth/callback/<id>``.
 
-Set ``debug`` to ``true`` to allow OAuth to be run in debug mode (for instance, if SSL is not yet set up).
+- ``google_auth`` accepts a ``domain`` option: when set, only the accounts of that Google Workspace domain are accepted.
+- ``linkedin_auth`` uses *Sign In with LinkedIn using OpenID Connect*: enable this product in the LinkedIn app.
+- The ``debug`` option of the former plugins is not used.
 
 Scoreboard plugin
 `````````````````
@@ -335,6 +393,7 @@ both scores are added. The last one is more complex and will create a reversed s
 
 The score used by this plugin for each task must be generated via a key/value custom feedback
 (see :ref:`feedback-custom`) using the ``score`` key. Only the *succeeded* tasks are taken into account.
+Scoreboards are visible to the students registered in the course and to its staff.
 
 Contests plugin
 ```````````````
@@ -346,16 +405,16 @@ To enable the plugin, add to your configuration file:
     plugins:
         - plugin_module: inginious.frontend.plugins.contests
 
-A new configuration page named *Contest* appears on the administration page. To enable the contest mode, check the
-*Enable contest plugin* box on the appropriate course. Please note that the plugin will override the task
-accessibility dates.
+A *Contest* settings page, reachable from the course menu, is available to the course administrators. To enable the
+contest mode, check *Enable contest plugin* on that page. Please note that the plugin will override the task
+accessibility dates. The contest scoreboard is visible to the students registered in the course and to its staff.
 
 
 Upcoming tasks plugin
 `````````````````````
 
 This plugin allows for students to easily visualize their upcoming tasks based on deadlines.
-The new page is available directly from the left main menu.
+The new page is available directly from the main menu.
 
 To enable the plugin, add to your configuration file:
 ::
@@ -366,7 +425,8 @@ To enable the plugin, add to your configuration file:
 Simple grader plugin
 ````````````````````
 
-This simple grader allows anonymous POST requests without storing submissions in database.
+This simple grader allows POST requests authenticated by a shared key, without user account and without storing
+submissions in database.
 
 To enable the plugin, add to your configuration file:
 ::
@@ -374,31 +434,36 @@ To enable the plugin, add to your configuration file:
     plugins:
         - plugin_module: inginious.frontend.plugins.simple_grader
           courseid : "external"
-          page_pattern: "/external"
+          api_key: "<a long random string>"
           return_fields: "^(result|text|problems)$"
 
-- ``courseid`` is the course id you want to expose to the simple grader.
+- ``courseid`` is the course id you want to expose to the simple grader (default: ``external``).
 
-- ``page_pattern`` is the URL at which you want to make the simple grader available.
+- ``api_key`` is the shared secret that every request must contain (field ``api_key``). **Required**: without it,
+  the plugin is disabled.
 
-- ``return_fields`` is a regular expression matching the submission fields that can be returned via the simple grader.
+- ``return_fields`` is a regular expression matching the submission fields that can be returned via the simple grader
+  (among ``result``, ``text``, ``grade``, ``problems``, ``tests``, ``custom``, ``state``, ``stdout`` and ``stderr``).
 
-A demonstration POST form will be available at the ``page_pattern`` specified URL.
+The grader is available at ``/external``; the ``page_pattern`` option of the former plugin is ignored. A demonstration
+POST form is displayed by a GET request on that URL. Requests are form-encoded or JSON objects with the fields below;
+requests coming from web pages of another origin must be sent as JSON. A request with a missing or wrong ``api_key``
+gets a ``403`` answer ``{"status": "error", "status_message": "Invalid API key"}``.
 
 New synchronized job
 !!!!!!!!!!!!!!!!!!!!
 
-External submissions must take the form of a POST request on the url defined by *page_pattern*.
-This POST must contains two data field:
+External submissions must take the form of a POST request on ``/external``.
+This POST must contain, besides ``api_key``, two data fields:
 
 - ``taskid``: the task id of the task
 
 - ``input``: the input for the task, in JSON. The input is a dictionary filled with problemid:problem_answer pairs.
 
-The return value will contains the standard return fields of an INGInious inginious.backend job plus a "status" field that will
-contain "ok".
+The return value will contain the fields allowed by ``return_fields`` plus a "status" field that will
+contain "done".
 
-If an internal error occurs, it will return a dictionary containing
+If an error occurs, it will return a dictionary containing
 
 ::
 
@@ -411,7 +476,7 @@ New asynchronous job
 !!!!!!!!!!!!!!!!!!!!
 
 This POST request allows new jobs to be treated asynchronously.
-It must contains three data fields:
+It must contain, besides ``api_key``, three data fields:
 
 - ``taskid``: the task id of the task
 
@@ -440,7 +505,7 @@ or
 Get status of asynchronous job
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-Given a jobid in input (as field of the POST request) and will return either:
+Given a ``jobid`` (and the ``api_key``) as fields of the POST request, it will return either:
 ::
 
     {
@@ -465,12 +530,16 @@ or
         "...":"..."
     }
 
-where ``...`` are the results of the job, as defined in the ``return_fields`` configuration value.
+where ``...`` are the results of the job, as defined in the ``return_fields`` configuration value. A result can be
+retrieved once; results that are not retrieved are deleted after one hour. Asynchronous jobs are kept in the memory of
+the frontend process: they are lost when it restarts.
 
 Git Repo plugin
 ```````````````
 This plugin allows saving submissions history in a Git repository, according to the following path pattern :
 ``courseid/taskid/username``. The version kept in the head of branch is the latest submission made.
+Each graded submission is committed with its input (``input.yaml``), its result (``result.yaml``) and the archive
+returned by the grader (``output/``).
 
 To enable this plugin, add to your configuration file:
 ::
@@ -479,16 +548,33 @@ To enable this plugin, add to your configuration file:
         - plugin_module: inginious.frontend.plugins.git_repo
           repo_directory: "./repo_submissions"
 
-The ``repo_directory`` parameter specify the path to the repository that must be initialized before configuration.
+The ``repo_directory`` parameter specify the path of the repository (default: ``./repo_submissions``). ``git`` must be
+installed on the host running the frontend.
 
-JSON task file readers plugin
-`````````````````````````````
-It is possible to store task files in other formats than YAML. **However, these plugins are provided for
-retro-compatibility with previous supported formats, which are deprecated. You therefore use these plugins at your own
-risks**.
-
-To enable the JSON task file format:
+LTI best submission plugin
+``````````````````````````
+This plugin adds the ``/lti/bestsubmission`` and ``/lti1.3/bestsubmission`` endpoints, which return in JSON the evaluated
+submission of the user of an LTI session for the task of the launch, with a summary of the questions and answers.
+To enable it:
 ::
 
     plugins:
-        - plugin_module: inginious.frontend.plugins.task_file_readers.json_reader
+        - plugin_module: inginious.frontend.plugins.ltibestsubmission
+
+Example and demonstration plugins
+`````````````````````````````````
+
+The following plugins are examples for developers; they are not useful in production.
+
+- ``inginious.frontend.plugins.demo`` serves a demonstration page at ``/plugindemo``.
+- ``inginious.frontend.plugins.taskless-hello-world`` serves at ``/taskless_hello_world`` (superadmins only) a page
+  that runs a *taskless* grading job (see :doc:`/dev_doc/extensions_doc/taskless_jobs`). Options: ``environment_type``
+  (default ``docker``), ``environment`` (default ``taskless-hello-world``), ``run_cmd`` (command run in the container
+  instead of its run file) and ``timeout`` (seconds, default 60).
+- ``inginious.frontend.plugins.task_editor_hook_example`` adds two tabs to the task editor and refuses to save a task
+  without a value for its *Task hint* field.
+
+Task file formats
+`````````````````
+Tasks are described in YAML (``task.yaml``). The JSON task file reader plugin
+(``inginious.frontend.plugins.task_file_readers.json_reader``) of the former Python frontend is not available.

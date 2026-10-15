@@ -1,0 +1,17 @@
+name: File upload
+author: INGInious test-suite
+context: |
+    Upload a ``.txt`` or ``.py`` file of at most 1 KiB whose first line is ``INGInious``.
+    Extensions and size are checked client-side (JS) and server-side
+    (``FileProblem.input_is_consistent``).
+environment_type: docker
+environment_id: default
+environment_parameters:
+    limits: {time: 10, memory: 128}
+problems:
+    upload:
+        type: file
+        name: Your file
+        header: A text file starting with the line ``INGInious``.
+        allowed_exts: [.txt, .py]
+        max_size: 1024

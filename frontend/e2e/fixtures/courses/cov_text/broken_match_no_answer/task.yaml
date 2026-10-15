@@ -1,0 +1,7 @@
+# Generated from tests/fixtures/rst (golden examples): one problem header per example.
+name: match_no_answer
+environment_type: mcq
+environment_id: mcq
+problems:
+  p:
+    type: match

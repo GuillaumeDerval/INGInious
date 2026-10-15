@@ -5,11 +5,22 @@ Creating a new frontend
 -----------------------
 
 INGInious is mainly a backend that is agnostic. It can be used to run nearly everything.
-The backend's code is in :ref:`backend`. You must use these classes to run new jobs.
+The backend's code is in :ref:`backend`. A frontend is a *client* of the backend: it connects to the client port of
+``inginious-backend`` (ZeroMQ ``DEALER`` socket) and exchanges the msgpack-encoded messages defined in
+``inginious/common/messages.py`` (``ClientNewJob``, ``BackendJobDone``, ``ClientKillJob``, ``ClientGetQueue``, ...).
 
-The common module contains classes that are intended to be inherited by new "frontends".
-The frontend given with INGInious is in fact an (big) extension of the common module.
-You can use it as an example on how to extend INGInious.
+The web frontend given with INGInious (``frontend/``) is such a client, written in TypeScript
+(``frontend/src/lib/server/backend/client.ts``). You can use it as an example on how to write a new client; the
+protocol is described in `frontend/docs/reference/backend-protocol.md`_. The Python client package
+(``inginious.client``) of the former frontend has been removed.
+
+.. _frontend/docs/reference/backend-protocol.md: https://github.com/INGInious/INGInious/blob/main/frontend/docs/reference/backend-protocol.md
+
+Extending the web frontend
+--------------------------
+
+The web frontend can be extended with plugins (see :doc:`plugins`). Its architecture is described in
+:doc:`/dev_doc/internals_doc/frontend`.
 
 Creating a new agent/environment type
 -------------------------------------
@@ -22,13 +33,16 @@ Your agent may need some parameters to run correctly, these parameters depending
 INGInious sends, inside each submission, a dictionnary called `environment_parameters`. This dictionnary is filled
 as the frontend wants it to be filled, so you must add some behavior into the frontend for it to send what you want.
 
-In the webapp, this can be done by extending the class `inginious.frontend.environment_types.env_type.FrontendEnvType`,
-and registering this new class using a call to the hook `register_env_type(env_obj)`.
+In the web frontend, the environment parameters are those of the ``environment_parameters`` key of ``task.yaml``.
+The known environment types are validated in ``frontend/src/lib/server/courses/task.ts`` and the fields shown by the
+task editor for each of them are defined in ``frontend/src/lib/components/course-admin/specs.ts`` (see `frontend/docs/features/site/24-environment-types.md`_).
+
+.. _frontend/docs/features/site/24-environment-types.md: https://github.com/INGInious/INGInious/blob/main/frontend/docs/features/site/24-environment-types.md
 
 Special environment parameters
 ------------------------------
 
-INGInious as a whole (i.e. both the "backend" and the webapp) look for specific environment parameters. They are
+INGInious as a whole (i.e. both the backend and the frontend) look for specific environment parameters. They are
 not mandatory.
 
 ``limits[time]``

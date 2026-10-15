@@ -1,0 +1,56 @@
+{
+  "name": "NAV Combinatory test",
+  "admins": [
+    "superadmin"
+  ],
+  "accessible": true,
+  "registration": true,
+  "task_dispenser": "combinatory_test",
+  "dispenser_data": {
+    "toc": [
+      {
+        "title": "Pool A",
+        "config": {
+          "amount": 2
+        },
+        "tasks_list": [
+          "c1",
+          "c2",
+          "c3",
+          "c4"
+        ]
+      },
+      {
+        "title": "Pool B",
+        "config": {
+          "amount": 1
+        },
+        "tasks_list": [
+          "c5",
+          "c6"
+        ]
+      }
+    ],
+    "config": {
+      "c1": {
+        "accessibility": true
+      },
+      "c2": {
+        "accessibility": true
+      },
+      "c3": {
+        "accessibility": true
+      },
+      "c4": {
+        "accessibility": true
+      },
+      "c5": {
+        "accessibility": true
+      },
+      "c6": {
+        "accessibility": true,
+        "weight": 4
+      }
+    }
+  }
+}

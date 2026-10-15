@@ -1,0 +1,32 @@
+accessible: true
+author: cstu
+categories: []
+contact_url: ''
+context: Type 42 to succeed, 21 for half grade. A file can also be uploaded.
+environment_id: default
+environment_parameters:
+    limits:
+        time: '30'
+        memory: '100'
+        hard_time: ''
+environment_type: docker
+name: Answer task
+network_grading: false
+problems:
+    answer:
+        type: code_single_line
+        name: The answer
+        header: Type the answer
+        default: ''
+    upload:
+        type: file
+        name: Upload
+        header: Optional file
+        allowed_exts: ['.txt', '.tar.gz']
+        max_size: 100000
+        optional: true
+stored_submissions: 0
+submission_limit:
+    amount: -1
+    period: -1
+weight: 1.0

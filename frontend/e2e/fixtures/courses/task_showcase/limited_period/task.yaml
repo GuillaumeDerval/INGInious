@@ -1,0 +1,18 @@
+name: Submission limit - 1 per hour
+author: INGInious test-suite
+context: |
+  Course config: ``submission_limit: {amount: 1, period: 1}``. One submission per hour; tokens are refilled when ``user_tasks.tokens.date`` is older than the period.
+
+  Correct answer: **Yes**.
+environment_type: mcq
+environment_id: mcq
+problems:
+  q:
+    type: multiple_choice
+    name: Simple question
+    header: Answer *Yes* to succeed, *No* to fail.
+    unshuffle: true
+    choices:
+      - text: 'Yes'
+        valid: true
+      - text: 'No'

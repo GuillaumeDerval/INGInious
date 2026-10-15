@@ -3,8 +3,8 @@ Understand INGInious
 
 INGInious is made from several different packages:
 
-- The common which contains basic blocks, like *tasks*.
-  Derivates from this blocks are created by the frontend and other modules.
+- The common package (``inginious.common``) which contains basic blocks shared by the backend and the agents, like
+  the messages exchanged between them and the task file parsing.
   The common package does not need the :ref:`backend` nor the :ref:`frontend`;
 - The :ref:`agent`, that runs jobs. It interacts directly with Docker to start new containers, and sends the grades back to the backend.
   A specific part of the :ref:`backend` is in charge of starting the agents automatically; you most of time won't need to it manually.
@@ -15,9 +15,11 @@ INGInious is made from several different packages:
   The backend only store information about *running* tasks. This point is important when considering replication and horizontal scalability (see
   later)
 - The :ref:`frontend` which is a web interface for the backend. It provides a simple yet powerful interface for students and teachers.
-  It is made to be "stateless": all its state is stored in DB, allowing to replicate the frontend horizontally.
-- The client which is an abstract layout for other clients than the frontend. It provides classes and methods that handle jobs.
-  This simplify the connection between INGInious and external frontends.
+  It is a Node.js application (SvelteKit) and acts as a *client* of the backend.
+  It is made to be "stateless": all its persistent state is stored in DB.
+
+The backend, the agents and the common package form the Python package ``inginious``; the frontend lives in the
+``frontend/`` directory of the repository.
 
 Basic architecture of INGInious
 -------------------------------
@@ -36,8 +38,10 @@ The completely horizontal scalability is (nearly) without additional configurati
 
 Scalability of the INGInious frontend
 -------------------------------------
-As the backend only stores information about *running* submission, and the frontend is stateless,
-we can use the replication feature of MongoDB to scale horizontally the frontends too.
+As the backend only stores information about *running* submission, and the frontend keeps its persistent state in
+MongoDB, we can use the replication feature of MongoDB to scale horizontally the frontends too. Note that some
+short-lived data is kept in the memory of each frontend process: the login rate limits are counted per process, and the
+results of the asynchronous jobs of the ``simple_grader`` plugin must be fetched from the process that started them.
 The (final) schema below shows the most advanced way of configuring INGInious,
 with multiple frontends replicated and multiple Docker hosts.
 
@@ -56,7 +60,8 @@ Jobs
 ----
 
 When you send a student's input to the backend, it creates what we call a *job*.
-Jobs are sent to an object called the *Client*, which itself is a simple communication layer to a job queue that we call the *Backend*.
+Jobs are sent by a *Client* (the backend client of the frontend, ``frontend/src/lib/server/backend/client.ts``), which
+itself is a simple communication layer to a job queue that we call the *Backend*.
 The *Backend* itself can be used by multiple *Clients*, and dispatch jobs among *Agents*, which can be of different types (for now, we have two
 kinds of agents, *DockerAgent* and *MCQAgent*)
 

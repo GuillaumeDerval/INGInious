@@ -1,0 +1,12 @@
+#!/bin/bash
+# Grading script of task_showcase/single_line
+WORD=$(getinput word)
+NUMBER=$(getinput number)
+OK=0
+if [ "$WORD" = "hello" ]; then feedback-result --id word success; feedback-msg --id word -m "Correct word."; OK=$((OK+1));
+else feedback-result --id word failed; feedback-msg --id word -m "Expected \`\`hello\`\`."; fi
+if [ "$NUMBER" = "7" ]; then feedback-result --id number success; OK=$((OK+1));
+else feedback-result --id number failed; feedback-msg --id number -m "Expected 7."; fi
+feedback-grade $((OK*50))
+if [ $OK -eq 2 ]; then feedback-result success; else feedback-result failed; fi
+feedback-msg -m "comment=[$(getinput comment)] notes=[$(getinput notes)]"

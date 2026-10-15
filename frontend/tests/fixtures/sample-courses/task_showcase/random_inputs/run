@@ -1,0 +1,12 @@
+#!/usr/bin/env python3
+# Grading script of task_showcase/random_inputs
+from inginious_container_api import feedback, input
+r = input.get_input("@random")
+expected = int(r[0] * 100) + int(r[1] * 100)
+answer = input.get_input("sum").strip()
+if answer == str(expected):
+    feedback.set_global_result("success")
+    feedback.set_global_feedback("Correct: %d." % expected)
+else:
+    feedback.set_global_result("failed")
+    feedback.set_global_feedback("Expected %d, got ``%s``." % (expected, answer))

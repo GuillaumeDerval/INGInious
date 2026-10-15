@@ -1,0 +1,17 @@
+# Companion of task_showcase: a previewable course (allow_preview: true) with one task.
+name: '[TASK] Previewable course'
+admins:
+- superadmin
+tutors: []
+accessible: true
+registration: true
+allow_preview: true
+allow_unregister: true
+is_lti: false
+task_dispenser: toc
+dispenser_data:
+    toc:
+    -   title: Preview
+        tasks_list: [preview_mcq]
+    config:
+        preview_mcq: {accessibility: true}

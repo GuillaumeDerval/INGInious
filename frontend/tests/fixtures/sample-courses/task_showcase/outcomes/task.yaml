@@ -1,0 +1,24 @@
+name: Grading outcomes
+author: INGInious test-suite
+context: |
+    Type one of the following modes to obtain the corresponding result:
+
+    ============  =========================================================================
+    mode          result
+    ============  =========================================================================
+    ``success``   ``success``, grade 100
+    ``failed``    ``failed``, grade 0
+    ``partial``   ``failed``, grade 37.5
+    ``timeout``   ``timeout`` (busy loop beyond the 2 s CPU time limit)
+    ``overflow``  ``overflow`` (allocates more than the 64 MiB memory limit)
+    ``crash``     ``crash`` (the script exits without giving any feedback)
+    ``sleep``     sleeps 20 s: use the kill button (result ``killed``)
+    ============  =========================================================================
+environment_type: docker
+environment_id: default
+environment_parameters:
+    limits: {time: 2, hard_time: 30, memory: 64, disk: 50}
+problems:
+    mode:
+        type: code_single_line
+        name: Mode

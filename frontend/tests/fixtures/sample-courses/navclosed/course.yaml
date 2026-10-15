@@ -1,0 +1,31 @@
+{
+  "name": "NAV Closed course",
+  "admins": [
+    "superadmin"
+  ],
+  "tutors": [],
+  "description": "Course NAV Closed course",
+  "accessible": false,
+  "registration": true,
+  "allow_unregister": true,
+  "task_dispenser": "toc",
+  "dispenser_data": {
+    "toc": [
+      {
+        "title": "Tasks",
+        "tasks_list": [
+          "t1",
+          "t2"
+        ]
+      }
+    ],
+    "config": {
+      "t1": {
+        "accessibility": true
+      },
+      "t2": {
+        "accessibility": true
+      }
+    }
+  }
+}

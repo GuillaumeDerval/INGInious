@@ -12,13 +12,13 @@ on:
 env:
   REGISTRY: "ghcr.io"
   VERSION: "${{ github.event_name == 'push' && github.ref_name || (github.event_name == 'release' && github.event.release.tag_name || 'ci') }}"
-  CORE_CONTAINERS: "backend frontend agent_mcq agent_docker webdav"
+  CORE_CONTAINERS: "backend frontend agent_mcq agent_docker"
   ENV_CONTAINERS: "base default python3"
 
 jobs:
   build_deploy_push:
     runs-on: ubuntu-24.04
-    needs: [tests]
+    needs: [tests, frontend_static, frontend_tests]
     steps:
       - uses: actions/checkout@v7
 
@@ -58,7 +58,7 @@ jobs:
 
   compose_build_and_deploy:
     runs-on: ubuntu-24.04
-    needs: [tests]
+    needs: [tests, frontend_static, frontend_tests]
     steps:
       - uses: actions/checkout@v7
 
@@ -129,3 +129,103 @@ jobs:
         with:
           project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
           coverage-reports: coverage.xml
+
+  # Web frontend (SvelteKit, frontend/): types, lint, formatting and production builds.
+  frontend_static:
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type check
+        run: npx svelte-kit sync && npx svelte-check --threshold warning
+
+      - name: Lint and formatting
+        run: npx eslint . && npx prettier --check .
+
+      - name: Build (web app and command-line tools)
+        run: npm run build && npm run build:cli
+
+  # Web frontend tests: unit (Vitest, server + Chromium components), integration
+  # (Playwright on the production build) and scale suite, against MongoDB, the backend
+  # and the grading agents built from this repository (frontend/e2e/compose.yml).
+  # Unit and integration coverage must stay at 95 % or more on every metric.
+  frontend_tests:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    defaults:
+      run:
+        working-directory: frontend
+    env:
+      E2E_TASKS_DIR: ${{ github.workspace }}/frontend/e2e/.tasks
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies and Chromium
+        run: npm ci && npx playwright install --with-deps chromium
+
+      # The docker agent grades only when the containers' memory.oom.group cgroup flag is set:
+      # systemd cgroup driver, and OOMPolicy=kill for the scopes of the containers.
+      - name: Configure Docker for the grading containers
+        working-directory: .
+        run: |
+          sudo mkdir -p /etc/systemd/system/docker-.scope.d
+          printf '[Scope]\nOOMPolicy=kill\n' | sudo tee /etc/systemd/system/docker-.scope.d/99-inginious.conf
+          config=$( (sudo cat /etc/docker/daemon.json 2>/dev/null || echo '{}') | jq '.["exec-opts"] = ["native.cgroupdriver=systemd"] | del(.["cgroup-parent"])')
+          echo "$config" | sudo tee /etc/docker/daemon.json
+          sudo systemctl daemon-reload
+          sudo systemctl restart docker
+          docker info --format 'cgroup driver: {{.CgroupDriver}}, cgroup version: {{.CgroupVersion}}'
+
+      - name: Start MongoDB, backend, agents and Mailpit
+        run: |
+          mkdir -p e2e/.tasks /tmp/agent_data
+          docker compose -f e2e/compose.yml up -d --build
+          # MongoDB and the backend accept connections, then the agents register their environments.
+          timeout 120 sh -c 'until nc -z 127.0.0.1 27017 && nc -z 127.0.0.1 2000; do sleep 2; done'
+          sleep 20
+        timeout-minutes: 30
+
+      - name: Unit tests (coverage ≥ 95 %)
+        run: npm run test:unit
+
+      - name: Integration tests (coverage ≥ 95 %)
+        run: npm run test:e2e
+
+      # Informative on shared CI runners (slower than the reference machine): results are uploaded.
+      - name: Scale suite (budgets of frontend/docs/performance.md)
+        run: npm run test:perf
+        continue-on-error: true
+
+      - name: Service logs on failure
+        if: failure()
+        run: docker compose -f e2e/compose.yml logs --tail=200
+
+      - name: Save reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-reports
+          path: |
+            frontend/coverage/unit
+            frontend/coverage/e2e/report
+            frontend/test-results
+            frontend/perf/results
+          if-no-files-found: ignore

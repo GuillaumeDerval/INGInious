@@ -3,8 +3,8 @@ What is INGInious?
 
 INGInious provides a simple and secure way to execute and test untrusted code.
 It has been developed by the INGI_ department (`Université catholique de Louvain`_) to automatic grading of programming
-assignments. The whole tool is written in Python_ (version 3.5+) and relies on Docker_ to provide secure execution
-environments and on MongoDB_ to keep track of submissions.
+assignments. Its backend and grading agents are written in Python_, its web frontend in TypeScript (SvelteKit_, running
+on Node.js). It relies on Docker_ to provide secure execution environments and on MongoDB_ to keep track of submissions.
 
 INGInious is completely language-agnostic and is able to run anything. Currently, this is limited to Linux programs as only
 Linux containers are provided and supported.
@@ -13,6 +13,7 @@ INGInious also provides an LTI_ module, allowing its integration to your existin
 
 .. _LTI: http://www.imsglobal.org/LTI/v1p1/ltiIMGv1p1.html
 .. _Python: http://www.python.org
+.. _SvelteKit: https://svelte.dev/docs/kit
 .. _Docker: https://www.docker.com
 .. _INGI: http://www.uclouvain.be/ingi.html
 .. _`Université catholique de Louvain`: http://www.uclouvain.be
@@ -47,7 +48,7 @@ For details about to create new containers and add new languages to INGInious, s
 Architecture
 ````````````
 
-INGInious comes with three distinct parts, the backend (and its agent) and a frontend.
+INGInious comes with three distinct parts: the backend, its agents, and a frontend.
 
 The backend (see :ref:`backend`) receives the code of the students and sends it to its agent (see :ref:`agent`), which is then
 responsible to send it to a Docker container_, and interact with the request made by the container.
@@ -55,11 +56,11 @@ responsible to send it to a Docker container_, and interact with the request mad
 That container then makes some verifications on the submission and returns one of the following four possible status : *success*, *crash*, *timeout*,
 or *failed*.
 
-INGInious also provides a frontend (see :ref:`frontend`).
-Made with MongoDB as database, the frontend is in fact an extension of the backend and allows students to work directly on a website.
-This frontend also provides statistics and management tools for the teachers.
+INGInious also provides a web frontend (see :ref:`frontend`), a Node.js application that stores its data in MongoDB
+and sends the submissions to the backend. It allows students to work directly on a website, and provides statistics
+and management tools for the teachers, a REST API, LTI integration and WebDAV access to the course files.
 
-Most of these functionalities can be extended through plugins.
+Some of these functionalities can be extended through plugins (see :ref:`plugins`).
 
 For a more advanced view of the architecture of INGInious, see :doc:`dev_doc/internals_doc/understand_inginious`.
 

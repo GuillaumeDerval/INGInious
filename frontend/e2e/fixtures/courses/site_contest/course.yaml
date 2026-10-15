@@ -1,0 +1,22 @@
+name: SITE contest course
+admins:
+  - e2e_admin
+accessible: true
+registration: true
+task_dispenser: contest
+dispenser_data:
+  contest_settings:
+    enabled: true
+    start: '2020-01-01 00:00:00+00:00'
+    end: '2099-01-01 00:00:00+00:00'
+    blackout: 0
+    penalty: 30
+  toc_data:
+    config:
+      code1: {}
+      mcq1: {}
+    toc:
+      - tasks_list:
+          - mcq1
+          - code1
+        title: Problems

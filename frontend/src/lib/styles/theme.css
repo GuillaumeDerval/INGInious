@@ -1,0 +1,139 @@
+/*
+ * "inginious" Skeleton theme (docs/design-system.md): design tokens only (palettes, fonts,
+ * radii, backgrounds). Activated by `data-theme="inginious"` on <html> (src/app.html).
+ *
+ * Palette (OKLCH, 50 = lightest … 950 = darkest), built from the INGInious logo
+ * (legacy/inginious/frontend/static/images/inginious_full_logo_only.svg):
+ * - primary: the snake green (#618d34 / #6fa03c / #4d6d29); 500 is slightly darker than
+ *   the logo so that white text on filled buttons keeps a contrast ≥ 4.5:1;
+ * - secondary: the hat yellow (#ffe85f / #edd859, shading #a5923f) — highlights only
+ *   (active indicators, stars, "new" badges), always with dark text;
+ * - tertiary: the coral of the logo (#e87853), rare accents;
+ * - success (emerald) / warning (amber) / error: result colours, hues kept apart from
+ *   the brand green and yellow so that statuses stay unambiguous;
+ * - surface: warm neutrals with a hint of the brand green. Light mode: page = surface-100, cards/inputs = surface-50.
+ *   Dark mode: page = --color-root-bg-dark (darker than 950), cards/inputs = surface-950,
+ *   so that `bg-surface-50-950` always means "elevated surface".
+ * Contrast tokens default to dark text on 50–300 and light text on 400–950 (Skeleton
+ * base theme); only the shades that differ are overridden below.
+ */
+[data-theme='inginious'] {
+	/* Typography: system UI stack (Inter when installed locally), 15px base text. */
+	--typo-base--font-family:
+		'Inter Variable', Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+		sans-serif;
+	--typo-base--font-size: 0.9375rem;
+	--typo-base--line-height: 1.55;
+	--typo-base--color-light: var(--color-surface-900);
+	--typo-base--color-dark: var(--color-surface-100);
+	--typo-heading--font-family: inherit;
+	--typo-heading--font-weight: 650;
+	--typo-heading--letter-spacing: -0.015em;
+	--typo-heading--color-light: var(--color-surface-950);
+	--typo-heading--color-dark: var(--color-surface-50);
+	--typo-anchor--color-light: var(--color-primary-600);
+	--typo-anchor--color-dark: var(--color-primary-300);
+	--typo-anchor--font-weight: 500;
+	--typo-anchor--hover--text-underline-offset: 3px;
+
+	/* Shape: 8px controls, 12px containers. */
+	--radius-base: 0.5rem;
+	--radius-container: 0.75rem;
+	--corner-shape-base: round;
+	--corner-shape-container: round;
+
+	/* Backgrounds and brand. */
+	--color-root-bg-light: var(--color-surface-100);
+	--color-root-bg-dark: oklch(0.15 0.006 110);
+	--color-brand-light: var(--color-primary-500);
+	--color-brand-dark: var(--color-primary-400);
+	--color-brand-contrast-dark: var(--color-primary-950);
+
+	--color-primary-50: oklch(0.975 0.02 130);
+	--color-primary-100: oklch(0.945 0.045 130);
+	--color-primary-200: oklch(0.895 0.08 130);
+	--color-primary-300: oklch(0.82 0.115 130);
+	--color-primary-400: oklch(0.709 0.131 130);
+	--color-primary-500: oklch(0.55 0.125 131);
+	--color-primary-600: oklch(0.494 0.103 131);
+	--color-primary-700: oklch(0.43 0.09 132);
+	--color-primary-800: oklch(0.36 0.075 133);
+	--color-primary-900: oklch(0.3 0.06 134);
+	--color-primary-950: oklch(0.235 0.045 135);
+
+	--color-secondary-50: oklch(0.985 0.03 100);
+	--color-secondary-100: oklch(0.965 0.07 100);
+	--color-secondary-200: oklch(0.937 0.136 101);
+	--color-secondary-300: oklch(0.925 0.156 100);
+	--color-secondary-400: oklch(0.876 0.147 100);
+	--color-secondary-500: oklch(0.78 0.14 98);
+	--color-secondary-600: oklch(0.66 0.105 96.5);
+	--color-secondary-700: oklch(0.55 0.09 96);
+	--color-secondary-800: oklch(0.45 0.075 95);
+	--color-secondary-900: oklch(0.36 0.06 95);
+	--color-secondary-950: oklch(0.27 0.045 95);
+
+	--color-tertiary-50: oklch(0.975 0.015 39);
+	--color-tertiary-100: oklch(0.945 0.04 39);
+	--color-tertiary-200: oklch(0.895 0.075 39);
+	--color-tertiary-300: oklch(0.82 0.11 39);
+	--color-tertiary-400: oklch(0.75 0.135 39);
+	--color-tertiary-500: oklch(0.62 0.15 38);
+	--color-tertiary-600: oklch(0.55 0.14 37);
+	--color-tertiary-700: oklch(0.47 0.12 36);
+	--color-tertiary-800: oklch(0.4 0.1 35);
+	--color-tertiary-900: oklch(0.33 0.08 35);
+	--color-tertiary-950: oklch(0.25 0.06 35);
+
+	--color-success-50: oklch(0.975 0.02 162);
+	--color-success-100: oklch(0.945 0.05 162);
+	--color-success-200: oklch(0.9 0.09 162);
+	--color-success-300: oklch(0.83 0.12 162);
+	--color-success-400: oklch(0.73 0.14 162);
+	--color-success-500: oklch(0.56 0.12 163);
+	--color-success-600: oklch(0.5 0.11 163);
+	--color-success-700: oklch(0.43 0.095 164);
+	--color-success-800: oklch(0.36 0.075 164);
+	--color-success-900: oklch(0.3 0.06 165);
+	--color-success-950: oklch(0.235 0.045 166);
+
+	--color-warning-50: oklch(0.982 0.02 75);
+	--color-warning-100: oklch(0.955 0.055 72);
+	--color-warning-200: oklch(0.915 0.1 70);
+	--color-warning-300: oklch(0.865 0.135 66);
+	--color-warning-400: oklch(0.81 0.155 62);
+	--color-warning-500: oklch(0.74 0.16 56);
+	--color-warning-600: oklch(0.6 0.14 50);
+	--color-warning-700: oklch(0.5 0.12 48);
+	--color-warning-800: oklch(0.42 0.095 48);
+	--color-warning-900: oklch(0.35 0.075 48);
+	--color-warning-950: oklch(0.26 0.055 48);
+	--color-secondary-contrast-400: var(--color-secondary-contrast-dark);
+	--color-secondary-contrast-500: var(--color-secondary-contrast-dark);
+	--color-warning-contrast-400: var(--color-warning-contrast-dark);
+	--color-warning-contrast-500: var(--color-warning-contrast-dark);
+
+	--color-error-50: oklch(0.975 0.013 20);
+	--color-error-100: oklch(0.94 0.035 20);
+	--color-error-200: oklch(0.885 0.07 20);
+	--color-error-300: oklch(0.8 0.115 22);
+	--color-error-400: oklch(0.7 0.17 24);
+	--color-error-500: oklch(0.565 0.2 26);
+	--color-error-600: oklch(0.505 0.18 27);
+	--color-error-700: oklch(0.44 0.15 27);
+	--color-error-800: oklch(0.38 0.12 27);
+	--color-error-900: oklch(0.31 0.09 27);
+	--color-error-950: oklch(0.245 0.06 27);
+
+	--color-surface-50: oklch(0.995 0.002 110);
+	--color-surface-100: oklch(0.972 0.004 110);
+	--color-surface-200: oklch(0.928 0.007 110);
+	--color-surface-300: oklch(0.87 0.01 110);
+	--color-surface-400: oklch(0.71 0.012 110);
+	--color-surface-500: oklch(0.56 0.013 110);
+	--color-surface-600: oklch(0.47 0.013 110);
+	--color-surface-700: oklch(0.38 0.012 110);
+	--color-surface-800: oklch(0.29 0.01 110);
+	--color-surface-900: oklch(0.225 0.008 110);
+	--color-surface-950: oklch(0.185 0.007 110);
+}

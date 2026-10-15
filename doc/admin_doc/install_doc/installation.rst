@@ -1,6 +1,22 @@
 Installation and deployment
 ===========================
 
+An INGInious instance is made of the following services:
+
+- a MongoDB_ database;
+- the *backend* (:ref:`inginious-backend`), which queues the grading jobs;
+- one or more *agents* (:ref:`inginious-agent-docker`, :ref:`inginious-agent-mcq`), which grade the jobs in containers;
+- the web *frontend*, a Node.js application (SvelteKit) located in the ``frontend/`` directory of the repository.
+  It serves the student, teacher and administration pages, the REST API, the LTI endpoints and the WebDAV access
+  to the course files (under ``/dav``).
+
+The backend and the agents are the Python package ``inginious``. The frontend reads the same ``configuration.yaml``
+file (see :ref:`ConfigReference`) and uses the same MongoDB database format as the former Python frontend
+(``inginious-webapp``), which it replaces: an existing instance can switch to it without migrating its data.
+
+The recommended deployment is the ``docker compose`` one (see :ref:`compose`). A manual installation is described
+afterwards.
+
 Supported platforms
 -------------------
 
@@ -9,19 +25,60 @@ INGInious runs Linux containers and is therefore intended to run on Linux.
 You may be able to run it on other platforms supporting Linux containers, but no support is provided yet.
 If you are willing to contribute this, feel free to contact us on Github.
 
-Dependencies setup
-------------------
+.. _compose:
+
+Deployment with docker compose
+------------------------------
+
+The repository provides a ``docker-compose.yml`` file that builds (or pulls) and runs every service:
+
+- ``db``: MongoDB, initialised with a superadmin account by ``deploy/init-mongo.js``;
+- ``backend``: ``inginious-backend``, listening for clients on port 2000 and for agents on port 2001;
+- ``agent-docker`` and ``agent-mcq``: the grading agents;
+- ``frontend``: the Node.js frontend (target ``frontend`` of ``deploy/Containerfile``), listening on port 8000;
+- ``caddy``: the reverse proxy terminating TLS (configuration in ``deploy/Caddyfile``), which forwards every request,
+  including WebDAV ones under ``/dav``, to the frontend;
+- ``env-base``, ``env-default`` and ``env-python3``: the default grading environments.
+
+From a clone of the repository:
+
+.. code-block:: bash
+
+    $ docker compose up --build
+
+and open https://localhost. The default login and password are ``superadmin``. The README of the repository details
+the environment variables of the superadmin account.
+
+Before running it in production:
+
+#. Edit ``configuration.deploy.yaml`` (mounted as ``/inginious/configuration.yaml`` in the frontend container):
+   change ``session_parameters.secret_key``, set ``session_parameters.secure: true``, set ``base_url`` and
+   ``webdav_host`` to your public URL (``webdav_host: https://your.host/dav``), and add the ``smtp`` and ``plugins`` entries you need (see :ref:`ConfigReference`).
+#. The ``frontend`` service takes its public URL from the ``X-Forwarded-Proto`` and ``X-Forwarded-Host`` headers set
+   by Caddy (``PROTOCOL_HEADER`` and ``HOST_HEADER`` in ``docker-compose.yml``): it refuses form submissions whose
+   origin does not match the URL used by the browser, so keep the frontend reachable only through the proxy.
+#. Replace the host names of ``deploy/Caddyfile`` by your domain name. See the
+   `Caddyfile documentation <https://caddyserver.com/docs/caddyfile>`_ for more advanced proxy configuration.
+#. Install your courses in the ``tasks`` directory (it is created by ``docker compose`` if needed).
+
+The frontend container needs no Python and the backend containers need no Node.js: each image only contains its own
+service.
+
+Manual installation: dependencies
+---------------------------------
 
 INGInious needs:
 
-- Python_ 3.10+
-- Docker_ or Podman_
-- MongoDB_
+- Python_ 3.10+ for the backend and the grading agents;
+- Docker_ or Podman_ for the grading containers;
+- MongoDB_;
+- `Node.js`_ 24 (with ``npm``) for the web frontend.
 
 .. _Docker: https://www.docker.com
 .. _Podman: https://podman.io/
 .. _Python: https://www.python.org/
 .. _MongoDB: http://www.mongodb.org/
+.. _Node.js: https://nodejs.org/
 
 RHEL/Rocky/Alma Linux 8+
 ````````````````````````
@@ -44,7 +101,8 @@ RHEL/Rocky/Alma Linux 8+
      EOF
      # dnf install -y mongodb-org mongodb-org-server
 
-   You may also add ``xmlsec1-openssl-devel libtool-ltdl-devel`` for the SAML2 auth plugin.
+   Node.js 24 can be installed from the ``nodejs:24`` module stream (``dnf module install -y nodejs:24``) when your
+   release provides it, or from the `Node.js download page <https://nodejs.org/en/download>`_.
 
 #. You can now enable and start the ``mongod`` and ``docker`` services:
    ::
@@ -53,9 +111,12 @@ RHEL/Rocky/Alma Linux 8+
 
 #. Check the cgroups version the container runtime is running on:
    ::
+
       # docker info | grep "Cgroup"
+
    If the cgroups version is ``2`` and cgroups driver is ``systemd``, apply the following systemd rule:
    ::
+
       # cat /etc/systemd/system/docker-.scope.d/99-inginious.conf
       [Scope]
       OOMPolicy=kill
@@ -85,7 +146,8 @@ Ubuntu 24.04+
       $ sudo apt update
       $ sudo apt install mongodb-org
 
-   You may also add ``libxmlsec1-dev libltdl-dev`` for the SAML2 auth plugin.
+   Node.js 24 is not packaged by Ubuntu: install it from the `Node.js download page <https://nodejs.org/en/download>`_
+   (official binaries, NodeSource repository or a version manager such as ``nvm``).
 
 #. You can now enable and start the ``mongod`` and ``docker`` services:
    ::
@@ -94,9 +156,12 @@ Ubuntu 24.04+
 
 #. Check the cgroups version the container runtime is running on:
    ::
+
       # docker info | grep "Cgroup"
+
    If the cgroups version is ``2`` and cgroups driver is ``systemd``, apply the following systemd rule:
    ::
+
       # cat /etc/systemd/system/docker-.scope.d/99-inginious.conf
       [Scope]
       OOMPolicy=kill
@@ -118,6 +183,7 @@ We use brew_ to install some packages. Packages are certainly available too via 
     $ brew update
     $ brew install mongodb-community
     $ brew install python3
+    $ brew install node@24
 
 Follow the instruction of brew to enable mongodb.
 
@@ -151,6 +217,9 @@ This command causes your user account to have non-user access.
 Installing INGInious
 --------------------
 
+Backend and agents
+``````````````````
+
 To keep a clean distribution, we recommend to work with a virtualenv:
 
 .. code-block:: bash
@@ -158,23 +227,36 @@ To keep a clean distribution, we recommend to work with a virtualenv:
     python3 -m venv /path/to/venv/INGInious
     source /path/to/venv/INGInious/bin/activate
 
-The recommended setup is to install INGInious via pip from PyPI.
-This allows you to use the latest supported version.
+The backend and the agents are installed via pip, from PyPI or from a clone of the repository:
 ::
 
     $ pip install --upgrade pip
-    $ pip install --upgrade inginious
+    $ pip install --upgrade inginious                                       # latest release
+    $ pip install --upgrade git+https://github.com/INGInious/INGInious.git  # development version
 
-This will automatically upgrade an existing version.
+This installs the commands ``inginious-backend``, ``inginious-agent-docker``, ``inginious-agent-mcq`` and the
+utilities listed in the commands reference. It does not install the web frontend.
 
-.. note::
+Frontend
+````````
 
-   You may want to enable the LDAP/SAML2 plugin.
-   In this case, you have to install more packages: simply add ``[ldap]`` or ``[saml2]`` to the above command, depending on your needs:
+The frontend is built from the ``frontend/`` directory of a clone of the repository:
+::
 
-   ::
+    $ git clone https://github.com/INGInious/INGInious.git
+    $ cd INGInious/frontend
+    $ npm ci
+    $ npm run build
+    $ npm prune --omit=dev     # optional: drop the build-only dependencies
 
-       $ pip install --upgrade inginious[saml2,ldap]
+The result is a standalone Node.js server in ``frontend/build``. It needs the ``node_modules`` directory next to it
+(runtime dependencies) and ``git`` on the ``PATH`` for the marketplace course import and the ``git_repo`` plugin.
+
+The command-line tools of the frontend (:ref:`inginious-setup`, :ref:`inginious-autotest` and :ref:`inginious-test-task`)
+are built separately:
+::
+
+    $ npm run build:cli
 
 .. _config:
 
@@ -196,424 +278,141 @@ It is recommended to create a folder for INGInious and subfolders for tasks and 
     $ mkdir tasks
     $ mkdir backup
 
-To configure the web app automatically, use the ``inginious-install`` CLI.
-
+The configuration file can be written by hand (see :ref:`ConfigReference`) or created with the ``inginious-setup``
+tool of the frontend, once the backend and MongoDB are running:
 ::
 
-    $ inginious-install
+    $ cd /path/to/INGInious/frontend
+    $ npx inginious-setup --file /var/www/inginious/configuration.yaml
 
-This will help you create the configuration file in the current directory.
-When asked about the tasks folder, enter an absolute folder: /var/www/inginious/tasks .
-Similarly, when asked about the backup folder, enter an absolute folder: /var/www/inginious/backup .
+It asks for the backend address, the MongoDB host and database, the tasks and backup folders (enter absolute paths,
+e.g. ``/var/www/inginious/tasks``), the superadmin account, whether the instance is served over HTTPS and the SMTP
+server, checks that MongoDB and the backend are reachable, creates the superadmin account and writes the file.
+See :ref:`inginious-setup` for its options.
 
-For manual configuration and details, see
-:ref:`ConfigReference`.
-In particular, make sure to add smtp configuration into your `configuration.yaml` file, since INGInious must send email during new user registration.
+Make sure the configuration has an ``smtp`` entry, since INGInious sends e-mails during user registration and
+password reset, and a ``base_url`` entry (the public URL of the instance), used to build the links of these e-mails.
 
-The detailed ``inginious-install`` reference can be found at :ref:`inginious-install`.
+.. note::
+
+    The frontend does not start a backend by itself: ``backend: local`` is refused. The backend and the agents
+    always run as separate processes (possibly on the same host), and ``backend`` must be their address
+    (e.g. ``tcp://127.0.0.1:2000``).
 
 Running INGInious
 -----------------
 
-During the configuration step, you were asked to setup either a local or remote backend. In the former case, the frontend
-will automatically start a local backend and grading agents.
-Additionally, if you intend to have many simultaneous submissions, it is highly recommended to have a webserver, such as lighttpd or Apache -- see below.
-
-With local backend/agent -- no webserver
-````````````````````````````````````````
-To run the frontend, please use the ``inginious-webapp`` CLI. This will open a small Python
-web server and display the url on which it is bind in the console. Some parameters (configuration file, host, port)
-can be specified. Details are available at :ref:`inginious-webapp`.
-
-With remote backend/agent -- no webserver
-`````````````````````````````````````````
-To run INGInious with a remote backend (and agents), do as follows:
-
-#. On the backend host, launch the backend (see :ref:`inginious-backend`) :
+#. Launch the backend (see :ref:`inginious-backend`):
    ::
 
-        inginious-backend tcp://backend-host:2001 tcp://backend-host:2000
+        inginious-backend tcp://0.0.0.0:2001 tcp://0.0.0.0:2000
 
-   The agents will connect on ``tcp://backend-host:2001`` and clients on ``tcp://backend-host:2000``
+   The agents connect on port 2001 and the frontend on port 2000. Restrict access to these ports to the hosts
+   running the agents and the frontend.
 #. Possibly on different hosts, launch the Docker and MCQ agents (see :ref:`inginious-agent-docker`
-   and :ref:`inginious-agent-mcq`) :
+   and :ref:`inginious-agent-mcq`):
    ::
 
         inginious-agent-docker tcp://backend-host:2001
         inginious-agent-mcq tcp://backend-host:2001
-#. In your INGInious frontend configuration file (see :ref:`ConfigReference`), set ``backend`` to :
+
+#. In the configuration file (see :ref:`ConfigReference`), set ``backend`` to the client address of the backend:
    ::
 
         backend: tcp://backend-host:2000
-#. Run the frontend using :ref:`inginious-webapp`.
+
+#. Start the frontend:
    ::
 
-         inginious-webapp --config /path/to/configuration.yaml
+        $ cd /path/to/INGInious/frontend
+        $ INGINIOUS_CONFIG=/var/www/inginious/configuration.yaml PORT=8000 \
+          PROTOCOL_HEADER=x-forwarded-proto HOST_HEADER=x-forwarded-host node build
+
+The frontend is configured by environment variables:
+
+``INGINIOUS_CONFIG``
+    Path of the configuration file. Defaults to ``./configuration.yaml``.
+
+``PORT`` and ``HOST``
+    Port and address the HTTP server listens on (defaults: ``3000`` and ``0.0.0.0``).
+
+``PROTOCOL_HEADER`` and ``HOST_HEADER``
+    Headers giving the public scheme and host name of the requests, set by the reverse proxy (usually
+    ``x-forwarded-proto`` and ``x-forwarded-host``). The frontend compares the origin of each form submission with
+    this public URL and refuses the others, so it must only be reachable through the proxy. Without a proxy, give the
+    public URL in ``APP_ORIGIN`` when building and running it instead
+    (``APP_ORIGIN=https://inginious.example.org npm run build``, and the same variable for ``node build``).
+
+``TZ``
+    Time zone used to display and parse dates (e.g. ``Europe/Brussels``).
+
+The other variables of the SvelteKit Node adapter (``BODY_SIZE_LIMIT``, ``ADDRESS_HEADER``, ...) are
+described in the `adapter-node documentation <https://svelte.dev/docs/kit/adapter-node>`_.
+
+The configuration file is read once, at start-up: restart the frontend after modifying it.
 
 .. _production:
 
-With local backend/agent and a webserver
-````````````````````````````````````````
+Running as a service behind a reverse proxy
+```````````````````````````````````````````
 
-The following guides suggest to run the INGInious webapp on http port and WebDAV on port 8080 on the same host.
-You are free to adapt them to your use case (for instance, adding SSL support or using two hostnames).
-
-.. _lighttpd:
-
-.. WARNING::
-    In configurations below, environment variables accessible to the application must be explicitly repeated.
-    **If you use a local backend with remote Docker daemon**, you may need to set the ``DOCKER_HOST`` variable.
-    To know the value to set, start a terminal that has access to the docker daemon (the terminal should be able to run
-    ``docker info``), and write ``echo $DOCKER_HOST``. If it returns nothing, just ignore this comment. It is possible
-    that you may need to do the same for the env variable ``DOCKER_CERT_PATH`` and ``DOCKER_TLS_VERIFY`` too.
-
-Using lighttpd
-``````````````
-
-In production environments, you can use lighttpd in replacement of the built-in Python server.
-This guide is made for CentOS 7.x.
-
-Install lighttpd with fastcgi:
-
+In production, run the frontend as a service and put a reverse proxy in front of it to terminate TLS.
+A *systemd* unit can look like:
 ::
 
-    # yum install lighttpd lighttpd-fastcgi
+    [Unit]
+    Description=INGInious frontend
+    After=network.target mongod.service
 
-Add the ``lighttpd`` user in the necessary groups, to allow it to launch new containers and to connect to mongodb:
+    [Service]
+    User=inginious
+    WorkingDirectory=/opt/INGInious/frontend
+    Environment=INGINIOUS_CONFIG=/var/www/inginious/configuration.yaml
+    Environment=PORT=8000
+    Environment=HOST=127.0.0.1
+    Environment=PROTOCOL_HEADER=x-forwarded-proto
+    Environment=HOST_HEADER=x-forwarded-host
+    ExecStart=/usr/bin/node build
+    Restart=on-failure
 
+    [Install]
+    WantedBy=multi-user.target
+
+The user running the frontend must be able to read and write the tasks directory (course and task edition, WebDAV).
+It does not need access to the Docker daemon.
+
+Any HTTP reverse proxy can be used. With Caddy:
 ::
 
-    # usermod -aG docker lighttpd
-    # usermod -aG mongodb lighttpd
-
-Create a folder for INGInious, for example ``/var/www/INGInious``, and change the directory owner to ``lighttpd``:
-
-::
-
-    # mkdir -p /var/www/INGInious
-    # chown -R lighttpd:lighttpd /var/www/INGInious
-
-Put your configuration file in that folder, as well as your tasks, backup, download, and temporary (if local backend)
-directories (see :ref:`config` for more details on these folders).
-
-Once this is done, we can configure lighttpd. First, the file ``/etc/lighttpd/modules.conf``, to load these modules:
-::
-
-    server.modules = (
-        "mod_access",
-        "mod_alias"
-    )
-
-    include "conf.d/compress.conf"
-    include "conf.d/fastcgi.conf"
-
-You can then add virtual host entries in a ``/etc/lighttpd/vhosts.d/inginious.conf`` file and apply the following rules:
-::
-
-    server.modules   += ( "mod_fastcgi" )
-    server.modules   += ( "mod_rewrite" )
-
-    $SERVER["socket"] == ":80" {
-        alias.url = (
-            "/static/" => "/usr/lib/python3.6/site-packages/inginious/frontend/static/"
-        )
-
-        fastcgi.server = ( "/inginious-webapp" =>
-            (( "socket" => "/tmp/fastcgi.socket",
-                "bin-path" => "/usr/bin/inginious-webapp",
-                "max-procs" => 1,
-                "bin-environment" => (
-                    "INGINIOUS_WEBAPP_HOST" => "0.0.0.0",
-                    "INGINIOUS_WEBAPP_PORT" => "80",
-                    "INGINIOUS_WEBAPP_CONFIG" => "/var/www/INGInious/configuration.yaml",
-                    "REAL_SCRIPT_NAME" => ""
-                ),
-                "check-local" => "disable"
-            ))
-        )
-
-        url.rewrite-once = (
-            "^/favicon.ico$" => "/static/icons/favicon.ico",
-            "^/static/(.*)$" => "/static/$1",
-            "^/(.*)$" => "/inginious-webapp/$1"
-        )
+    inginious.example.org {
+        reverse_proxy 127.0.0.1:8000
     }
 
-    $SERVER["socket"] == ":8080" {
-        fastcgi.server = ( "/inginious-webdav" =>
-            (( "socket" => "/tmp/fastcgi.socket",
-                "bin-path" => "/usr/bin/inginious-webdav",
-                "max-procs" => 1,
-                "bin-environment" => (
-                    "INGINIOUS_WEBDAV_HOST" => "0.0.0.0",
-                    "INGINIOUS_WEBDAV_PORT" => "8080",
-                    "INGINIOUS_WEBAPP_CONFIG" => "/var/www/INGInious/configuration.yaml",
-                    "REAL_SCRIPT_NAME" => ""
-                ),
-                "check-local" => "disable"
-            ))
-        )
+With nginx:
+::
 
-        url.rewrite-once = (
-            "^/(.*)$" => "/inginious-webdav/$1"
-        )
+    server {
+        listen 443 ssl;
+        server_name inginious.example.org;
+        # ssl_certificate ...;
+        client_max_body_size 100m;
+
+        location / {
+            proxy_pass http://127.0.0.1:8000;
+            proxy_set_header Host $host;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            proxy_set_header X-Forwarded-Host $host;
+        }
     }
 
-
-In your lighttpd configuration  ``/etc/lighttpd/lighttpd.conf`` change these lines:
-::
-
-   server.document-root = server_root + "/INGInious"
-
-Also append this at the end of ``/etc/lighttpd/lighttpd.conf``:
-
-  ::
-
-   include "/etc/lighttpd/vhosts.d/inginious.conf"
-
-.. note::
-
-   Make sure that INGInious static directory path is executable by Ligttpd by giving the right permission with ``chmod``
-
-In some cases docker won't be able to run INGInious containers due to invalid temp directory just
-make sure you append this in your INGInious configuration.yaml
-
-  ::
-
-   local-config:
-       tmp_dir: /var/www/INGInious/agent_tmp
-
-The ``INGINIOUS_WEBAPP`` and ``INGINIOUS_WEBDAV`` prefixed environment variables are used to replace the default command line parameters.
-See :ref:`inginious-webapp` for more details.
-
-The ``REAL_SCRIPT_NAME`` environment variable must be specified under lighttpd if you plan to access the application
-from another path than the specified one. In this case, lighttpd forces to set a non-root path ``/inginious-webapp``,
-while a root access if wanted, in order to serve static files correctly. Therefore, this environment variable is set
-to an empty string in addition to the rewrite rule.
-
-.. note::
-
-   The Default configuration doesn't optimize Inginious for performance, please refer to
-   https://redmine.lighttpd.net/projects/lighttpd/wiki/Docs_Performance for more about performance optimising
-   you may also change 'max-procs' and append "PHP_FCGI_CHILDREN" => "someValue" inside "bin-environment"
-   for more about these values check https://redmine.lighttpd.net/projects/lighttpd/wiki/Docs_PerformanceFastCGI
-
-
-Finally, start the server:
-
-::
-
-    # systemctl enable lighttpd
-    # systemctl start lighttpd
-
-.. _apache:
-
-Using Apache on CentOS 7.x
-``````````````````````````
-
-You may also want to use Apache. You should install `mod_wsgi`. WSGI interfaces are supported through the
-`inginious-webapp` script.
-
-Install the following packages (please note that the Python3.5+ version of *mod_wsgi* is required):
-::
-
-    # yum install httpd httpd-devel
-    # pip3.5 install mod_wsgi
-
-Add the ``apache`` user in the necessary groups, to allow it to launch new containers and to connect to mongodb:
-::
-
-    # usermod -aG docker apache
-    # usermod -aG mongodb apache
-
-Create a folder for INGInious, for example ``/var/www/INGInious``, and change the directory owner to ``apache``:
-::
-
-    # mkdir -p /var/www/INGInious
-    # chown -R apache:apache /var/www/INGInious
-
-Put your configuration file in that folder, as well as your tasks, backup, download, and temporary (if local backend)
-directories (see :ref:`config` for more details on these folders).
-
-Set the environment variables used by the INGInious CLI scripts in the Apache service environment file
-(see lighttpd_ for more details):
-::
-
-    # cat  << EOF >> /etc/sysconfig/httpd
-    INGINIOUS_WEBAPP_CONFIG="/var/www/INGInious/configuration.yaml"
-    INGINIOUS_WEBAPP_HOST="0.0.0.0"
-    INGINIOUS_WEBAPP_PORT="80"
-    EOF
-    # rm /etc/httpd/conf.d/welcome.conf
-
-Please note that the service environment file ``/etc/sysconfig/httpd`` may differ from your distribution and wether it
-uses *systemd* or *init*.
-
-Append this in your INGInious configuration.yaml
-
-  ::
-
-   local-config:
-       tmp_dir: /var/www/inginious/agent_tmp
-
-You can then add virtual host entries in a ``/etc/httpd/vhosts.d/inginious.conf`` file and apply the following rules:
-
-  ::
-
-    <VirtualHost *:80>
-        ServerName my_inginious_domain
-        LoadModule wsgi_module /usr/lib64/python3.5/site-packages/mod_wsgi/server/mod_wsgi-py35.cpython-35m-x86_64-linux-gnu.so
-
-        WSGIScriptAlias / "/usr/local/lib/python3.6/dist-packages/inginious/frontend/wsgi/webapp.py"
-        WSGIScriptReloading On
-
-        Alias /static /usr/lib/python3.6/site-packages/inginious/frontend/static
-
-        <Directory "/usr/bin">
-            <Files "inginious-webapp">
-                Require all granted
-            </Files>
-        </Directory>
-
-        <DirectoryMatch "/usr/lib/python3.6/site-packages/inginious/frontend/static">
-            Require all granted
-        </DirectoryMatch>
-    </VirtualHost>
-
-    <VirtualHost *:8080>
-        ServerName my_inginious_domain
-        LoadModule wsgi_module /usr/lib64/python3.6/site-packages/mod_wsgi/server/mod_wsgi-py35.cpython-35m-x86_64-linux-gnu.so
-
-        WSGIScriptAlias / "/usr/local/lib/python3.6/dist-packages/inginious/frontend/wsgi/webdav.py"
-        WSGIScriptReloading On
-
-        <Directory "/usr/bin">
-            <Files "inginious-webdav">
-                Require all granted
-            </Files>
-        </Directory>
-    </VirtualHost>
-
-Please note that the compiled *wsgi* module path may differ according to the exact Python version you are running.
-
-
-Using Apache on Ubuntu 18.04
-````````````````````````````
-
-Change the owner to the inginious folder and its contents to the Apache2 user:
-::
-
-    chown -R www-data:www-data /var/www/inginious
-
-Set the global server name: add the line `ServerName localhost` in `/etc/apache2/conf.d/httpd.conf`
-
-Set the environment variables used by the INGInious CLI scripts in the Apache service environment file, /etc/apache2/envvars :
-::
-
-    export INGINIOUS_WEBAPP_CONFIG="/var/www/inginious/configuration.yaml"
-    export INGINIOUS_WEBAPP_HOST="0.0.0.0"
-    export INGINIOUS_WEBAPP_PORT="80"
-
-Add them also inside the file `/lib/systemd/system/apache2.service`, as follows:
-::
-
-    Environment=INGINIOUS_WEBAPP_CONFIG="/var/www/inginious/configuration.yaml"
-    Environment=INGINIOUS_WEBAPP_HOST="0.0.0.0"
-    Environment=INGINIOUS_WEBAPP_PORT="80"
-
-
-Append this in your INGInious configuration.yaml
-
-  ::
-
-   local-config:
-       tmp_dir: /var/www/inginious/agent_tmp
-
-Add virtual host entries in a `/etc/apache2/sites-available/inginious.conf` file with the following rules:
-
-  ::
-
-    <VirtualHost *:80>
-        WSGIScriptAlias / "/usr/local/lib/python3.6/dist-packages/inginious/frontend/wsgi/webapp.py"
-        WSGIScriptReloading On
-
-        Alias /static /usr/local/lib/python3.6/dist-packages/inginious/frontend/static
-
-            <Directory "/usr/local/bin">
-                <Files "inginious-webapp">
-                    Require all granted
-                </Files>
-            </Directory>
-
-            <DirectoryMatch "/usr/local/lib/python3.6/dist-packages/inginious/frontend/static">
-                Require all granted
-            </DirectoryMatch>
-
-        ServerAdmin erelsgl@gmail.com
-        DocumentRoot /var/www/inginious
-    </VirtualHost>
-
-
-    <VirtualHost *:8080>
-            WSGIScriptAlias / "/usr/local/lib/python3.6/dist-packages/inginious/frontend/wsgi/webdav.py"
-            WSGIScriptReloading On
-
-            <Directory "/usr/local/bin">
-                <Files "inginious-webdav">
-                    Require all granted
-                </Files>
-            </Directory>
-    </VirtualHost>
-
-Please note that the static files path may differ according to the exact Python version you are running.
-
-Then, enable the new site and reload apache2:
-
-  ::
-
-    a2enmod wsgi
-    a2dissite 000-default
-    a2ensite inginious
-    systemctl reload apache2
-
-Apache will automatically start the frontend.
-
-To check that the various parts of the system are correctly installed, you can use the following commands.
-
-1  Check that docker is active:
-
-    # systemctl status docker
-
-2  Check that mongo db is active:
-
-    # systemctl status mongodb
-
-3  Check that Apache 2 is active:
-
-    # systemctl status apache2
-
-All of them should be in status "active (running)".
-
-4  Check that wsgi is installed:
-
-    # source /etc/apache2/envvars
-    # apache2 -M
-
-The last line should be "wsgi_module (shared)".
-
-    # apache2 -S
-
-There should be two lines under `VirtualHost configuration:` referring to `inginious.conf`.
-
-5  Check access to a file in the `static` folder, e.g.:
-
-    # curl http://localhost/static/icons/wb.svg
-
-6  Check access to the `courselist` folder:
-
-    # curl http://localhost/courselist
-
-7  Finally, open the URL to your website in a browser, and login as superadmin; you should see the INGInious homepage.
+When the frontend is only reachable through the proxy, set ``reverse-proxy-config: {enable: true}`` in the
+configuration, so that the client IP addresses (used by the login rate limits) and the public URL (used to verify
+LTI signatures) are read from the ``X-Forwarded-*`` headers. Leave it disabled otherwise.
+
+To check the installation, open the public URL in a browser, log in as superadmin, install a course (for instance
+the tutorial of the `INGInious demo tasks <https://github.com/INGInious/demo-tasks>`_) and submit a task: the
+submission is graded when the backend and the agents are connected. The *Queue* page lists the running jobs.
 
 Optional apps
 =============
@@ -623,21 +422,16 @@ Optional apps
 WebDAV setup
 ------------
 
-An optional WebDAV server can be used with INGInious to allow course administrators to access
-their course filesystem. This is an additional app that needs to be launched on another port or hostname.
-Run the WebDAV server using :ref:`inginious-webdav`.
+Course administrators can access the files of their courses with a WebDAV client. WebDAV is served by the frontend
+itself under the ``/dav`` path: there is no separate service to run. Users authenticate with their username and
+their API key (created with the "Generate secret" button of the WebDAV box); only the administrators of a course (and
+the superadmins) can access it, and only over HTTPS (see ``webdav_allow_http`` in :ref:`ConfigReference`).
 
-  ::
+To display the WebDAV URL and credentials to course administrators (on the task list page of the course
+administration), set ``webdav_host`` to the public URL of that path in the
+configuration file (see :ref:`ConfigReference`)::
 
-    inginious-webdav --config /path/to/configuration.yaml --port 8000
-
-In your configuration file (see :ref:`ConfigReference`), set ``webdav_host`` to:
-  ::
-
-    <protocol>://<hostname>:<port>
-
-where ``protocol`` is either ``http`` or ``https``, ``hostname`` and ``port`` the hostname and port
-where the WebDAV app is running.
+    webdav_host: https://inginious.example.org/dav
 
 .. _webterm_setup:
 
@@ -658,7 +452,7 @@ You can then launch the tool by running:
     $ npm start bind_hostname bind_port debug_host:debug_ports
 
 This will launch the app on ``http://bind_hostname:bind_port``. The ``debug_host`` and ``debug_ports`` parameters are
-the debug paramaters on the local (see :ref:`ConfigReference`) or remote (see :ref:`inginious-agent-docker`) Docker agent.
+the debug parameters of the Docker agent (see :ref:`inginious-agent-docker`).
 
 To make the INGInious frontend aware of that application, update your configuration file by setting the ``webterm``
 field to ``http://bind_hostname:bind_port`` (see :ref:`ConfigReference`).

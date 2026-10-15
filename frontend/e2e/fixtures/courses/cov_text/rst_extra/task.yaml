@@ -1,0 +1,406 @@
+# Generated from tests/fixtures/rst (golden examples): one problem header per example.
+name: RST extra constructs
+author: INGInious test-suite
+context: ''
+environment_type: mcq
+environment_id: mcq
+input_random: 2
+problems:
+  field_list:
+    type: match
+    name: field_list
+    header: |-
+      Intro.
+
+      :Field one: value
+      :Field two: *x*
+    answer: x
+  line_block_blank:
+    type: match
+    name: line_block_blank
+    header: |-
+      | line one
+      |
+      | line three
+    answer: x
+  attribution:
+    type: match
+    name: attribution
+    header: |-
+      Para.
+
+          Quoted text.
+
+          -- Somebody
+    answer: x
+  table_directive:
+    type: match
+    name: table_directive
+    header: |-
+      .. table:: Caption
+         :widths: 1 2
+
+         =====  =====
+         A      B
+         =====  =====
+         1      2
+         =====  =====
+    answer: x
+  table_directive_empty:
+    type: match
+    name: table_directive_empty
+    header: |-
+      .. table:: Nothing
+
+         no table here
+    answer: x
+  grid_spans:
+    type: match
+    name: grid_spans
+    header: |-
+      +-----+-----+
+      | spanning  |
+      +=====+=====+
+      | a   | b   |
+      +-----+     +
+      | c   |     |
+      +-----+-----+
+    answer: x
+  classifier:
+    type: match
+    name: classifier
+    header: |-
+      term : classifier
+          Definition.
+    answer: x
+  list_table_options:
+    type: match
+    name: list_table_options
+    header: |-
+      .. list-table:: Options
+         :header-rows: 1
+         :widths: 1 2
+
+         * - H1
+           - H2
+         * - a
+           - b
+    answer: x
+  list_table_empty:
+    type: match
+    name: list_table_empty
+    header: |-
+      .. list-table:: Empty
+
+         just text
+    answer: x
+  csv_header:
+    type: match
+    name: csv_header
+    header: |-
+      .. csv-table:: CSV
+         :header: "A", "B"
+
+         1, "two, quoted"
+    answer: x
+  csv_empty:
+    type: match
+    name: csv_empty
+    header: |
+      .. csv-table:: Nothing
+    answer: x
+  admonition_plain:
+    type: match
+    name: admonition_plain
+    header: |-
+      .. admonition:: My Own Title
+
+         Body.
+    answer: x
+  hidden_until_empty:
+    type: match
+    name: hidden_until_empty
+    header: |
+      .. hidden-until:: 2020-01-01
+    answer: x
+  hidden_until_eu:
+    type: match
+    name: hidden_until_eu
+    header: |-
+      .. hidden-until:: 01/01/2020 10:00
+
+         EU-DATE
+    answer: x
+  hidden_until_offset:
+    type: match
+    name: hidden_until_offset
+    header: |-
+      .. hidden-until:: 2020-01-01T00:00:00+02:00
+
+         OFFSET-DATE
+    answer: x
+  hidden_until_zulu:
+    type: match
+    name: hidden_until_zulu
+    header: |-
+      .. hidden-until:: 2020-01-01T00:00:00Z
+
+         ZULU-DATE
+    answer: x
+  hidden_until_invalid:
+    type: match
+    name: hidden_until_invalid
+    header: |-
+      .. hidden-until:: 2020-13-45
+
+         bad
+    answer: x
+  code_empty:
+    type: match
+    name: code_empty
+    header: |
+      .. code:: python
+    answer: x
+  raw_latex:
+    type: match
+    name: raw_latex
+    header: |-
+      .. raw:: latex
+
+         \LaTeX
+    answer: x
+  image_options:
+    type: match
+    name: image_options
+    header: |-
+      .. image:: data:image/png;base64,iVBORw0KGgo=
+         :align: left
+         :class: thumb
+         :width: 50%
+         :alt: tiny
+    answer: x
+  image_bad_data:
+    type: match
+    name: image_bad_data
+    header: '.. image:: data:text/html,hello'
+    answer: x
+  figure_legend:
+    type: match
+    name: figure_legend
+    header: |-
+      .. figure:: pic.png
+         :align: center
+
+         The caption.
+
+         The legend.
+    answer: x
+  substitution_image:
+    type: match
+    name: substitution_image
+    header: |-
+      |logo| text
+
+      .. |logo| image:: logo.png
+    answer: x
+  substitution_raw:
+    type: match
+    name: substitution_raw
+    header: |-
+      A |br| B |tex|
+
+      .. |br| raw:: html
+
+         <br/>
+
+      .. |tex| raw:: latex
+
+         \newline
+    answer: x
+  footnote_twice:
+    type: match
+    name: footnote_twice
+    header: |-
+      A [1]_ and again [1]_.
+
+      .. [1] The note.
+    answer: x
+  custom_roles:
+    type: match
+    name: custom_roles
+    header: |-
+      .. role:: custom
+
+      .. role:: rawtex(raw)
+         :format: latex
+
+      .. role:: 42
+
+      :custom:`styled` and :rawtex:`\x` and :emphasis:`em` :sup:`2` :abbreviation:`ab` :title:`cite`
+    answer: x
+  unknown_role:
+    type: match
+    name: unknown_role
+    header: An :unknown:`role` here.
+    answer: x
+  rubric:
+    type: match
+    name: rubric
+    header: '.. rubric:: A rubric'
+    answer: x
+  code_extra_languages:
+    type: match
+    name: code_extra_languages
+    header: |-
+      .. code-block:: ocaml
+
+         let x = 1
+
+      .. code-block:: scala
+
+         val x = 1
+
+      .. code-block:: haskell
+
+         x = 1
+
+      .. code-block:: octave
+
+         x = 1;
+
+      .. code-block:: prolog
+
+         x(1).
+
+      .. code-block:: racket
+
+         (define x 1)
+
+      .. code-block:: asm
+
+         mov eax, 1
+
+      .. code-block:: tex
+
+         \x
+
+      .. code-block:: sh
+
+         echo 1
+
+      .. code-block:: unknownlang
+
+         ???
+    answer: x
+  random_rst:
+    type: match
+    name: random_rst
+    header: |-
+      .. raw:: html
+
+         <span class="rnd"><script>document.write(input["@random"][0])</script>|<script>document.write(input["@random"])</script></span>
+    answer: x
+  bare_literal:
+    type: match
+    name: bare_literal
+    header: |-
+      Text
+
+      ::
+
+          LITERAL-ONLY
+    answer: x
+  header_only_tables:
+    type: match
+    name: header_only_tables
+    header: |
+      .. list-table:: Head only
+         :header-rows: 1
+
+         * - H
+
+      .. csv-table:: CSV head only
+         :header: "X", "Y"
+    answer: x
+  list_table_plain_rows:
+    type: match
+    name: list_table_plain_rows
+    header: |-
+      .. list-table::
+
+         * plain row
+         * - a
+    answer: x
+  role_without_name:
+    type: match
+    name: role_without_name
+    header: |-
+      .. role:: (x)
+
+      Text.
+    answer: x
+  compound_literal:
+    type: match
+    name: compound_literal
+    header: |-
+      .. compound::
+         :class: extra
+
+         Compound body.
+
+      :literal:`lit  x` and an _`inline target`.
+
+      .. a comment
+    answer: x
+  img_without_src:
+    type: match
+    name: img_without_src
+    header: |-
+      .. raw:: html
+
+         <img alt="no source">
+    answer: x
+  more_dates:
+    type: match
+    name: more_dates
+    header: |-
+      .. hidden-until:: 2020-01-01T00:00:00-05:00
+
+         MINUS-OFFSET
+
+      .. hidden-until:: 2020-01-01T00:00:00+02
+
+         SHORT-OFFSET
+
+      .. hidden-until:: 2020-02-30
+
+         IMPOSSIBLE
+
+      .. hidden-until:: 01/01/2020
+
+         EU-NO-TIME
+
+      .. hidden-until:: 01/01/2020 10:00:30
+
+         EU-SECONDS
+    answer: x
+  fallback_hidden:
+    type: match
+    name: fallback_hidden
+    header: |-
+      .. hidden-until:: 2099-01-01
+
+         SECRET-IN-FALLBACK
+
+      A
+      =====
+
+      B
+      -----
+
+      C
+      =====
+
+      D
+      ~~~~~
+    answer: x

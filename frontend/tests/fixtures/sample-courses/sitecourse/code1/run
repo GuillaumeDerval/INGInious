@@ -1,0 +1,11 @@
+#!/usr/bin/python3
+from inginious_container_api import feedback, input
+code = input.get_input("answer").strip()
+try:
+    v = float(code)
+    feedback.set_custom_value("score", v)
+    feedback.set_global_result("success")
+    feedback.set_global_feedback("Score: %s" % v)
+except Exception:
+    feedback.set_global_result("failed")
+    feedback.set_global_feedback("Not a number")

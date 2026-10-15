@@ -1,0 +1,12 @@
+# A lone unnamed file problem with a 2 MB limit.
+name: Lone file
+author: INGInious test-suite
+context: Upload a file.
+environment_type: mcq
+environment_id: mcq
+problems:
+  upload:
+    type: file
+    header: Any text file.
+    allowed_exts: [.txt]
+    max_size: 2097152

@@ -1,0 +1,30 @@
+name: Single-line code and optional fields
+author: INGInious test-suite
+context: |
+  ``code_single_line`` problems (one ``<input type=text>`` each) plus an **optional**
+  ``code`` problem. Answers: ``word`` must be ``hello``, ``number`` must be ``7``,
+  ``comment`` (optional single line) and ``notes`` (optional code box) may be empty.
+environment_type: docker
+environment_id: default
+environment_parameters:
+  limits: { time: 10, memory: 128 }
+problems:
+  word:
+    type: code_single_line
+    name: A word
+    header: Type ``hello``.
+    default: hel
+  number:
+    type: code_single_line
+    name: A number
+    header: Type ``7``.
+  comment:
+    type: code_single_line
+    name: Optional comment
+    header: Optional, may be left empty.
+    optional: true
+  notes:
+    type: code
+    name: Optional notes
+    header: Optional multi-line notes (language ``plain``).
+    optional: true

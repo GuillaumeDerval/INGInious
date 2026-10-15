@@ -1,0 +1,3 @@
+#!/usr/bin/python3
+from inginious_container_api import feedback
+feedback.set_global_result("success")

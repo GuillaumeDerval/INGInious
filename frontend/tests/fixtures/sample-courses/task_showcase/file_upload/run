@@ -1,0 +1,11 @@
+#!/bin/bash
+# Grading script of task_showcase/file_upload
+NAME=$(getinput upload:filename)
+FIRST=$(getinput upload | head -n 1 | tr -d '\r')
+if [ "$FIRST" = "INGInious" ]; then
+    feedback-result success
+    feedback-msg -m "File \`\`$NAME\`\` accepted."
+else
+    feedback-result failed
+    feedback-msg -m "File \`\`$NAME\`\`: first line is \`\`$FIRST\`\`, expected \`\`INGInious\`\`."
+fi

@@ -1,0 +1,18 @@
+# Code task whose actions are intercepted by the tests (errors, polling, busy states).
+name: Code
+author: INGInious test-suite
+context: Write some code.
+environment_type: mcq
+environment_id: mcq
+problems:
+  code:
+    type: code
+    name: Code
+    header: Some Python.
+    language: python
+    default: 'print(1)'
+  word:
+    type: match
+    name: Word
+    header: A word.
+    answer: x

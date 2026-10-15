@@ -1,0 +1,9 @@
+#!/bin/bash
+# Grading script of task_showcase/rich_feedback
+feedback-result success
+feedback-grade 100
+feedback-msg < feedback.rst
+feedback-result --id anything success
+feedback-msg --id anything -m "Problem feedback **anything**: you typed \`\`$(getinput anything)\`\`."
+feedback-result --id second failed
+feedback-msg --id second -m ".. warning:: Problem-level admonition (second)."

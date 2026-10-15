@@ -1,6 +1,10 @@
 Developer's documentation
 =========================
 
+INGInious is made of a Python package (``inginious``: backend, grading agents, common code and command-line
+utilities) and of a web frontend written with SvelteKit (TypeScript), in the ``frontend/`` directory of the
+repository. The developer documentation of the frontend (architecture, conventions, feature specifications,
+references) is in ``frontend/docs/``; :doc:`dev_doc/internals_doc/frontend` gives an overview and links to it.
 
 Extensions
 ----------
@@ -11,19 +15,7 @@ Extensions
    dev_doc/extensions_doc/how_to_extend
    dev_doc/extensions_doc/i18n
    dev_doc/extensions_doc/plugins
-   dev/doc/extensions_doc/taskless_jobs
-
-Agents
-``````
-
-Subproblems
-```````````
-
-Task dispensers
-```````````````
-
-Authentication methods
-```````````````````````
+   dev_doc/extensions_doc/taskless_jobs
 
 Internals
 ---------

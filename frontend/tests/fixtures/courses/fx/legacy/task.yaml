@@ -1,0 +1,13 @@
+name: Legacy task
+environment: python3
+limits:
+  time: 30
+weight: 4
+stored_submissions: 1
+groups: true
+evaluate: last
+accessible: 2025-01-01 00:00:00/2030-01-01 00:00:00
+categories:
+  - old
+custom_key: keep me
+problems: {}

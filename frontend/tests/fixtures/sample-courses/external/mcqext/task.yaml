@@ -1,0 +1,10 @@
+name: MCQ external
+environment_type: mcq
+environment_id: mcq
+environment_parameters: {}
+problems:
+  q2:
+    type: match
+    name: Q
+    header: Type yes
+    answer: 'yes'

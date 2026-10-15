@@ -1,0 +1,14 @@
+name: Score task code2
+author: SITE
+context: Type a number; it becomes your custom score.
+environment_type: docker
+environment_id: default
+environment_parameters:
+  limits: {time: 10, memory: 128, disk: 100}
+  run_cmd: ''
+problems:
+  answer:
+    type: code
+    name: Number
+    header: Enter a number
+    language: plain
