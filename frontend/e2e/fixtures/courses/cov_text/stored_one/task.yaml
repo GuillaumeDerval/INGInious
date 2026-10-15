@@ -1,0 +1,12 @@
+# Only one stored submission (pruning deletes the older ones with their files).
+name: One stored submission
+author: INGInious test-suite
+context: Anything.
+environment_type: mcq
+environment_id: mcq
+problems:
+  q:
+    type: match
+    name: Q
+    header: Anything.
+    answer: x

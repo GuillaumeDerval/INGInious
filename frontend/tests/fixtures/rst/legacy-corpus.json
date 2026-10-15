@@ -1,0 +1,1172 @@
+[
+	{
+		"file": "infra/tasks/cadm1/course.yaml",
+		"key": "description",
+		"rst": "desc",
+		"html": "<p>desc</p>\n"
+	},
+	{
+		"file": "infra/tasks/cadm1/task1/task.yaml",
+		"key": "context",
+		"rst": "Some *rst* context\nline 2",
+		"html": "<p>Some <em>rst</em> context\nline 2</p>\n"
+	},
+	{
+		"file": "infra/tasks/cadm1/task1/task.yaml",
+		"key": "q5.choices.0",
+		"rst": "Yes",
+		"html": "<p>Yes</p>\n"
+	},
+	{
+		"file": "infra/tasks/cadm1/task1/task.yaml",
+		"key": "q5.choices.1",
+		"rst": "No",
+		"html": "<p>No</p>\n"
+	},
+	{
+		"file": "infra/tasks/cstu_course/02_courses/task.yaml",
+		"key": "context",
+		"rst": ".. container:: row\n\n    .. container:: col-md-10 text-justify\n\n        The INGInious platform can host different courses. Each course is composed of a set of different tasks or assignments. Each of these are stored in a unique folder and identified using an alphanumerical identifier, referred as the *course id* or *task id*.\n\n        Courses are created by the super administrator(s) from the main page displaying the available courses, by specifying a new *course id*.\n\n    .. container:: col-md-2 text-center\n\n        .. raw:: html\n\n           <i style=\"font-size:120px;\" class=\"fa fa-sitemap\"></i>\n\nThe course administration\n-------------------------\n\nSettings\n````````\n\n.. class:: text-justify\n\n    The `Course settings`_ are mostly used by the *micro-LMS* (webapp) frontend. Several parameters can be changed from there:\n\n    - **Name** : This is the complete displayed name of the course.\n    - **Administrators and tutors/teaching assistants** : This is the username list (separated by comma) of the course administrators or teaching assistants (TA). Administrators can access and change everything, and even delete the entire course. TA can acces the student submissions and change the student registrations.\n    - **Group attribution** : Students can be distributed in groups and audiences with the Users management page. The groups are useful if you want, for example, students to send a submission as a group for some specific tasks. With the Group attribution parameter you can allow students to register themselves into groups or groups to be handled only by staff. Another aspect that you will discover on the Users management page is the audience concept. This is invisible to the students view and allows the administrator to do see statistics on larger students clusters such as classrooms.\n    - **Course preview** : This is used to allow students who did not register for the course to see the course tasks in a read-only mode where they can not send submissions.\n    - **Accessibility** : A course can be open to students for a selected period only, if desired.\n    - **Registration policy** : Registrations can be open for a selected period only, with an optional registration password. This has to be differentiated from accessibility. Indeed, a course can be accessible while registrations are closed.\n    - **Access control** : This is used to restrict the course access to selected users.\n\n\n    All these settings are stored in a ``course.yaml`` file, in the course-associated folder and can be directly modified on the ``Course administration`` page.\n\n.. _`Course settings`: /admin/tutorial/settings\n\nCourse organization and statistics\n``````````````````````````````````\n\n.. class:: text-justify\n\n    The Users_management_ , Tasks_ and Submissions_ pages allow you to manage students/groups/audiences registrations, course tasks and students submissions respectively.\n\n    - `Users_management`_ page allows you to enroll/unenroll users from your course. It also displays some basic statistics on your students and the teaching staff that can be expanded by clicking on *View submissions*. It also allows to manage groups and audiences with the possibility to upload/download the structure as a yaml file as described in documentation.\n\n    - Tasks_ page allows you to edit the course tasks using the graphical editor where you can, for example, change their order. It also allow to open submissions for a specific task with the **view submissions** button or to modify a task with the **Edit task** button.\n\n    - Submissions_ page allows you to display all the submissions with filters options for specific groups, audiences, students or tasks. There, you can open a specific submission, download it or even replay it if you updated the grading script.\n\n\n.. _Users_management: /admin/tutorial/students\n.. _Students: /admin/tutorial/students\n.. _Tasks: /admin/tutorial/tasks\n.. _Submissions: /admin/tutorial/submissions\n\n\nMarketplace\n```````````\n\nThe Marketplace_ allows to import available courses into your own INGInious deployment by copying their files. This could be very useful for new teachers willing to learn by inspecting already built courses.\n\nNote, by default, these imported courses will not be displayed to students. You can change this in the course settings later.\n\n.. _Marketplace: /marketplace\n\nLet's take a tour\n-----------------\n\nBrowse the INGInious course administration pages to discover the full set of features. Once you've made that, answer to the small MCQ below to check your understanding and learn more.",
+		"html": "<div class=\"row\">\n<div class=\"col-md-10 text-justify\">\n<p>The INGInious platform can host different courses. Each course is composed of a set of different tasks or assignments. Each of these are stored in a unique folder and identified using an alphanumerical identifier, referred as the <em>course id</em> or <em>task id</em>.</p>\n<p>Courses are created by the super administrator(s) from the main page displaying the available courses, by specifying a new <em>course id</em>.</p>\n</div>\n<div class=\"col-md-2 text-center\">\n<i style=\"font-size:120px;\" class=\"fa fa-sitemap\"></i></div>\n</div>\n<div class=\"section\" id=\"the-course-administration\">\n<h3>The course administration</h3>\n<div class=\"section\" id=\"settings\">\n<h4>Settings</h4>\n<p class=\"text-justify\">The <a class=\"reference external\" href=\"/admin/tutorial/settings\" target=\"_blank\">Course settings</a> are mostly used by the <em>micro-LMS</em> (webapp) frontend. Several parameters can be changed from there:</p>\n<ul class=\"text-justify simple\">\n<li><strong>Name</strong> : This is the complete displayed name of the course.</li>\n<li><strong>Administrators and tutors/teaching assistants</strong> : This is the username list (separated by comma) of the course administrators or teaching assistants (TA). Administrators can access and change everything, and even delete the entire course. TA can acces the student submissions and change the student registrations.</li>\n<li><strong>Group attribution</strong> : Students can be distributed in groups and audiences with the Users management page. The groups are useful if you want, for example, students to send a submission as a group for some specific tasks. With the Group attribution parameter you can allow students to register themselves into groups or groups to be handled only by staff. Another aspect that you will discover on the Users management page is the audience concept. This is invisible to the students view and allows the administrator to do see statistics on larger students clusters such as classrooms.</li>\n<li><strong>Course preview</strong> : This is used to allow students who did not register for the course to see the course tasks in a read-only mode where they can not send submissions.</li>\n<li><strong>Accessibility</strong> : A course can be open to students for a selected period only, if desired.</li>\n<li><strong>Registration policy</strong> : Registrations can be open for a selected period only, with an optional registration password. This has to be differentiated from accessibility. Indeed, a course can be accessible while registrations are closed.</li>\n<li><strong>Access control</strong> : This is used to restrict the course access to selected users.</li>\n</ul>\n<p class=\"text-justify\">All these settings are stored in a <code class=\"docutils literal\">course.yaml</code> file, in the course-associated folder and can be directly modified on the <code class=\"docutils literal\">Course administration</code> page.</p>\n</div>\n<div class=\"section\" id=\"course-organization-and-statistics\">\n<h4>Course organization and statistics</h4>\n<p class=\"text-justify\">The <a class=\"reference external\" href=\"/admin/tutorial/students\" target=\"_blank\">Users_management</a> , <a class=\"reference external\" href=\"/admin/tutorial/tasks\" target=\"_blank\">Tasks</a> and <a class=\"reference external\" href=\"/admin/tutorial/submissions\" target=\"_blank\">Submissions</a> pages allow you to manage students/groups/audiences registrations, course tasks and students submissions respectively.</p>\n<ul class=\"text-justify simple\">\n<li><a class=\"reference external\" href=\"/admin/tutorial/students\" target=\"_blank\">Users_management</a> page allows you to enroll/unenroll users from your course. It also displays some basic statistics on your students and the teaching staff that can be expanded by clicking on <em>View submissions</em>. It also allows to manage groups and audiences with the possibility to upload/download the structure as a yaml file as described in documentation.</li>\n<li><a class=\"reference external\" href=\"/admin/tutorial/tasks\" target=\"_blank\">Tasks</a> page allows you to edit the course tasks using the graphical editor where you can, for example, change their order. It also allow to open submissions for a specific task with the <strong>view submissions</strong> button or to modify a task with the <strong>Edit task</strong> button.</li>\n<li><a class=\"reference external\" href=\"/admin/tutorial/submissions\" target=\"_blank\">Submissions</a> page allows you to display all the submissions with filters options for specific groups, audiences, students or tasks. There, you can open a specific submission, download it or even replay it if you updated the grading script.</li>\n</ul>\n</div>\n<div class=\"section\" id=\"marketplace\">\n<h4>Marketplace</h4>\n<p>The <a class=\"reference external\" href=\"/marketplace\" target=\"_blank\">Marketplace</a> allows to import available courses into your own INGInious deployment by copying their files. This could be very useful for new teachers willing to learn by inspecting already built courses.</p>\n<p>Note, by default, these imported courses will not be displayed to students. You can change this in the course settings later.</p>\n</div>\n</div>\n<div class=\"section\" id=\"let-s-take-a-tour\">\n<h3>Let's take a tour</h3>\n<p>Browse the INGInious course administration pages to discover the full set of features. Once you've made that, answer to the small MCQ below to check your understanding and learn more.</p>\n</div>\n"
+	},
+	{
+		"file": "infra/tasks/cstu_course/02_courses/task.yaml",
+		"key": "q1.header",
+		"rst": "You've been preparing your course material during last summer and  are now ready to open your course to users. You want an assignment to be done by groups/teams of max. 3 students and checked the option in the task parameter to allow group submission. You want students to form their groups. How can you achieve this ?",
+		"html": "<p>You've been preparing your course material during last summer and  are now ready to open your course to users. You want an assignment to be done by groups/teams of max. 3 students and checked the option in the task parameter to allow group submission. You want students to form their groups. How can you achieve this ?</p>\n"
+	},
+	{
+		"file": "infra/tasks/cstu_course/02_courses/task.yaml",
+		"key": "q1.choices.0",
+		"rst": "You create a sufficient amount of empty groups with appropriate maximum size in the Users management page.",
+		"html": "<p>You create a sufficient amount of empty groups with appropriate maximum size in the Users management page.</p>\n"
+	},
+	{
+		"file": "infra/tasks/cstu_course/02_courses/task.yaml",
+		"key": "q1.choices.1",
+		"rst": "You create a sufficient amount of empty groups with appropriate maximum size and check that students are allowed to register by themselves in the course settings.",
+		"html": "<p>You create a sufficient amount of empty groups with appropriate maximum size and check that students are allowed to register by themselves in the course settings.</p>\n"
+	},
+	{
+		"file": "infra/tasks/cstu_course/02_courses/task.yaml",
+		"key": "q1.choices.2",
+		"rst": "You check that students are allowed to register by themselves.",
+		"html": "<p>You check that students are allowed to register by themselves.</p>\n"
+	},
+	{
+		"file": "infra/tasks/cstu_course/02_courses/task.yaml",
+		"key": "q2.header",
+		"rst": "You have a large number of students, some are engineering students and some are computer science students.\nYou want students to join teams to work together but you don't want students from different curricula to mix together.\nHow can you achieve that?",
+		"html": "<p>You have a large number of students, some are engineering students and some are computer science students.\nYou want students to join teams to work together but you don't want students from different curricula to mix together.\nHow can you achieve that?</p>\n"
+	},
+	{
+		"file": "infra/tasks/cstu_course/02_courses/task.yaml",
+		"key": "q2.choices.0",
+		"rst": "You create two audiences in the Users management page and fill them with students or upload a structure with a yaml file as described in documentation. Then you create groups and add audience restriction to the groups. Finally, you allow students to register in groups with the course settings page. ",
+		"html": "<p>You create two audiences in the Users management page and fill them with students or upload a structure with a yaml file as described in documentation. Then you create groups and add audience restriction to the groups. Finally, you allow students to register in groups with the course settings page.</p>\n"
+	},
+	{
+		"file": "infra/tasks/cstu_course/02_courses/task.yaml",
+		"key": "q2.choices.1",
+		"rst": "INGInious does not allow this.",
+		"html": "<p>INGInious does not allow this.</p>\n"
+	},
+	{
+		"file": "infra/tasks/cstu_course/02_courses/task.yaml",
+		"key": "q2.choices.2",
+		"rst": "You create two audiences in the Users management page and fill them with students or upload a structure with a yaml file as described in documentation. Then you allow students to register in groups with the course settings page. ",
+		"html": "<p>You create two audiences in the Users management page and fill them with students or upload a structure with a yaml file as described in documentation. Then you allow students to register in groups with the course settings page.</p>\n"
+	},
+	{
+		"file": "infra/tasks/cstu_course/02_courses/task.yaml",
+		"key": "q3.header",
+		"rst": "You're about to restart your course this semester and want all the student data to be cleaned while keeping the course and tasks unmodified for the new students. How do you do that ?",
+		"html": "<p>You're about to restart your course this semester and want all the student data to be cleaned while keeping the course and tasks unmodified for the new students. How do you do that ?</p>\n"
+	},
+	{
+		"file": "infra/tasks/cstu_course/02_courses/task.yaml",
+		"key": "q3.choices.0",
+		"rst": "You ask the super-administrator to duplicate the course.",
+		"html": "<p>You ask the super-administrator to duplicate the course.</p>\n"
+	},
+	{
+		"file": "infra/tasks/cstu_course/02_courses/task.yaml",
+		"key": "q3.choices.1",
+		"rst": "In the administration *Danger zone*, you archive the course data, so that past year are wiped and backup if needed later.",
+		"html": "<p>In the administration <em>Danger zone</em>, you archive the course data, so that past year are wiped and backup if needed later.</p>\n"
+	},
+	{
+		"file": "infra/tasks/cstu_course/02_courses/task.yaml",
+		"key": "q4.header",
+		"rst": "Among the following suggestions, what statistics tables are actually available through the course administration pages ?",
+		"html": "<p>Among the following suggestions, what statistics tables are actually available through the course administration pages ?</p>\n"
+	},
+	{
+		"file": "infra/tasks/cstu_course/02_courses/task.yaml",
+		"key": "q4.choices.0",
+		"rst": "All the submissions of a given student",
+		"html": "<p>All the submissions of a given student</p>\n"
+	},
+	{
+		"file": "infra/tasks/cstu_course/02_courses/task.yaml",
+		"key": "q4.choices.1",
+		"rst": "The submissions for a given task of a given student",
+		"html": "<p>The submissions for a given task of a given student</p>\n"
+	},
+	{
+		"file": "infra/tasks/cstu_course/02_courses/task.yaml",
+		"key": "q4.choices.2",
+		"rst": "All the submissions for a given audience",
+		"html": "<p>All the submissions for a given audience</p>\n"
+	},
+	{
+		"file": "infra/tasks/cstu_course/02_courses/task.yaml",
+		"key": "q4.choices.3",
+		"rst": "The submissions for a given task of a given group",
+		"html": "<p>The submissions for a given task of a given group</p>\n"
+	},
+	{
+		"file": "infra/tasks/cstu_course/03_tasks/task.yaml",
+		"key": "context",
+		"rst": ".. container:: row\n\n    .. container:: col-md-10 text-justify\n\n        Tasks, or activities, or assignments, form the course content. Each INGInious task is composed of a problem set graded at the same time (run on a predefined environment) and possibly depending on each other. A task is linked to a course and is identified with a *course id/task id* pair.\n\n        Tasks can be created by course administrators by specifying a new *task id* on the Tasks_ page. This page also allows to modify the tasks order and to setup the tasks dispenser. This last tool allows to select between two display options for the tasks. The default one is the ``Table of content`` mode where you can create a selection with tasks that will be displayed to the students. The second option is the ``Combinatory test`` that allows to define sections among which only a specified amount of tasks will be displayed randomly.\n\n        .. _Tasks: /admin/tutorial/tasks\n\n    .. container:: col-md-2 text-center\n\n        .. raw:: html\n\n           <i style=\"font-size:120px;\" class=\"fa fa-list-alt\"></i>\n\nTask edition\n------------\n.. class:: text-justify\n\n    Tasks are entirely editable from the *micro-LMS* (webapp). However, these parameters are stored in a ``task.yaml``, in the task-associated folder.\n\nBasic settings\n``````````````\n.. class:: text-justify\n\n    Except the name and context information, the task basic settings are mainly used by the *micro-LMS* (webapp). These settings include:\n\n    - **Submission mode** : If you allow your students to work in group/team, you need to configure the submission mode accordingly.\n    - **Submission storage** : This option limits the size of the submission history.\n    - **Submission limit** : This option is used to restrict the number of submissions students can make per time period.\n    - **Evaluation submission** : This option provides download facility for the administrator by tagging a submission as the reference one. Note that submissions are tagged just after execution.\n    - **Accessibility** : Some tasks may be made accessible for a short amount of time only if some deadline is applicable.\n\nContainer setup\n```````````````\n\n.. container:: row\n\n    .. container:: col-md-2 text-center\n\n        .. image:: $common/docker.png\n          :height: 100px\n\n    .. container:: col-md-10 text-justify\n\n        INGInious runs the test suite in a container, an operating system component allowing resources isolation in a faster way than with virtual machines.\n\n        This is further simplified by the usage of **Docker**, an open-source API for creating and defining containers, also providing disk image abstraction, making the definition of additional INGInious environments easy for the administrators.\n\n.. class:: text-justify\n\n    Except the ``mcq`` environment used for multiple_choice questions, all the INGInious environments will start a container when launching the test suite. These containers can be preconfigured with the following parameters:\n\n    - **(Hard) timeout** : The timeout value is the maximum CPU (computation) time allowed for the task. Once this threshold is reached, the container is shut down and the student is returned a *Time out* feedback. The hard timeout is the maximum wall (human) time allowed for the task.\n    - **Memory** : This is the maximum amount of RAM the container can allocate. If this value is evaluated as too high by the INGInious agent, it will warn you at the container launch.\n    - **Output limit** : This is the maximum amount of data that can be output from the container. This parameter is useful if you need to print student generated data on feedback.\n    - **Grading environment** : The grading environment is defined by the provided software set.\n    - **Internet connectivity** : If, for some reason, you need to access the Internet during the tests, check this option is activated.\n\n\nSubproblems\n```````````\n.. class:: text-justify\n\n    Different kinds of problems can be displayed on the INGInious task page:\n\n    - **Code** : This box displays an editable text area with syntax highlighting and automatic indentation.\n    - **File upload** : This box provides a file upload facility, if several files have to be submitted in a single archive for instance.\n    - **Match** : This box displays a small input field used for matching student and expected result.\n    - **MCQ** : This box displays a multiple choice question, with the ability to select multiple valid answers, and displaying feedback for each chosen option.\n\n    Match and MCQ questions can be automatically graded using the ``mcq`` environment that will use the feedback defined using the task editor. However, all problem inputs can be fetched from a container-based environment.\n\nTask files\n``````````\n.. class:: text-justify\n\n    Task files are mainly used for launching the tests in container-based environments. Those tests will be started using the ``run`` file. This file must be placed at the task files root folder and be executable (either script or binary).\n\n    Two special subdirectories can be created in the task files folder:\n\n    - ``/public`` : This folder is publicly available from the frontends and can be used to share some initial documents, implementations, or skeletons with students.\n      To give access to those file, place a link to ``taskid/filepath`` inside your task description.\n    - ``/student`` : This folder is used in combination with the ``run_student`` API to provide another level of isolation while running the tests.\n      More information about this folder will be provided further in this tutorial.\n\n      Note: The ``$common/public`` and ``$common/student`` directories at the root of the course directory also allow to share files for all the tasks of the same course.\n\nDescription\n-----------\n\n.. class:: text-justify\n\n    Task and problems context descriptions can be formatted using reStructuredText syntax and :math:`\\LaTeX` syntax for mathematical expressions. Please refer to both their documentation to find out the full set of features.\n\n    :math:`\\LaTeX` expressions can be inserted via the following snippet:\n\n    .. code-block:: rst\n\n        This is a :math:`\\LaTeX` expression !\n\n    Syntax-highlighted code blocks can be inserted via the following snippet and CodeMirror language identifiers:\n\n    .. code-block:: rst\n\n       Copy and paste the code below:\n\n       .. code-block:: python\n\n          print \"Hello World!\"\n\nThe task description can also include images such as the docker logo included in the text above:\n\n   .. code-block:: rst\n\n            .. image:: $common/docker.png\n              :height: 100px\n\nNotice the image can be located in the specific task directory, for example with the path ``03_tasks/public/docker.png`` or within a ``$common/public`` directory at the root of the course directory to allow every task to access these files.\n\nLet's take a tour\n-----------------\n\n.. class:: text-justify\n\n    Browse the INGInious task edition tabs to discover the full set of features. Once you've made that, answer to the small MCQ below to check your understanding and learn more.",
+		"html": "<div class=\"row\">\n<div class=\"col-md-10 text-justify\">\n<p>Tasks, or activities, or assignments, form the course content. Each INGInious task is composed of a problem set graded at the same time (run on a predefined environment) and possibly depending on each other. A task is linked to a course and is identified with a <em>course id/task id</em> pair.</p>\n<p>Tasks can be created by course administrators by specifying a new <em>task id</em> on the <a class=\"reference external\" href=\"/admin/tutorial/tasks\" target=\"_blank\">Tasks</a> page. This page also allows to modify the tasks order and to setup the tasks dispenser. This last tool allows to select between two display options for the tasks. The default one is the <code class=\"docutils literal\">Table of content</code> mode where you can create a selection with tasks that will be displayed to the students. The second option is the <code class=\"docutils literal\">Combinatory test</code> that allows to define sections among which only a specified amount of tasks will be displayed randomly.</p>\n</div>\n<div class=\"col-md-2 text-center\">\n<i style=\"font-size:120px;\" class=\"fa fa-list-alt\"></i></div>\n</div>\n<div class=\"section\" id=\"task-edition\">\n<h3>Task edition</h3>\n<p class=\"text-justify\">Tasks are entirely editable from the <em>micro-LMS</em> (webapp). However, these parameters are stored in a <code class=\"docutils literal\">task.yaml</code>, in the task-associated folder.</p>\n<div class=\"section\" id=\"basic-settings\">\n<h4>Basic settings</h4>\n<p class=\"text-justify\">Except the name and context information, the task basic settings are mainly used by the <em>micro-LMS</em> (webapp). These settings include:</p>\n<ul class=\"text-justify simple\">\n<li><strong>Submission mode</strong> : If you allow your students to work in group/team, you need to configure the submission mode accordingly.</li>\n<li><strong>Submission storage</strong> : This option limits the size of the submission history.</li>\n<li><strong>Submission limit</strong> : This option is used to restrict the number of submissions students can make per time period.</li>\n<li><strong>Evaluation submission</strong> : This option provides download facility for the administrator by tagging a submission as the reference one. Note that submissions are tagged just after execution.</li>\n<li><strong>Accessibility</strong> : Some tasks may be made accessible for a short amount of time only if some deadline is applicable.</li>\n</ul>\n</div>\n<div class=\"section\" id=\"container-setup\">\n<h4>Container setup</h4>\n<div class=\"row\">\n<div class=\"col-md-2 text-center\">\n<img alt=\"$common/docker.png\" src=\"$common/docker.png\" style=\"height: 100px;\" />\n</div>\n<div class=\"col-md-10 text-justify\">\n<p>INGInious runs the test suite in a container, an operating system component allowing resources isolation in a faster way than with virtual machines.</p>\n<p>This is further simplified by the usage of <strong>Docker</strong>, an open-source API for creating and defining containers, also providing disk image abstraction, making the definition of additional INGInious environments easy for the administrators.</p>\n</div>\n</div>\n<p class=\"text-justify\">Except the <code class=\"docutils literal\">mcq</code> environment used for multiple_choice questions, all the INGInious environments will start a container when launching the test suite. These containers can be preconfigured with the following parameters:</p>\n<ul class=\"text-justify simple\">\n<li><strong>(Hard) timeout</strong> : The timeout value is the maximum CPU (computation) time allowed for the task. Once this threshold is reached, the container is shut down and the student is returned a <em>Time out</em> feedback. The hard timeout is the maximum wall (human) time allowed for the task.</li>\n<li><strong>Memory</strong> : This is the maximum amount of RAM the container can allocate. If this value is evaluated as too high by the INGInious agent, it will warn you at the container launch.</li>\n<li><strong>Output limit</strong> : This is the maximum amount of data that can be output from the container. This parameter is useful if you need to print student generated data on feedback.</li>\n<li><strong>Grading environment</strong> : The grading environment is defined by the provided software set.</li>\n<li><strong>Internet connectivity</strong> : If, for some reason, you need to access the Internet during the tests, check this option is activated.</li>\n</ul>\n</div>\n<div class=\"section\" id=\"subproblems\">\n<h4>Subproblems</h4>\n<p class=\"text-justify\">Different kinds of problems can be displayed on the INGInious task page:</p>\n<ul class=\"text-justify simple\">\n<li><strong>Code</strong> : This box displays an editable text area with syntax highlighting and automatic indentation.</li>\n<li><strong>File upload</strong> : This box provides a file upload facility, if several files have to be submitted in a single archive for instance.</li>\n<li><strong>Match</strong> : This box displays a small input field used for matching student and expected result.</li>\n<li><strong>MCQ</strong> : This box displays a multiple choice question, with the ability to select multiple valid answers, and displaying feedback for each chosen option.</li>\n</ul>\n<p class=\"text-justify\">Match and MCQ questions can be automatically graded using the <code class=\"docutils literal\">mcq</code> environment that will use the feedback defined using the task editor. However, all problem inputs can be fetched from a container-based environment.</p>\n</div>\n<div class=\"section\" id=\"task-files\">\n<h4>Task files</h4>\n<p class=\"text-justify\">Task files are mainly used for launching the tests in container-based environments. Those tests will be started using the <code class=\"docutils literal\">run</code> file. This file must be placed at the task files root folder and be executable (either script or binary).</p>\n<p class=\"text-justify\">Two special subdirectories can be created in the task files folder:</p>\n<ul class=\"text-justify\">\n<li><p class=\"first\"><code class=\"docutils literal\">/public</code> : This folder is publicly available from the frontends and can be used to share some initial documents, implementations, or skeletons with students.\nTo give access to those file, place a link to <code class=\"docutils literal\">taskid/filepath</code> inside your task description.</p>\n</li>\n<li><p class=\"first\"><code class=\"docutils literal\">/student</code> : This folder is used in combination with the <code class=\"docutils literal\">run_student</code> API to provide another level of isolation while running the tests.\nMore information about this folder will be provided further in this tutorial.</p>\n<p>Note: The <code class=\"docutils literal\">$common/public</code> and <code class=\"docutils literal\">$common/student</code> directories at the root of the course directory also allow to share files for all the tasks of the same course.</p>\n</li>\n</ul>\n</div>\n</div>\n<div class=\"section\" id=\"description\">\n<h3>Description</h3>\n<p class=\"text-justify\">Task and problems context descriptions can be formatted using reStructuredText syntax and <span class=\"math\">\\(\\LaTeX\\)</span> syntax for mathematical expressions. Please refer to both their documentation to find out the full set of features.</p>\n<p class=\"text-justify\"><span class=\"math\">\\(\\LaTeX\\)</span> expressions can be inserted via the following snippet:</p>\n<pre class=\"code rst text-justify literal-block\">\nThis is a :math:`\\LaTeX` expression !\n</pre>\n<p class=\"text-justify\">Syntax-highlighted code blocks can be inserted via the following snippet and CodeMirror language identifiers:</p>\n<pre class=\"code rst text-justify literal-block\">\nCopy and paste the code below:\n\n.. code-block:: python\n\n   print &quot;Hello World!&quot;\n</pre>\n<p>The task description can also include images such as the docker logo included in the text above:</p>\n<blockquote>\n<pre class=\"code rst literal-block\">\n.. image:: $common/docker.png\n  :height: 100px\n</pre>\n</blockquote>\n<p>Notice the image can be located in the specific task directory, for example with the path <code class=\"docutils literal\">03_tasks/public/docker.png</code> or within a <code class=\"docutils literal\">$common/public</code> directory at the root of the course directory to allow every task to access these files.</p>\n</div>\n<div class=\"section\" id=\"let-s-take-a-tour\">\n<h3>Let's take a tour</h3>\n<p class=\"text-justify\">Browse the INGInious task edition tabs to discover the full set of features. Once you've made that, answer to the small MCQ below to check your understanding and learn more.</p>\n</div>\n"
+	},
+	{
+		"file": "infra/tasks/cstu_course/03_tasks/task.yaml",
+		"key": "q1.header",
+		"rst": "Your course contains two tasks ``task1`` and ``task2``. You want them to weight respectively for 20% and 80% of the final student course score. How can you do that ?",
+		"html": "<p>Your course contains two tasks <code class=\"docutils literal\">task1</code> and <code class=\"docutils literal\">task2</code>. You want them to weight respectively for 20% and 80% of the final student course score. How can you do that ?</p>\n"
+	},
+	{
+		"file": "infra/tasks/cstu_course/03_tasks/task.yaml",
+		"key": "q1.choices.0",
+		"rst": "The *grading weight* of ``task1`` and ``task2`` can be set respectively to ``2`` and ``8``.",
+		"html": "<p>The <em>grading weight</em> of <code class=\"docutils literal\">task1</code> and <code class=\"docutils literal\">task2</code> can be set respectively to <code class=\"docutils literal\">2</code> and <code class=\"docutils literal\">8</code>.</p>\n"
+	},
+	{
+		"file": "infra/tasks/cstu_course/03_tasks/task.yaml",
+		"key": "q1.choices.1",
+		"rst": "The *grading weight* of ``task1`` and ``task2`` can be set respectively to ``0.2`` and ``0.8``.",
+		"html": "<p>The <em>grading weight</em> of <code class=\"docutils literal\">task1</code> and <code class=\"docutils literal\">task2</code> can be set respectively to <code class=\"docutils literal\">0.2</code> and <code class=\"docutils literal\">0.8</code>.</p>\n"
+	},
+	{
+		"file": "infra/tasks/cstu_course/03_tasks/task.yaml",
+		"key": "q1.choices.2",
+		"rst": "You can't.",
+		"html": "<p>You can't.</p>\n"
+	},
+	{
+		"file": "infra/tasks/cstu_course/03_tasks/task.yaml",
+		"key": "q2.header",
+		"rst": "The *Container setup* tab allows you to set some limitation parameters for code execution. Does it apply to the built-in ``mcq`` environment ?",
+		"html": "<p>The <em>Container setup</em> tab allows you to set some limitation parameters for code execution. Does it apply to the built-in <code class=\"docutils literal\">mcq</code> environment ?</p>\n"
+	},
+	{
+		"file": "infra/tasks/cstu_course/03_tasks/task.yaml",
+		"key": "q2.choices.0",
+		"rst": "No, MCQ are statically checked, no student code is run and no ``run`` file is required.",
+		"html": "<p>No, MCQ are statically checked, no student code is run and no <code class=\"docutils literal\">run</code> file is required.</p>\n"
+	},
+	{
+		"file": "infra/tasks/cstu_course/03_tasks/task.yaml",
+		"key": "q2.choices.1",
+		"rst": "Yes, you'll need to create a ``run`` file that parse all data and displays the appropriate feedback to the student.",
+		"html": "<p>Yes, you'll need to create a <code class=\"docutils literal\">run</code> file that parse all data and displays the appropriate feedback to the student.</p>\n"
+	},
+	{
+		"file": "infra/tasks/cstu_course/03_tasks/task.yaml",
+		"key": "q3.header",
+		"rst": ".. code:: HTML\n\n    <p style=\"text-align: center;\">This is a new paragraph.</p>\n\nIs this a correct context description ?",
+		"html": "<pre class=\"code HTML literal-block\">\n&lt;p style=&quot;text-align: center;&quot;&gt;This is a new paragraph.&lt;/p&gt;\n</pre>\n<p>Is this a correct context description ?</p>\n"
+	},
+	{
+		"file": "infra/tasks/cstu_course/03_tasks/task.yaml",
+		"key": "q4.header",
+		"rst": "How can you set a deadline on a given task ?",
+		"html": "<p>How can you set a deadline on a given task ?</p>\n"
+	},
+	{
+		"file": "infra/tasks/cstu_course/03_tasks/task.yaml",
+		"key": "q4.choices.0",
+		"rst": "You can setup the task with custom accessibility and specify at least an ending date.",
+		"html": "<p>You can setup the task with custom accessibility and specify at least an ending date.</p>\n"
+	},
+	{
+		"file": "infra/tasks/cstu_course/03_tasks/task.yaml",
+		"key": "q4.choices.1",
+		"rst": "You can set the task inacessible when the deadline is over.",
+		"html": "<p>You can set the task inacessible when the deadline is over.</p>\n"
+	},
+	{
+		"file": "infra/tasks/cstu_course/03_tasks/task.yaml",
+		"key": "q5.header",
+		"rst": "Container-based grading environments require an executable ``run`` script at the root of your task files folder to initiate the tests. What is the particularity of that file ?",
+		"html": "<p>Container-based grading environments require an executable <code class=\"docutils literal\">run</code> script at the root of your task files folder to initiate the tests. What is the particularity of that file ?</p>\n"
+	},
+	{
+		"file": "infra/tasks/cstu_course/03_tasks/task.yaml",
+		"key": "q5.choices.0",
+		"rst": "It must be a Bash script.",
+		"html": "<p>It must be a Bash script.</p>\n"
+	},
+	{
+		"file": "infra/tasks/cstu_course/03_tasks/task.yaml",
+		"key": "q5.choices.1",
+		"rst": "It must be a Python script.",
+		"html": "<p>It must be a Python script.</p>\n"
+	},
+	{
+		"file": "infra/tasks/cstu_course/03_tasks/task.yaml",
+		"key": "q5.choices.2",
+		"rst": "It can be any executable file.",
+		"html": "<p>It can be any executable file.</p>\n"
+	},
+	{
+		"file": "infra/tasks/cstu_course/03_tasks/task.yaml",
+		"key": "q6.header",
+		"rst": "You want to display the UML scheme of a class to be implemented by the student as an image on the task context. This image file has been specifically created for that assignment. How do you do that ?",
+		"html": "<p>You want to display the UML scheme of a class to be implemented by the student as an image on the task context. This image file has been specifically created for that assignment. How do you do that ?</p>\n"
+	},
+	{
+		"file": "infra/tasks/cstu_course/03_tasks/task.yaml",
+		"key": "q6.choices.0",
+		"rst": "You host the file on an external server and add the image using the ``.. image::`` directive to the task context.",
+		"html": "<p>You host the file on an external server and add the image using the <code class=\"docutils literal\">.. image::</code> directive to the task context.</p>\n"
+	},
+	{
+		"file": "infra/tasks/cstu_course/03_tasks/task.yaml",
+		"key": "q6.choices.1",
+		"rst": "You place the image file into the ``public`` subdirectory of your task files or in the ``$commno/public`` directory and use the ``.. image::`` directive to add it to the task context",
+		"html": "<p>You place the image file into the <code class=\"docutils literal\">public</code> subdirectory of your task files or in the <code class=\"docutils literal\">$commno/public</code> directory and use the <code class=\"docutils literal\">.. image::</code> directive to add it to the task context</p>\n"
+	},
+	{
+		"file": "infra/tasks/cstu_course/03_tasks/task.yaml",
+		"key": "q7.header",
+		"rst": "You have a large set of tasks files available, including 5 tasks on math analysis and 5 tasks on algebra.\nYou want, for a test, every student to receive one random analysis task and one random algebra task.\nHow can you achieve this?",
+		"html": "<p>You have a large set of tasks files available, including 5 tasks on math analysis and 5 tasks on algebra.\nYou want, for a test, every student to receive one random analysis task and one random algebra task.\nHow can you achieve this?</p>\n"
+	},
+	{
+		"file": "infra/tasks/cstu_course/03_tasks/task.yaml",
+		"key": "q7.choices.0",
+		"rst": "In the task page, you select Combinatory test in the task dispenser. Then you create two sections, one for analysis and one for algebra. You put the corresponding tasks in the two sections and configure them to show only one task.",
+		"html": "<p>In the task page, you select Combinatory test in the task dispenser. Then you create two sections, one for analysis and one for algebra. You put the corresponding tasks in the two sections and configure them to show only one task.</p>\n"
+	},
+	{
+		"file": "infra/tasks/cstu_course/03_tasks/task.yaml",
+		"key": "q7.choices.1",
+		"rst": "In the task page, you select Table of content in the task dispenser. Then you create two sections, one for Analysis and one for algebra.",
+		"html": "<p>In the task page, you select Table of content in the task dispenser. Then you create two sections, one for Analysis and one for algebra.</p>\n"
+	},
+	{
+		"file": "infra/tasks/cstu_course/03_tasks/task.yaml",
+		"key": "q7.choices.2",
+		"rst": "In the task page, you select Combinatory test in the task dispenser. Then you create two sections, one with analysis tasks and one with algerab tasks.",
+		"html": "<p>In the task page, you select Combinatory test in the task dispenser. Then you create two sections, one with analysis tasks and one with algerab tasks.</p>\n"
+	},
+	{
+		"file": "infra/tasks/cstu_course/05_fetching_input/task.yaml",
+		"key": "context",
+		"rst": ".. container:: row\n\n    .. container:: col-md-10 text-justify\n\n        In this section you'll see how to fetch the student input in order to perform the evaluation and provide feedback.\n\n        The task problems are identified using their *problem ids*, which are specified at the new problem addition. Using these *problem ids*, you'll either store the content of the problem field somewhere, or include it in an existing template.\n\n    .. container:: col-md-2 text-center\n\n        .. raw:: html\n\n           <i style=\"font-size:120px;\" class=\"fa fa-edit\"></i>\n\nThe ``getinput`` API\n---------------------\n\n.. class:: text-justify\n\n    The following exercise defines an additional code box with *problem id* ``studentcode``. The ``getinput`` API is used with *problem id* as argument and returns the value of the associated input field.\n\n    The following command will fetch the ``studentcode`` problem and store the code into a ``studentcode.py`` file in the ``student`` directory.\n\n    .. code-block:: bash\n\n        getinput studentcode > student/studentcode.py\n\n    The API will, by default, return the binary content of file in case of a file upload problem. Additional syntax using ``problemid:filename`` and ``problemid:value`` will give you explicit access to the filename as it was uploaded and binary file content. For instance, the following command will store the ``studentupload`` problem filename inside variable ``FILENAME``:\n\n    .. code-block:: bash\n\n        FILENAME=$(getinput studentupload:filename)\n\n\n\nLet's take a tour\n-----------------\n\n.. class:: text-justify\n\n    Use the file upload and code box inputs defined below along with the sandbox to find out in details the ``getinput`` and ``parsetemplate`` features. This task is using a run script that simply grades as success if the sandbox code runs correctly. Your sandbox output will be shown in feedback.",
+		"html": "<div class=\"row\">\n<div class=\"col-md-10 text-justify\">\n<p>In this section you'll see how to fetch the student input in order to perform the evaluation and provide feedback.</p>\n<p>The task problems are identified using their <em>problem ids</em>, which are specified at the new problem addition. Using these <em>problem ids</em>, you'll either store the content of the problem field somewhere, or include it in an existing template.</p>\n</div>\n<div class=\"col-md-2 text-center\">\n<i style=\"font-size:120px;\" class=\"fa fa-edit\"></i></div>\n</div>\n<div class=\"section\" id=\"the-getinput-api\">\n<h3>The <code class=\"docutils literal\">getinput</code> API</h3>\n<p class=\"text-justify\">The following exercise defines an additional code box with <em>problem id</em> <code class=\"docutils literal\">studentcode</code>. The <code class=\"docutils literal\">getinput</code> API is used with <em>problem id</em> as argument and returns the value of the associated input field.</p>\n<p class=\"text-justify\">The following command will fetch the <code class=\"docutils literal\">studentcode</code> problem and store the code into a <code class=\"docutils literal\">studentcode.py</code> file in the <code class=\"docutils literal\">student</code> directory.</p>\n<pre class=\"code bash text-justify literal-block\">\ngetinput studentcode &gt; student/studentcode.py\n</pre>\n<p class=\"text-justify\">The API will, by default, return the binary content of file in case of a file upload problem. Additional syntax using <code class=\"docutils literal\">problemid:filename</code> and <code class=\"docutils literal\">problemid:value</code> will give you explicit access to the filename as it was uploaded and binary file content. For instance, the following command will store the <code class=\"docutils literal\">studentupload</code> problem filename inside variable <code class=\"docutils literal\">FILENAME</code>:</p>\n<pre class=\"code bash text-justify literal-block\">\nFILENAME=$(getinput studentupload:filename)\n</pre>\n</div>\n<div class=\"section\" id=\"let-s-take-a-tour\">\n<h3>Let's take a tour</h3>\n<p class=\"text-justify\">Use the file upload and code box inputs defined below along with the sandbox to find out in details the <code class=\"docutils literal\">getinput</code> and <code class=\"docutils literal\">parsetemplate</code> features. This task is using a run script that simply grades as success if the sandbox code runs correctly. Your sandbox output will be shown in feedback.</p>\n</div>\n"
+	},
+	{
+		"file": "infra/tasks/cstu_course/05_fetching_input/task.yaml",
+		"key": "studentupload.header",
+		"rst": "This box is used to upload a file and has *problem id* ``studentupload``. Please select any file on your disk that meet the requirements. Please note that it will be stored within the submission.",
+		"html": "<p>This box is used to upload a file and has <em>problem id</em> <code class=\"docutils literal\">studentupload</code>. Please select any file on your disk that meet the requirements. Please note that it will be stored within the submission.</p>\n"
+	},
+	{
+		"file": "infra/tasks/cstu_course/05_fetching_input/task.yaml",
+		"key": "studentcode.header",
+		"rst": "This box is used to type code and has problem id ``studentcode``. No syntax highlighting is configured.",
+		"html": "<p>This box is used to type code and has problem id <code class=\"docutils literal\">studentcode</code>. No syntax highlighting is configured.</p>\n"
+	},
+	{
+		"file": "infra/tasks/cstu_course/05_fetching_input/task.yaml",
+		"key": "thecode.header",
+		"rst": "Use this code box as a sandbox for testing the ``getinput`` API. **Here you'll write an executable script**, so do not forget beginning your code, for instance, by:\n\n.. code-block:: bash\n\n    #!/bin/bash",
+		"html": "<p>Use this code box as a sandbox for testing the <code class=\"docutils literal\">getinput</code> API. <strong>Here you'll write an executable script</strong>, so do not forget beginning your code, for instance, by:</p>\n<pre class=\"code bash literal-block\">\n#!/bin/bash\n</pre>\n"
+	},
+	{
+		"file": "infra/tasks/cstu_course/answer/task.yaml",
+		"key": "context",
+		"rst": "Type 42 to succeed, 21 for half grade. A file can also be uploaded.",
+		"html": "<p>Type 42 to succeed, 21 for half grade. A file can also be uploaded.</p>\n"
+	},
+	{
+		"file": "infra/tasks/cstu_course/answer/task.yaml",
+		"key": "answer.header",
+		"rst": "Type the answer",
+		"html": "<p>Type the answer</p>\n"
+	},
+	{
+		"file": "infra/tasks/cstu_course/answer/task.yaml",
+		"key": "upload.header",
+		"rst": "Optional file",
+		"html": "<p>Optional file</p>\n"
+	},
+	{
+		"file": "infra/tasks/cstu_course/course.yaml",
+		"key": "description",
+		"rst": "course for CSTU docs",
+		"html": "<p>course for CSTU docs</p>\n"
+	},
+	{
+		"file": "infra/tasks/external/helloworld/task.yaml",
+		"key": "question1.header",
+		"rst": "print Hello World!",
+		"html": "<p>print Hello World!</p>\n"
+	},
+	{
+		"file": "infra/tasks/external/mcqext/task.yaml",
+		"key": "q2.header",
+		"rst": "Type yes",
+		"html": "<p>Type yes</p>\n"
+	},
+	{
+		"file": "infra/tasks/lti_test/course.yaml",
+		"key": "description",
+		"rst": "Course used by the LTI documentation agent",
+		"html": "<p>Course used by the LTI documentation agent</p>\n"
+	},
+	{
+		"file": "infra/tasks/lti_test/mcq1/task.yaml",
+		"key": "context",
+		"rst": "A task for LTI tests. Here is a relative image: |img| and a `relative link <public/hello.txt>`_ and an `absolute link <https://example.org/x>`_.\n\n.. |img| image:: public/pixel.png",
+		"html": "<p>A task for LTI tests. Here is a relative image: <img alt=\"img\" src=\"public/pixel.png\" /> and a <a class=\"reference external\" href=\"public/hello.txt\" target=\"_blank\">relative link</a> and an <a class=\"reference external\" href=\"https://example.org/x\" target=\"_blank\">absolute link</a>.</p>\n"
+	},
+	{
+		"file": "infra/tasks/lti_test/mcq1/task.yaml",
+		"key": "q1.header",
+		"rst": "Pick the right one",
+		"html": "<p>Pick the right one</p>\n"
+	},
+	{
+		"file": "infra/tasks/lti_test/mcq1/task.yaml",
+		"key": "q1.choices.0",
+		"rst": "Right",
+		"html": "<p>Right</p>\n"
+	},
+	{
+		"file": "infra/tasks/lti_test/mcq1/task.yaml",
+		"key": "q1.choices.1",
+		"rst": "Wrong",
+		"html": "<p>Wrong</p>\n"
+	},
+	{
+		"file": "infra/tasks/navacl/course.yaml",
+		"key": "description",
+		"rst": "Course NAV ACL email accept",
+		"html": "<p>Course NAV ACL email accept</p>\n"
+	},
+	{
+		"file": "infra/tasks/navacl/t1/task.yaml",
+		"key": "context",
+		"rst": "Task *A1* for navigation tests.",
+		"html": "<p>Task <em>A1</em> for navigation tests.</p>\n"
+	},
+	{
+		"file": "infra/tasks/navacl/t2/task.yaml",
+		"key": "context",
+		"rst": "Task *A2* for navigation tests.",
+		"html": "<p>Task <em>A2</em> for navigation tests.</p>\n"
+	},
+	{
+		"file": "infra/tasks/navarchive/course.yaml",
+		"key": "description",
+		"rst": "Course NAV Archived course",
+		"html": "<p>Course NAV Archived course</p>\n"
+	},
+	{
+		"file": "infra/tasks/navarchive/t1/task.yaml",
+		"key": "context",
+		"rst": "Task *X1* for navigation tests.",
+		"html": "<p>Task <em>X1</em> for navigation tests.</p>\n"
+	},
+	{
+		"file": "infra/tasks/navarchive/t2/task.yaml",
+		"key": "context",
+		"rst": "Task *X2* for navigation tests.",
+		"html": "<p>Task <em>X2</em> for navigation tests.</p>\n"
+	},
+	{
+		"file": "infra/tasks/navbind/course.yaml",
+		"key": "description",
+		"rst": "Course NAV ACL binding",
+		"html": "<p>Course NAV ACL binding</p>\n"
+	},
+	{
+		"file": "infra/tasks/navbind/t1/task.yaml",
+		"key": "context",
+		"rst": "Task *B1* for navigation tests.",
+		"html": "<p>Task <em>B1</em> for navigation tests.</p>\n"
+	},
+	{
+		"file": "infra/tasks/navbind/t2/task.yaml",
+		"key": "context",
+		"rst": "Task *B2* for navigation tests.",
+		"html": "<p>Task <em>B2</em> for navigation tests.</p>\n"
+	},
+	{
+		"file": "infra/tasks/navclosed/course.yaml",
+		"key": "description",
+		"rst": "Course NAV Closed course",
+		"html": "<p>Course NAV Closed course</p>\n"
+	},
+	{
+		"file": "infra/tasks/navclosed/t1/task.yaml",
+		"key": "context",
+		"rst": "Task *C1* for navigation tests.",
+		"html": "<p>Task <em>C1</em> for navigation tests.</p>\n"
+	},
+	{
+		"file": "infra/tasks/navclosed/t2/task.yaml",
+		"key": "context",
+		"rst": "Task *C2* for navigation tests.",
+		"html": "<p>Task <em>C2</em> for navigation tests.</p>\n"
+	},
+	{
+		"file": "infra/tasks/navcombi/c1/task.yaml",
+		"key": "context",
+		"rst": "Task *Combi 1* for navigation tests.",
+		"html": "<p>Task <em>Combi 1</em> for navigation tests.</p>\n"
+	},
+	{
+		"file": "infra/tasks/navcombi/c2/task.yaml",
+		"key": "context",
+		"rst": "Task *Combi 2* for navigation tests.",
+		"html": "<p>Task <em>Combi 2</em> for navigation tests.</p>\n"
+	},
+	{
+		"file": "infra/tasks/navcombi/c3/task.yaml",
+		"key": "context",
+		"rst": "Task *Combi 3* for navigation tests.",
+		"html": "<p>Task <em>Combi 3</em> for navigation tests.</p>\n"
+	},
+	{
+		"file": "infra/tasks/navcombi/c4/task.yaml",
+		"key": "context",
+		"rst": "Task *Combi 4* for navigation tests.",
+		"html": "<p>Task <em>Combi 4</em> for navigation tests.</p>\n"
+	},
+	{
+		"file": "infra/tasks/navcombi/c5/task.yaml",
+		"key": "context",
+		"rst": "Task *Combi 5* for navigation tests.",
+		"html": "<p>Task <em>Combi 5</em> for navigation tests.</p>\n"
+	},
+	{
+		"file": "infra/tasks/navcombi/c6/task.yaml",
+		"key": "context",
+		"rst": "Task *Combi 6* for navigation tests.",
+		"html": "<p>Task <em>Combi 6</em> for navigation tests.</p>\n"
+	},
+	{
+		"file": "infra/tasks/navdeny/course.yaml",
+		"key": "description",
+		"rst": "Course NAV ACL username deny",
+		"html": "<p>Course NAV ACL username deny</p>\n"
+	},
+	{
+		"file": "infra/tasks/navdeny/t1/task.yaml",
+		"key": "context",
+		"rst": "Task *D1* for navigation tests.",
+		"html": "<p>Task <em>D1</em> for navigation tests.</p>\n"
+	},
+	{
+		"file": "infra/tasks/navdeny/t2/task.yaml",
+		"key": "context",
+		"rst": "Task *D2* for navigation tests.",
+		"html": "<p>Task <em>D2</em> for navigation tests.</p>\n"
+	},
+	{
+		"file": "infra/tasks/navfuture/course.yaml",
+		"key": "description",
+		"rst": "Course NAV Future course",
+		"html": "<p>Course NAV Future course</p>\n"
+	},
+	{
+		"file": "infra/tasks/navfuture/t1/task.yaml",
+		"key": "context",
+		"rst": "Task *F1* for navigation tests.",
+		"html": "<p>Task <em>F1</em> for navigation tests.</p>\n"
+	},
+	{
+		"file": "infra/tasks/navfuture/t2/task.yaml",
+		"key": "context",
+		"rst": "Task *F2* for navigation tests.",
+		"html": "<p>Task <em>F2</em> for navigation tests.</p>\n"
+	},
+	{
+		"file": "infra/tasks/navlti/course.yaml",
+		"key": "description",
+		"rst": "Course NAV LTI course",
+		"html": "<p>Course NAV LTI course</p>\n"
+	},
+	{
+		"file": "infra/tasks/navlti/t1/task.yaml",
+		"key": "context",
+		"rst": "Task *L1* for navigation tests.",
+		"html": "<p>Task <em>L1</em> for navigation tests.</p>\n"
+	},
+	{
+		"file": "infra/tasks/navlti/t2/task.yaml",
+		"key": "context",
+		"rst": "Task *L2* for navigation tests.",
+		"html": "<p>Task <em>L2</em> for navigation tests.</p>\n"
+	},
+	{
+		"file": "infra/tasks/navopen/course.yaml",
+		"key": "description",
+		"rst": "This is the **NAV open course**.\n\n- item one\n- item two\n",
+		"html": "<p>This is the <strong>NAV open course</strong>.</p>\n<ul class=\"simple\">\n<li>item one</li>\n<li>item two</li>\n</ul>\n"
+	},
+	{
+		"file": "infra/tasks/navopen/t1/task.yaml",
+		"key": "context",
+		"rst": "Task *T1 easy* for navigation tests.",
+		"html": "<p>Task <em>T1 easy</em> for navigation tests.</p>\n"
+	},
+	{
+		"file": "infra/tasks/navopen/t2/task.yaml",
+		"key": "context",
+		"rst": "Task *T2 hard* for navigation tests.",
+		"html": "<p>Task <em>T2 hard</em> for navigation tests.</p>\n"
+	},
+	{
+		"file": "infra/tasks/navopen/t3/task.yaml",
+		"key": "context",
+		"rst": "Task *T3 weight zero* for navigation tests.",
+		"html": "<p>Task <em>T3 weight zero</em> for navigation tests.</p>\n"
+	},
+	{
+		"file": "infra/tasks/navopen/textra/task.yaml",
+		"key": "context",
+		"rst": "Task *T extra not in toc* for navigation tests.",
+		"html": "<p>Task <em>T extra not in toc</em> for navigation tests.</p>\n"
+	},
+	{
+		"file": "infra/tasks/navopen/tfuture/task.yaml",
+		"key": "context",
+		"rst": "Task *T future* for navigation tests.",
+		"html": "<p>Task <em>T future</em> for navigation tests.</p>\n"
+	},
+	{
+		"file": "infra/tasks/navopen/tnever/task.yaml",
+		"key": "context",
+		"rst": "Task *T never* for navigation tests.",
+		"html": "<p>Task <em>T never</em> for navigation tests.</p>\n"
+	},
+	{
+		"file": "infra/tasks/navopen/tpast/task.yaml",
+		"key": "context",
+		"rst": "Task *T past* for navigation tests.",
+		"html": "<p>Task <em>T past</em> for navigation tests.</p>\n"
+	},
+	{
+		"file": "infra/tasks/navopen/tsoft/task.yaml",
+		"key": "context",
+		"rst": "Task *T soft deadline* for navigation tests.",
+		"html": "<p>Task <em>T soft deadline</em> for navigation tests.</p>\n"
+	},
+	{
+		"file": "infra/tasks/navpreview/course.yaml",
+		"key": "description",
+		"rst": "Course NAV Preview course",
+		"html": "<p>Course NAV Preview course</p>\n"
+	},
+	{
+		"file": "infra/tasks/navpreview/t1/task.yaml",
+		"key": "context",
+		"rst": "Task *V1* for navigation tests.",
+		"html": "<p>Task <em>V1</em> for navigation tests.</p>\n"
+	},
+	{
+		"file": "infra/tasks/navpreview/t2/task.yaml",
+		"key": "context",
+		"rst": "Task *V2* for navigation tests.",
+		"html": "<p>Task <em>V2</em> for navigation tests.</p>\n"
+	},
+	{
+		"file": "infra/tasks/navpwd/course.yaml",
+		"key": "description",
+		"rst": "Course NAV Password course",
+		"html": "<p>Course NAV Password course</p>\n"
+	},
+	{
+		"file": "infra/tasks/navpwd/t1/task.yaml",
+		"key": "context",
+		"rst": "Task *P1* for navigation tests.",
+		"html": "<p>Task <em>P1</em> for navigation tests.</p>\n"
+	},
+	{
+		"file": "infra/tasks/navpwd/t2/task.yaml",
+		"key": "context",
+		"rst": "Task *P2* for navigation tests.",
+		"html": "<p>Task <em>P2</em> for navigation tests.</p>\n"
+	},
+	{
+		"file": "infra/tasks/navregclosed/course.yaml",
+		"key": "description",
+		"rst": "Course NAV Registration closed",
+		"html": "<p>Course NAV Registration closed</p>\n"
+	},
+	{
+		"file": "infra/tasks/navregclosed/t1/task.yaml",
+		"key": "context",
+		"rst": "Task *R1* for navigation tests.",
+		"html": "<p>Task <em>R1</em> for navigation tests.</p>\n"
+	},
+	{
+		"file": "infra/tasks/navregclosed/t2/task.yaml",
+		"key": "context",
+		"rst": "Task *R2* for navigation tests.",
+		"html": "<p>Task <em>R2</em> for navigation tests.</p>\n"
+	},
+	{
+		"file": "infra/tasks/sitecontest/code1/task.yaml",
+		"key": "context",
+		"rst": "Type a number; it becomes your custom score.",
+		"html": "<p>Type a number; it becomes your custom score.</p>\n"
+	},
+	{
+		"file": "infra/tasks/sitecontest/code1/task.yaml",
+		"key": "answer.header",
+		"rst": "Enter a number",
+		"html": "<p>Enter a number</p>\n"
+	},
+	{
+		"file": "infra/tasks/sitecontest/mcq1/task.yaml",
+		"key": "context",
+		"rst": "Pick the right answer.",
+		"html": "<p>Pick the right answer.</p>\n"
+	},
+	{
+		"file": "infra/tasks/sitecontest/mcq1/task.yaml",
+		"key": "q1.header",
+		"rst": "What is 1+1?",
+		"html": "<p>What is 1+1?</p>\n"
+	},
+	{
+		"file": "infra/tasks/sitecontest/mcq1/task.yaml",
+		"key": "q1.choices.0",
+		"rst": "2",
+		"html": "<p>2</p>\n"
+	},
+	{
+		"file": "infra/tasks/sitecontest/mcq1/task.yaml",
+		"key": "q1.choices.1",
+		"rst": "3",
+		"html": "<p>3</p>\n"
+	},
+	{
+		"file": "infra/tasks/sitecontest/mcq1/task.yaml",
+		"key": "q1.choices.2",
+		"rst": "4",
+		"html": "<p>4</p>\n"
+	},
+	{
+		"file": "infra/tasks/sitecourse/course.yaml",
+		"key": "description",
+		"rst": "Course used by SITE documentation",
+		"html": "<p>Course used by SITE documentation</p>\n"
+	},
+	{
+		"file": "infra/tasks/sitecourse/file1/task.yaml",
+		"key": "context",
+		"rst": "Upload a file.",
+		"html": "<p>Upload a file.</p>\n"
+	},
+	{
+		"file": "infra/tasks/sitecourse/file1/task.yaml",
+		"key": "f.header",
+		"rst": "Any .txt file",
+		"html": "<p>Any .txt file</p>\n"
+	},
+	{
+		"file": "infra/tasks/task_preview/preview_mcq/task.yaml",
+		"key": "context",
+		"rst": "The course ``task_preview`` has ``allow_preview: true``: non-registered users can see the\ntask (the submit button is replaced by *Please enroll in the course to submit.*).\n",
+		"html": "<p>The course <code class=\"docutils literal\">task_preview</code> has <code class=\"docutils literal\">allow_preview: true</code>: non-registered users can see the\ntask (the submit button is replaced by <em>Please enroll in the course to submit.</em>).</p>\n"
+	},
+	{
+		"file": "infra/tasks/task_showcase/archive_task/task.yaml",
+		"key": "context",
+		"rst": "The grading script writes ``/archive/report.txt`` (and a sub-folder). The resulting tgz\nis stored in GridFS (``submissions.archive``) and included when staff download\nsubmissions. Type any text: it is copied into the report.\n",
+		"html": "<p>The grading script writes <code class=\"docutils literal\">/archive/report.txt</code> (and a sub-folder). The resulting tgz\nis stored in GridFS (<code class=\"docutils literal\">submissions.archive</code>) and included when staff download\nsubmissions. Type any text: it is copied into the report.</p>\n"
+	},
+	{
+		"file": "infra/tasks/task_showcase/closed_task/task.yaml",
+		"key": "context",
+		"rst": "Accessibility ``2020-01-01 / 2021-01-01``: visible but closed: *The deadline is over, you cannot submit anymore*.\n\nCorrect answer: **Yes**.\n",
+		"html": "<p>Accessibility <code class=\"docutils literal\"><span class=\"pre\">2020-01-01</span> / <span class=\"pre\">2021-01-01</span></code>: visible but closed: <em>The deadline is over, you cannot submit anymore</em>.</p>\n<p>Correct answer: <strong>Yes</strong>.</p>\n"
+	},
+	{
+		"file": "infra/tasks/task_showcase/closed_task/task.yaml",
+		"key": "q.header",
+		"rst": "Answer *Yes* to succeed, *No* to fail.",
+		"html": "<p>Answer <em>Yes</em> to succeed, <em>No</em> to fail.</p>\n"
+	},
+	{
+		"file": "infra/tasks/task_showcase/code_python/task.yaml",
+		"key": "context",
+		"rst": "Write a Python function ``count_to(n)`` returning the list ``[1, 2, ..., n]``.\n\nThe grading script runs 4 tests; grade = 25% per passing test. It sets the course\ntags ``skill_loop`` (visible skill), ``skill_hidden`` (staff-only skill),\n``misc_off_by_one`` (misconception) and an auto-tag, a ``custom`` value and the\ntask ``state``. A correct answer is::\n\n    def count_to(n):\n        result = []\n        for i in range(1, n + 1):\n            result.append(i)\n        return result\n",
+		"html": "<p>Write a Python function <code class=\"docutils literal\">count_to(n)</code> returning the list <code class=\"docutils literal\">[1, 2, <span class=\"pre\">...,</span> n]</code>.</p>\n<p>The grading script runs 4 tests; grade = 25% per passing test. It sets the course\ntags <code class=\"docutils literal\">skill_loop</code> (visible skill), <code class=\"docutils literal\">skill_hidden</code> (staff-only skill),\n<code class=\"docutils literal\">misc_off_by_one</code> (misconception) and an auto-tag, a <code class=\"docutils literal\">custom</code> value and the\ntask <code class=\"docutils literal\">state</code>. A correct answer is:</p>\n<pre class=\"literal-block\">\ndef count_to(n):\n    result = []\n    for i in range(1, n + 1):\n        result.append(i)\n    return result\n</pre>\n"
+	},
+	{
+		"file": "infra/tasks/task_showcase/code_python/task.yaml",
+		"key": "code.header",
+		"rst": "Implement ``count_to(n)``.",
+		"html": "<p>Implement <code class=\"docutils literal\">count_to(n)</code>.</p>\n"
+	},
+	{
+		"file": "infra/tasks/task_showcase/course.yaml",
+		"key": "description",
+		"rst": "Every problem type and every task/submission option of INGInious, one task each.\nSee docs/features/task/ for the specification.\n",
+		"html": "<p>Every problem type and every task/submission option of INGInious, one task each.\nSee docs/features/task/ for the specification.</p>\n"
+	},
+	{
+		"file": "infra/tasks/task_showcase/eval_last/task.yaml",
+		"key": "context",
+		"rst": "Course config: ``evaluation_mode: last``. The **last** submission (not the best) is the one used for the grade.\n\nCorrect answer: **Yes**.\n",
+		"html": "<p>Course config: <code class=\"docutils literal\">evaluation_mode: last</code>. The <strong>last</strong> submission (not the best) is the one used for the grade.</p>\n<p>Correct answer: <strong>Yes</strong>.</p>\n"
+	},
+	{
+		"file": "infra/tasks/task_showcase/file_upload/task.yaml",
+		"key": "context",
+		"rst": "Upload a ``.txt`` or ``.py`` file of at most 1 KiB whose first line is ``INGInious``.\nExtensions and size are checked client-side (JS) and server-side\n(``FileProblem.input_is_consistent``).\n",
+		"html": "<p>Upload a <code class=\"docutils literal\">.txt</code> or <code class=\"docutils literal\">.py</code> file of at most 1 KiB whose first line is <code class=\"docutils literal\">INGInious</code>.\nExtensions and size are checked client-side (JS) and server-side\n(<code class=\"docutils literal\">FileProblem.input_is_consistent</code>).</p>\n"
+	},
+	{
+		"file": "infra/tasks/task_showcase/file_upload/task.yaml",
+		"key": "upload.header",
+		"rst": "A text file starting with the line ``INGInious``.",
+		"html": "<p>A text file starting with the line <code class=\"docutils literal\">INGInious</code>.</p>\n"
+	},
+	{
+		"file": "infra/tasks/task_showcase/future_task/task.yaml",
+		"key": "context",
+		"rst": "Accessibility starts in 2099: invisible to students (task_unavailable.html), visible to staff.\n\nCorrect answer: **Yes**.\n",
+		"html": "<p>Accessibility starts in 2099: invisible to students (task_unavailable.html), visible to staff.</p>\n<p>Correct answer: <strong>Yes</strong>.</p>\n"
+	},
+	{
+		"file": "infra/tasks/task_showcase/group_task/task.yaml",
+		"key": "context",
+		"rst": "Course config: ``group_submission: true``. Students must belong to a group (collection ``groups``); one submission is shared by all members (``submissions.username`` lists all of them).\n\nCorrect answer: **Yes**.\n",
+		"html": "<p>Course config: <code class=\"docutils literal\">group_submission: true</code>. Students must belong to a group (collection <code class=\"docutils literal\">groups</code>); one submission is shared by all members (<code class=\"docutils literal\">submissions.username</code> lists all of them).</p>\n<p>Correct answer: <strong>Yes</strong>.</p>\n"
+	},
+	{
+		"file": "infra/tasks/task_showcase/legacy_env/task.yaml",
+		"key": "context",
+		"rst": "Uses the legacy ``environment: mcq`` key (v0.6 format).",
+		"html": "<p>Uses the legacy <code class=\"docutils literal\">environment: mcq</code> key (v0.6 format).</p>\n"
+	},
+	{
+		"file": "infra/tasks/task_showcase/limited_amount/task.yaml",
+		"key": "context",
+		"rst": "Course config: ``submission_limit: {amount: 2, period: -1}``. After 2 graded submissions the submit button is replaced by *You have reached the submission limit.*\n\nCorrect answer: **Yes**.\n",
+		"html": "<p>Course config: <code class=\"docutils literal\">submission_limit: {amount: 2, period: <span class=\"pre\">-1}</span></code>. After 2 graded submissions the submit button is replaced by <em>You have reached the submission limit.</em></p>\n<p>Correct answer: <strong>Yes</strong>.</p>\n"
+	},
+	{
+		"file": "infra/tasks/task_showcase/limited_period/task.yaml",
+		"key": "context",
+		"rst": "Course config: ``submission_limit: {amount: 1, period: 1}``. One submission per hour; tokens are refilled when ``user_tasks.tokens.date`` is older than the period.\n\nCorrect answer: **Yes**.\n",
+		"html": "<p>Course config: <code class=\"docutils literal\">submission_limit: {amount: 1, period: 1}</code>. One submission per hour; tokens are refilled when <code class=\"docutils literal\">user_tasks.tokens.date</code> is older than the period.</p>\n<p>Correct answer: <strong>Yes</strong>.</p>\n"
+	},
+	{
+		"file": "infra/tasks/task_showcase/match_answer/task.yaml",
+		"key": "context",
+		"rst": "``match`` problems: the answer is compared (after ``strip()``) with ``answer``,\ncase-sensitive. Feedback is \"Correct answer\" / \"Wrong answer\" per problem.\n",
+		"html": "<p><code class=\"docutils literal\">match</code> problems: the answer is compared (after <code class=\"docutils literal\">strip()</code>) with <code class=\"docutils literal\">answer</code>,\ncase-sensitive. Feedback is &quot;Correct answer&quot; / &quot;Wrong answer&quot; per problem.</p>\n"
+	},
+	{
+		"file": "infra/tasks/task_showcase/match_answer/task.yaml",
+		"key": "answer.header",
+		"rst": "What is the answer to life, the universe and everything?",
+		"html": "<p>What is the answer to life, the universe and everything?</p>\n"
+	},
+	{
+		"file": "infra/tasks/task_showcase/match_answer/task.yaml",
+		"key": "city.header",
+		"rst": "Which city is called *la Ville Lumi\u00e8re*? (case-sensitive)",
+		"html": "<p>Which city is called <em>la Ville Lumi\u00e8re</em>? (case-sensitive)</p>\n"
+	},
+	{
+		"file": "infra/tasks/task_showcase/mcq_centralize/task.yaml",
+		"key": "context",
+		"rst": "Three sub-problems with ``centralize: true``: no \"Wrong answer\"/\"Correct answer\"\nmessage is attached to each problem; only the global message\n\"You have N wrong answer(s).\" is displayed. Grade = 100 * correct / 3.\n",
+		"html": "<p>Three sub-problems with <code class=\"docutils literal\">centralize: true</code>: no &quot;Wrong answer&quot;/&quot;Correct answer&quot;\nmessage is attached to each problem; only the global message\n&quot;You have N wrong answer(s).&quot; is displayed. Grade = 100 * correct / 3.</p>\n"
+	},
+	{
+		"file": "infra/tasks/task_showcase/mcq_centralize/task.yaml",
+		"key": "q1.header",
+		"rst": "What colour is a clear daytime sky?",
+		"html": "<p>What colour is a clear daytime sky?</p>\n"
+	},
+	{
+		"file": "infra/tasks/task_showcase/mcq_centralize/task.yaml",
+		"key": "q1.choices.0",
+		"rst": "Blue",
+		"html": "<p>Blue</p>\n"
+	},
+	{
+		"file": "infra/tasks/task_showcase/mcq_centralize/task.yaml",
+		"key": "q1.choices.1",
+		"rst": "Green",
+		"html": "<p>Green</p>\n"
+	},
+	{
+		"file": "infra/tasks/task_showcase/mcq_centralize/task.yaml",
+		"key": "q2.header",
+		"rst": "Select the even numbers.",
+		"html": "<p>Select the even numbers.</p>\n"
+	},
+	{
+		"file": "infra/tasks/task_showcase/mcq_centralize/task.yaml",
+		"key": "q2.choices.2",
+		"rst": "5",
+		"html": "<p>5</p>\n"
+	},
+	{
+		"file": "infra/tasks/task_showcase/mcq_centralize/task.yaml",
+		"key": "q3.header",
+		"rst": "How much is 2 + 2 ?",
+		"html": "<p>How much is 2 + 2 ?</p>\n"
+	},
+	{
+		"file": "infra/tasks/task_showcase/mcq_multiple/task.yaml",
+		"key": "context",
+		"rst": "A **multiple-answer** question (checkboxes), not shuffled (``unshuffle: true``),\nwithout custom error message: the mcq agent then prepends the internal message\n*\"Wrong answer. Make sure to select all the valid possibilities\"*.\n",
+		"html": "<p>A <strong>multiple-answer</strong> question (checkboxes), not shuffled (<code class=\"docutils literal\">unshuffle: true</code>),\nwithout custom error message: the mcq agent then prepends the internal message\n<em>&quot;Wrong answer. Make sure to select all the valid possibilities&quot;</em>.</p>\n"
+	},
+	{
+		"file": "infra/tasks/task_showcase/mcq_multiple/task.yaml",
+		"key": "primes.header",
+		"rst": "Select **all** the prime numbers.",
+		"html": "<p>Select <strong>all</strong> the prime numbers.</p>\n"
+	},
+	{
+		"file": "infra/tasks/task_showcase/mcq_multiple/task.yaml",
+		"key": "primes.choices.3",
+		"rst": "9",
+		"html": "<p>9</p>\n"
+	},
+	{
+		"file": "infra/tasks/task_showcase/mcq_single/task.yaml",
+		"key": "context",
+		"rst": "A **single-answer** multiple choice question graded by the ``mcq`` agent.\n\nThe choices are shuffled per user (seed = problem id + language + username) and only\n``limit: 3`` of the 4 choices are shown (at least one valid choice is always kept).\n",
+		"html": "<p>A <strong>single-answer</strong> multiple choice question graded by the <code class=\"docutils literal\">mcq</code> agent.</p>\n<p>The choices are shuffled per user (seed = problem id + language + username) and only\n<code class=\"docutils literal\">limit: 3</code> of the 4 choices are shown (at least one valid choice is always kept).</p>\n"
+	},
+	{
+		"file": "infra/tasks/task_showcase/mcq_single/task.yaml",
+		"key": "capital.header",
+		"rst": "What is the capital of *Belgium*?",
+		"html": "<p>What is the capital of <em>Belgium</em>?</p>\n"
+	},
+	{
+		"file": "infra/tasks/task_showcase/mcq_single/task.yaml",
+		"key": "capital.choices.0",
+		"rst": "Brussels",
+		"html": "<p>Brussels</p>\n"
+	},
+	{
+		"file": "infra/tasks/task_showcase/mcq_single/task.yaml",
+		"key": "capital.choices.1",
+		"rst": "Antwerp",
+		"html": "<p>Antwerp</p>\n"
+	},
+	{
+		"file": "infra/tasks/task_showcase/mcq_single/task.yaml",
+		"key": "capital.choices.2",
+		"rst": "Li\u00e8ge",
+		"html": "<p>Li\u00e8ge</p>\n"
+	},
+	{
+		"file": "infra/tasks/task_showcase/mcq_single/task.yaml",
+		"key": "capital.choices.3",
+		"rst": "Paris",
+		"html": "<p>Paris</p>\n"
+	},
+	{
+		"file": "infra/tasks/task_showcase/never_task/task.yaml",
+		"key": "context",
+		"rst": "Accessibility ``false``: never accessible to students.\n\nCorrect answer: **Yes**.\n",
+		"html": "<p>Accessibility <code class=\"docutils literal\">false</code>: never accessible to students.</p>\n<p>Correct answer: <strong>Yes</strong>.</p>\n"
+	},
+	{
+		"file": "infra/tasks/task_showcase/outcomes/task.yaml",
+		"key": "context",
+		"rst": "Type one of the following modes to obtain the corresponding result:\n\n============  =========================================================================\nmode          result\n============  =========================================================================\n``success``   ``success``, grade 100\n``failed``    ``failed``, grade 0\n``partial``   ``failed``, grade 37.5\n``timeout``   ``timeout`` (busy loop beyond the 2 s CPU time limit)\n``overflow``  ``overflow`` (allocates more than the 64 MiB memory limit)\n``crash``     ``crash`` (the script exits without giving any feedback)\n``sleep``     sleeps 20 s: use the kill button (result ``killed``)\n============  =========================================================================\n",
+		"html": "<p>Type one of the following modes to obtain the corresponding result:</p>\n<table class=\"docutils table table-bordered\">\n<colgroup>\n<col width=\"14%\" />\n<col width=\"86%\" />\n</colgroup>\n<thead class=\"thead-light\">\n<tr><th class=\"head\">mode</th>\n<th class=\"head\">result</th>\n</tr>\n</thead>\n<tbody>\n<tr><td><code class=\"docutils literal\">success</code></td>\n<td><code class=\"docutils literal\">success</code>, grade 100</td>\n</tr>\n<tr><td><code class=\"docutils literal\">failed</code></td>\n<td><code class=\"docutils literal\">failed</code>, grade 0</td>\n</tr>\n<tr><td><code class=\"docutils literal\">partial</code></td>\n<td><code class=\"docutils literal\">failed</code>, grade 37.5</td>\n</tr>\n<tr><td><code class=\"docutils literal\">timeout</code></td>\n<td><code class=\"docutils literal\">timeout</code> (busy loop beyond the 2 s CPU time limit)</td>\n</tr>\n<tr><td><code class=\"docutils literal\">overflow</code></td>\n<td><code class=\"docutils literal\">overflow</code> (allocates more than the 64 MiB memory limit)</td>\n</tr>\n<tr><td><code class=\"docutils literal\">crash</code></td>\n<td><code class=\"docutils literal\">crash</code> (the script exits without giving any feedback)</td>\n</tr>\n<tr><td><code class=\"docutils literal\">sleep</code></td>\n<td>sleeps 20 s: use the kill button (result <code class=\"docutils literal\">killed</code>)</td>\n</tr>\n</tbody>\n</table>\n"
+	},
+	{
+		"file": "infra/tasks/task_showcase/random_inputs/task.yaml",
+		"key": "context",
+		"rst": "This task has ``input_random: 2``: two random floats in [0,1) are generated per user\n(seed = username + taskid + courseid), stored in ``user_tasks.random`` and exposed to the\npage as ``input[\"@random\"]``.\n\n.. raw:: html\n\n    <p>Your values: <b id=\"rnd-a\"></b> and <b id=\"rnd-b\"></b>.</p>\n    <script>\n    document.getElementById(\"rnd-a\").textContent = Math.floor(input[\"@random\"][0] * 100);\n    document.getElementById(\"rnd-b\").textContent = Math.floor(input[\"@random\"][1] * 100);\n    </script>\n\nEnter the **sum** of the two integers shown above.\n",
+		"html": "<p>This task has <code class=\"docutils literal\">input_random: 2</code>: two random floats in [0,1) are generated per user\n(seed = username + taskid + courseid), stored in <code class=\"docutils literal\">user_tasks.random</code> and exposed to the\npage as <code class=\"docutils literal\"><span class=\"pre\">input[&quot;&#64;random&quot;]</span></code>.</p>\n<p>Your values: <b id=\"rnd-a\"></b> and <b id=\"rnd-b\"></b>.</p>\n<script>\ndocument.getElementById(\"rnd-a\").textContent = Math.floor(input[\"@random\"][0] * 100);\ndocument.getElementById(\"rnd-b\").textContent = Math.floor(input[\"@random\"][1] * 100);\n</script><p>Enter the <strong>sum</strong> of the two integers shown above.</p>\n"
+	},
+	{
+		"file": "infra/tasks/task_showcase/random_inputs/task.yaml",
+		"key": "sum.header",
+		"rst": "Sum of the two values.",
+		"html": "<p>Sum of the two values.</p>\n"
+	},
+	{
+		"file": "infra/tasks/task_showcase/random_regen/task.yaml",
+		"key": "context",
+		"rst": "``input_random: 1`` and ``regenerate_input_random: true``: a new random value is drawn at\n**every** page load (seed includes ``time.time()``) and overwrites ``user_tasks.random``.\nSubmitting from an older tab is rejected with\n*\"Your task has been regenerated. This current task is outdated.\"*\n\n.. raw:: html\n\n    <p>Your value: <b id=\"rnd\"></b></p>\n    <script>document.getElementById(\"rnd\").textContent = Math.floor(input[\"@random\"][0] * 1000);</script>\n\nType the value shown above.\n",
+		"html": "<p><code class=\"docutils literal\">input_random: 1</code> and <code class=\"docutils literal\">regenerate_input_random: true</code>: a new random value is drawn at\n<strong>every</strong> page load (seed includes <code class=\"docutils literal\">time.time()</code>) and overwrites <code class=\"docutils literal\">user_tasks.random</code>.\nSubmitting from an older tab is rejected with\n<em>&quot;Your task has been regenerated. This current task is outdated.&quot;</em></p>\n<p>Your value: <b id=\"rnd\"></b></p>\n<script>document.getElementById(\"rnd\").textContent = Math.floor(input[\"@random\"][0] * 1000);</script><p>Type the value shown above.</p>\n"
+	},
+	{
+		"file": "infra/tasks/task_showcase/rich_feedback/task.yaml",
+		"key": "context",
+		"rst": "Submit anything: the grading script returns a feedback exercising every RST feature\nsupported by ``parsable_text.py``: admonitions rendered as Bootstrap alerts (no title) or\ncards (``:title:``), ``hidden-until`` (one date in the past, one in 2099), ``code-block``\n(also empty), ``:time:`` role, tables, raw HTML, ``container``/``class`` directives,\nlinks (``target=_blank``), math, and per-problem feedback.\n\nThe context itself also uses RST:\n\n.. note::\n    :title: A note with a title (card)\n\n    Card body.\n\n.. tip:: A tip without title (alert-info).\n\n+-------+-------+\n| col A | col B |\n+=======+=======+\n| 1     | 2     |\n+-------+-------+\n",
+		"html": "<p>Submit anything: the grading script returns a feedback exercising every RST feature\nsupported by <code class=\"docutils literal\">parsable_text.py</code>: admonitions rendered as Bootstrap alerts (no title) or\ncards (<code class=\"docutils literal\">:title:</code>), <code class=\"docutils literal\"><span class=\"pre\">hidden-until</span></code> (one date in the past, one in 2099), <code class=\"docutils literal\"><span class=\"pre\">code-block</span></code>\n(also empty), <code class=\"docutils literal\">:time:</code> role, tables, raw HTML, <code class=\"docutils literal\">container</code>/<code class=\"docutils literal\">class</code> directives,\nlinks (<code class=\"docutils literal\">target=_blank</code>), math, and per-problem feedback.</p>\n<p>The context itself also uses RST:</p>\n<div class=\"admonition note card mb-3 border-default\">\n<div class=\"admonition note card-header bg-default\">\nA note with a title (card)</div>\n<div class=\"admonition note card-body\">\nCard body.</div>\n</div>\n<div class=\"admonition tip alert alert-info\">\nA tip without title (alert-info).</div>\n<table class=\"docutils table table-bordered\">\n<colgroup>\n<col width=\"50%\" />\n<col width=\"50%\" />\n</colgroup>\n<thead class=\"thead-light\">\n<tr><th class=\"head\">col A</th>\n<th class=\"head\">col B</th>\n</tr>\n</thead>\n<tbody>\n<tr><td>1</td>\n<td>2</td>\n</tr>\n</tbody>\n</table>\n"
+	},
+	{
+		"file": "infra/tasks/task_showcase/rich_feedback/task.yaml",
+		"key": "anything.header",
+		"rst": "Type anything.",
+		"html": "<p>Type anything.</p>\n"
+	},
+	{
+		"file": "infra/tasks/task_showcase/rich_feedback/task.yaml",
+		"key": "second.header",
+		"rst": "Type anything here too.",
+		"html": "<p>Type anything here too.</p>\n"
+	},
+	{
+		"file": "infra/tasks/task_showcase/single_line/task.yaml",
+		"key": "context",
+		"rst": "``code_single_line`` problems (one ``<input type=text>`` each) plus an **optional**\n``code`` problem. Answers: ``word`` must be ``hello``, ``number`` must be ``7``,\n``comment`` (optional single line) and ``notes`` (optional code box) may be empty.\n",
+		"html": "<p><code class=\"docutils literal\">code_single_line</code> problems (one <code class=\"docutils literal\">&lt;input type=text&gt;</code> each) plus an <strong>optional</strong>\n<code class=\"docutils literal\">code</code> problem. Answers: <code class=\"docutils literal\">word</code> must be <code class=\"docutils literal\">hello</code>, <code class=\"docutils literal\">number</code> must be <code class=\"docutils literal\">7</code>,\n<code class=\"docutils literal\">comment</code> (optional single line) and <code class=\"docutils literal\">notes</code> (optional code box) may be empty.</p>\n"
+	},
+	{
+		"file": "infra/tasks/task_showcase/single_line/task.yaml",
+		"key": "word.header",
+		"rst": "Type ``hello``.",
+		"html": "<p>Type <code class=\"docutils literal\">hello</code>.</p>\n"
+	},
+	{
+		"file": "infra/tasks/task_showcase/single_line/task.yaml",
+		"key": "number.header",
+		"rst": "Type ``7``.",
+		"html": "<p>Type <code class=\"docutils literal\">7</code>.</p>\n"
+	},
+	{
+		"file": "infra/tasks/task_showcase/single_line/task.yaml",
+		"key": "comment.header",
+		"rst": "Optional, may be left empty.",
+		"html": "<p>Optional, may be left empty.</p>\n"
+	},
+	{
+		"file": "infra/tasks/task_showcase/single_line/task.yaml",
+		"key": "notes.header",
+		"rst": "Optional multi-line notes (language ``plain``).",
+		"html": "<p>Optional multi-line notes (language <code class=\"docutils literal\">plain</code>).</p>\n"
+	},
+	{
+		"file": "infra/tasks/task_showcase/soft_deadline/task.yaml",
+		"key": "context",
+		"rst": "Accessibility ``2020-01-01 / 2021-01-01 (soft) / 2099-12-31 (hard)``: the soft deadline is passed (red deadline row) but submissions are still accepted.\n\nCorrect answer: **Yes**.\n",
+		"html": "<p>Accessibility <code class=\"docutils literal\"><span class=\"pre\">2020-01-01</span> / <span class=\"pre\">2021-01-01</span> (soft) / <span class=\"pre\">2099-12-31</span> (hard)</code>: the soft deadline is passed (red deadline row) but submissions are still accepted.</p>\n<p>Correct answer: <strong>Yes</strong>.</p>\n"
+	},
+	{
+		"file": "infra/tasks/task_showcase/stored_two/task.yaml",
+		"key": "context",
+		"rst": "Course config: ``no_stored_submissions: 2``. Only the evaluated submission and the most recent ones are kept (2 in total); older ones are deleted from ``submissions``.\n\nCorrect answer: **Yes**.\n",
+		"html": "<p>Course config: <code class=\"docutils literal\">no_stored_submissions: 2</code>. Only the evaluated submission and the most recent ones are kept (2 in total); older ones are deleted from <code class=\"docutils literal\">submissions</code>.</p>\n<p>Correct answer: <strong>Yes</strong>.</p>\n"
+	},
+	{
+		"file": "infra/tasks/task_showcase/task_info/task.yaml",
+		"key": "context",
+		"rst": "This task shows the information column (author, contact link, deadline, categories) and\nserves **public files** from ``task_info/public/`` at ``/course/task_showcase/task_info/<path>``:\n\n* `hello.txt <task_info/hello.txt>`_ (text/plain)\n* `sub/data.json <task_info/sub/data.json>`_ (sub-folder)\n* `common.txt <$common/common.txt>`_ (course-wide ``$common/public``)\n\n.. image:: task_info/pixel.svg\n    :alt: an inline SVG image served from the public folder\n\nThe JavaScript variable ``input`` is available to the context:\n\n.. raw:: html\n\n    <p>Username seen by JS: <code id=\"js-username\"></code>, language: <code id=\"js-lang\"></code></p>\n    <script>\n    document.getElementById(\"js-username\").textContent = input[\"@username\"];\n    document.getElementById(\"js-lang\").textContent = input[\"@lang\"];\n    </script>\n",
+		"html": "<p>This task shows the information column (author, contact link, deadline, categories) and\nserves <strong>public files</strong> from <code class=\"docutils literal\">task_info/public/</code> at <code class=\"docutils literal\"><span class=\"pre\">/course/task_showcase/task_info/&lt;path&gt;</span></code>:</p>\n<ul class=\"simple\">\n<li><a class=\"reference external\" href=\"task_info/hello.txt\" target=\"_blank\">hello.txt</a> (text/plain)</li>\n<li><a class=\"reference external\" href=\"task_info/sub/data.json\" target=\"_blank\">sub/data.json</a> (sub-folder)</li>\n<li><a class=\"reference external\" href=\"$common/common.txt\" target=\"_blank\">common.txt</a> (course-wide <code class=\"docutils literal\">$common/public</code>)</li>\n</ul>\n<object data=\"task_info/pixel.svg\" type=\"image/svg+xml\">an inline SVG image served from the public folder</object>\n<p>The JavaScript variable <code class=\"docutils literal\">input</code> is available to the context:</p>\n<p>Username seen by JS: <code id=\"js-username\"></code>, language: <code id=\"js-lang\"></code></p>\n<script>\ndocument.getElementById(\"js-username\").textContent = input[\"@username\"];\ndocument.getElementById(\"js-lang\").textContent = input[\"@lang\"];\n</script>"
+	},
+	{
+		"file": "infra/tasks/tutorial/01_getting_started/task.yaml",
+		"key": "context",
+		"rst": ".. container:: row\n\n   .. container:: col-xs-8 col-md-9 text-justify\n\n      Welcome on the INGInious platform ! INGInious is an automatic grading platform mainly designed for coding-like assignments and widely extensible.\n\n      It allows to run any kind of test with any kind of software in secure environments, and to provide students with feedback on their programming assignments or MCQ quizzes in a friendly graphical environment.\n\n      INGInious comes with a *micro LMS* (webapp) that allows storing and managing/restricting student submissions, producing statistics, and provides grouped submissions facilities such as teams or classrooms with up to two levels of hierarchy.\n\n   .. container:: col-xs-4 col-md-3 text-center\n\n      .. image:: $common/inginious.png\n           :height: 180px\n\n.. class:: text-justify\n\n    If you already rely on an existing LMS such as Moodle or edX, you can integrate the INGInious grading features using our LTI interface and keep using your now-augmented existing e-learning platform.\n\nRoles\n-----\n.. class:: text-justify\n\n    According to your role in a course, you may see things a bit differently on this page:\n\n\n    - **Student**: Below you'll find the questions to answer to succeed this mission. Once you've answered to all the questions, click on *Submit*. No submission limit or deadline is set on this mission. Your score for this mission is, by default, the best one you've submitted.\n    - **Tutor/teaching assistant**: You then have read access to submissions made by registered students by clicking on *View submissions*. Note: Admin submissions won't appear there.\n    - **(Super-)Administrator**: If a deadline or submission limit is set, it won't apply to you. You can change the parameters and edit the test files by clicking on *Edit Task*. An additional button is also available next to the *Submit* button. This button allows you to get an SSH remote access to your secure grading environment. More information about this tool will be provided further in this tutorial.\n\nHello World!\n------------\n\nThis basic introduction task aims at getting you familiar with the INGInious submission interface.\n\nYour mission\n````````````\n\nIn this mission, you'll have to use the Python 3 built-in ``print`` function to display an ``Hello World!`` message on the console.\n\nHow is this checked ?\n`````````````````````\n\nEach INGInious programming assignment tests are started using the task ``run`` script, which can be any executable file. This mission is evaluated using the following ``run`` script :\n\n.. code:: bash\n\n    #!/bin/bash\n\n    getinput thecode > student/student_code.py\n    output=$(python3 student/student_code.py)\n\n    if [ \"$output\" = \"Hello World!\" ]; then\n        feedback-result success\n    else\n        feedback-result failed\n        feedback-msg -em \"Your program displayed : $output\"\n    fi\n\nThis fetches the ``thecode`` problem content and stores it in a ``student/student_code.py`` file. It then checks if the program output is ``Hello World!`` or prints a feedback message with the actual program output. As an admin, you can see or modify this script directly with the button ``Edit Task`` then ``Task files`` tab or with the webdav if configured.",
+		"html": "<div class=\"row\">\n<div class=\"col-xs-8 col-md-9 text-justify\">\n<p>Welcome on the INGInious platform ! INGInious is an automatic grading platform mainly designed for coding-like assignments and widely extensible.</p>\n<p>It allows to run any kind of test with any kind of software in secure environments, and to provide students with feedback on their programming assignments or MCQ quizzes in a friendly graphical environment.</p>\n<p>INGInious comes with a <em>micro LMS</em> (webapp) that allows storing and managing/restricting student submissions, producing statistics, and provides grouped submissions facilities such as teams or classrooms with up to two levels of hierarchy.</p>\n</div>\n<div class=\"col-xs-4 col-md-3 text-center\">\n<img alt=\"$common/inginious.png\" src=\"$common/inginious.png\" style=\"height: 180px;\" />\n</div>\n</div>\n<p class=\"text-justify\">If you already rely on an existing LMS such as Moodle or edX, you can integrate the INGInious grading features using our LTI interface and keep using your now-augmented existing e-learning platform.</p>\n<div class=\"section\" id=\"roles\">\n<h3>Roles</h3>\n<p class=\"text-justify\">According to your role in a course, you may see things a bit differently on this page:</p>\n<ul class=\"text-justify simple\">\n<li><strong>Student</strong>: Below you'll find the questions to answer to succeed this mission. Once you've answered to all the questions, click on <em>Submit</em>. No submission limit or deadline is set on this mission. Your score for this mission is, by default, the best one you've submitted.</li>\n<li><strong>Tutor/teaching assistant</strong>: You then have read access to submissions made by registered students by clicking on <em>View submissions</em>. Note: Admin submissions won't appear there.</li>\n<li><strong>(Super-)Administrator</strong>: If a deadline or submission limit is set, it won't apply to you. You can change the parameters and edit the test files by clicking on <em>Edit Task</em>. An additional button is also available next to the <em>Submit</em> button. This button allows you to get an SSH remote access to your secure grading environment. More information about this tool will be provided further in this tutorial.</li>\n</ul>\n</div>\n<div class=\"section\" id=\"hello-world\">\n<h3>Hello World!</h3>\n<p>This basic introduction task aims at getting you familiar with the INGInious submission interface.</p>\n<div class=\"section\" id=\"your-mission\">\n<h4>Your mission</h4>\n<p>In this mission, you'll have to use the Python 3 built-in <code class=\"docutils literal\">print</code> function to display an <code class=\"docutils literal\">Hello World!</code> message on the console.</p>\n</div>\n<div class=\"section\" id=\"how-is-this-checked\">\n<h4>How is this checked ?</h4>\n<p>Each INGInious programming assignment tests are started using the task <code class=\"docutils literal\">run</code> script, which can be any executable file. This mission is evaluated using the following <code class=\"docutils literal\">run</code> script :</p>\n<pre class=\"code bash literal-block\">\n#!/bin/bash\n\ngetinput thecode &gt; student/student_code.py\noutput=$(python3 student/student_code.py)\n\nif [ &quot;$output&quot; = &quot;Hello World!&quot; ]; then\n    feedback-result success\nelse\n    feedback-result failed\n    feedback-msg -em &quot;Your program displayed : $output&quot;\nfi\n</pre>\n<p>This fetches the <code class=\"docutils literal\">thecode</code> problem content and stores it in a <code class=\"docutils literal\">student/student_code.py</code> file. It then checks if the program output is <code class=\"docutils literal\">Hello World!</code> or prints a feedback message with the actual program output. As an admin, you can see or modify this script directly with the button <code class=\"docutils literal\">Edit Task</code> then <code class=\"docutils literal\">Task files</code> tab or with the webdav if configured.</p>\n</div>\n</div>\n"
+	},
+	{
+		"file": "infra/tasks/tutorial/01_getting_started/task.yaml",
+		"key": "thecode.header",
+		"rst": "Here you are asked to provide a basic Python 3 program displaying ``Hello World!`` on standard output. This box will have the id ``thecode``.\n\n*Hint :* to display something on standard output, use the built-in ``print`` method.",
+		"html": "<p>Here you are asked to provide a basic Python 3 program displaying <code class=\"docutils literal\">Hello World!</code> on standard output. This box will have the id <code class=\"docutils literal\">thecode</code>.</p>\n<p><em>Hint :</em> to display something on standard output, use the built-in <code class=\"docutils literal\">print</code> method.</p>\n"
+	},
+	{
+		"file": "infra/tasks/tutorial/04_run_student/task.yaml",
+		"key": "context",
+		"rst": ".. container:: row\n\n    .. container:: col-md-10 text-justify\n\n        The next sections of this tutorial will help you interfacing your test suite with INGInious.\n\n        In the *Getting started* section of this tutorial, you were asked to provide a small Python program printing ``Hello World!`` on standard output. The grading script was the following one:\n\n        .. code-block:: bash\n\n            #!/bin/bash\n\n            getinput thecode > student/student_code.py\n            output=$(python3 student/student_code.py)\n\n            if [ \"$output\" = \"Hello World!\" ]; then\n                feedback-result success\n            else\n                feedback-result failed\n                feedback-msg -em \"Your program displayed : $output\"\n            fi\n\n    .. container:: col-md-2 text-center\n\n        .. raw:: html\n\n           <i style=\"font-size:120px;\" class=\"fa fa-shield\"></i>\n\nBreaking the grading script\n---------------------------\n\n.. class:: text-justify\n\n    The grading script shown above will execute the grading code and student-provided code in the same context. An alert student who knows how the INGInious API interact between the grading script and the submission manager may try to open several new processes to change its own result.\n\n    For instance, this grading script is particularly sensible on the ``feedback-grade`` and ``feedback-msg`` API (discussed later). Try again mission *1. Getting started* with this simple code and observe the result:\n\n    .. code-block:: python\n\n        import os\n        print(\"Hello World!\")\n        os.system(\"feedback-msg -em 'You have made it.' \")\n\n    Moreover, students are also able to modify grading scripts that would not yet be loaded at the time their code is executed. One can easily conclude that a badly written grading script may leave the student with total control on how (s)he's graded, requiring the teaching staff to read manually all the submissions to detect fraud.\n\nThe ``run_student`` API\n-----------------------\n.. class:: text-justify\n\n    To ensure the student has no access to your grading scripts or the INGInious interface, a specific ``run_student`` API is provided.\n\n    This tool is used to add a layer of isolation by spawning a process in a new container which possibly has overriden limitations and has only access to the ``student`` task subdirectory. This is known as the *student container*, in contrast to the *grading container*.\n\nUsing the API\n``````````````\n.. class:: text-justify\n\n    The ``run_student`` API is a *grading container*-accessible shell command that takes as positional argument the shell command to launch inside the *student container*, as well as the following optional parameters:\n\n    --container CONTAINER\n        Name of the environment to use. The default is the same as the current environment.\n\n    --time TIMEOUT_VALUE\n        Timeout (CPU time) for the container. The default is the same as the grading container.\n\n    --hard-time TIMEOUT_VALUE\n        Hard timeout for the container (wall time). The default is three times the value indicated for ``--time``.\n\n    --memory MEMORY\n        Maximum memory for the container, in MB. The default is the same as the current container.\n\n    --share-network\n        Share the network stack of the grading container with the student container. This is not the case by default.\n\n\n    It forwards standard I/O, most signals and returns specific additional exit codes:\n\n    - ``252`` : *student container* killed due to an out-of-memory\n    - ``253`` : *student container* timed out\n    - ``254`` : I/O redirection failed\n\nAdapting the grading script\n```````````````````````````\n\n.. class:: text-justify\n\n    The existing grading script can now be adapted easily. This will become:\n\n    .. code-block:: bash\n\n        #!/bin/bash\n\n        getinput thecode > student/student_code.py\n        output=$(run_student python3 student/student_code.py)\n\n        if [ \"$output\" = \"Hello World!\" ]; then\n            feedback-result success\n        else\n            feedback-result failed\n            feedback-msg -em \"Your program displayed : $output\"\n        fi\n\n    Please note that the *student container* will have access to the ``/student`` directory but not to the *grading container* working space for isolation. The ``getinput`` API, described in next task, should generally put student codes in the ``/student`` directory to allow *student container* to access them.\n\nRetry to break the code\n```````````````````````\n.. class:: text-justify\n\n    The current task ``run`` script has been corrected to reflect the need for student process isolation. Try to break the grading script again ! You will not be able to modify the feedback or result anymore !",
+		"html": "<div class=\"row\">\n<div class=\"col-md-10 text-justify\">\n<p>The next sections of this tutorial will help you interfacing your test suite with INGInious.</p>\n<p>In the <em>Getting started</em> section of this tutorial, you were asked to provide a small Python program printing <code class=\"docutils literal\">Hello World!</code> on standard output. The grading script was the following one:</p>\n<pre class=\"code bash literal-block\">\n#!/bin/bash\n\ngetinput thecode &gt; student/student_code.py\noutput=$(python3 student/student_code.py)\n\nif [ &quot;$output&quot; = &quot;Hello World!&quot; ]; then\n    feedback-result success\nelse\n    feedback-result failed\n    feedback-msg -em &quot;Your program displayed : $output&quot;\nfi\n</pre>\n</div>\n<div class=\"col-md-2 text-center\">\n<i style=\"font-size:120px;\" class=\"fa fa-shield\"></i></div>\n</div>\n<div class=\"section\" id=\"breaking-the-grading-script\">\n<h3>Breaking the grading script</h3>\n<p class=\"text-justify\">The grading script shown above will execute the grading code and student-provided code in the same context. An alert student who knows how the INGInious API interact between the grading script and the submission manager may try to open several new processes to change its own result.</p>\n<p class=\"text-justify\">For instance, this grading script is particularly sensible on the <code class=\"docutils literal\"><span class=\"pre\">feedback-grade</span></code> and <code class=\"docutils literal\"><span class=\"pre\">feedback-msg</span></code> API (discussed later). Try again mission <em>1. Getting started</em> with this simple code and observe the result:</p>\n<pre class=\"code python text-justify literal-block\">\nimport os\nprint(&quot;Hello World!&quot;)\nos.system(&quot;feedback-msg -em 'You have made it.' &quot;)\n</pre>\n<p class=\"text-justify\">Moreover, students are also able to modify grading scripts that would not yet be loaded at the time their code is executed. One can easily conclude that a badly written grading script may leave the student with total control on how (s)he's graded, requiring the teaching staff to read manually all the submissions to detect fraud.</p>\n</div>\n<div class=\"section\" id=\"the-run-student-api\">\n<h3>The <code class=\"docutils literal\">run_student</code> API</h3>\n<p class=\"text-justify\">To ensure the student has no access to your grading scripts or the INGInious interface, a specific <code class=\"docutils literal\">run_student</code> API is provided.</p>\n<p class=\"text-justify\">This tool is used to add a layer of isolation by spawning a process in a new container which possibly has overriden limitations and has only access to the <code class=\"docutils literal\">student</code> task subdirectory. This is known as the <em>student container</em>, in contrast to the <em>grading container</em>.</p>\n<div class=\"section\" id=\"using-the-api\">\n<h4>Using the API</h4>\n<p class=\"text-justify\">The <code class=\"docutils literal\">run_student</code> API is a <em>grading container</em>-accessible shell command that takes as positional argument the shell command to launch inside the <em>student container</em>, as well as the following optional parameters:</p>\n<table class=\"text-justify docutils option-list\" frame=\"void\" rules=\"none\">\n<col class=\"option\" />\n<col class=\"description\" />\n<tbody valign=\"top\">\n<tr><td class=\"option-group\" colspan=\"2\">\n<kbd><span class=\"option\">--container <var>CONTAINER</var></span></kbd></td>\n</tr>\n<tr><td>&nbsp;</td><td>Name of the environment to use. The default is the same as the current environment.</td></tr>\n<tr><td class=\"option-group\" colspan=\"2\">\n<kbd><span class=\"option\">--time <var>TIMEOUT_VALUE</var></span></kbd></td>\n</tr>\n<tr><td>&nbsp;</td><td>Timeout (CPU time) for the container. The default is the same as the grading container.</td></tr>\n<tr><td class=\"option-group\" colspan=\"2\">\n<kbd><span class=\"option\">--hard-time <var>TIMEOUT_VALUE</var></span></kbd></td>\n</tr>\n<tr><td>&nbsp;</td><td>Hard timeout for the container (wall time). The default is three times the value indicated for <code class=\"docutils literal\"><span class=\"pre\">--time</span></code>.</td></tr>\n<tr><td class=\"option-group\" colspan=\"2\">\n<kbd><span class=\"option\">--memory <var>MEMORY</var></span></kbd></td>\n</tr>\n<tr><td>&nbsp;</td><td>Maximum memory for the container, in MB. The default is the same as the current container.</td></tr>\n<tr><td class=\"option-group\" colspan=\"2\">\n<kbd><span class=\"option\">--share-network</span></kbd></td>\n</tr>\n<tr><td>&nbsp;</td><td>Share the network stack of the grading container with the student container. This is not the case by default.</td></tr>\n</tbody>\n</table>\n<p class=\"text-justify\">It forwards standard I/O, most signals and returns specific additional exit codes:</p>\n<ul class=\"text-justify simple\">\n<li><code class=\"docutils literal\">252</code> : <em>student container</em> killed due to an out-of-memory</li>\n<li><code class=\"docutils literal\">253</code> : <em>student container</em> timed out</li>\n<li><code class=\"docutils literal\">254</code> : I/O redirection failed</li>\n</ul>\n</div>\n<div class=\"section\" id=\"adapting-the-grading-script\">\n<h4>Adapting the grading script</h4>\n<p class=\"text-justify\">The existing grading script can now be adapted easily. This will become:</p>\n<pre class=\"code bash text-justify literal-block\">\n#!/bin/bash\n\ngetinput thecode &gt; student/student_code.py\noutput=$(run_student python3 student/student_code.py)\n\nif [ &quot;$output&quot; = &quot;Hello World!&quot; ]; then\n    feedback-result success\nelse\n    feedback-result failed\n    feedback-msg -em &quot;Your program displayed : $output&quot;\nfi\n</pre>\n<p class=\"text-justify\">Please note that the <em>student container</em> will have access to the <code class=\"docutils literal\">/student</code> directory but not to the <em>grading container</em> working space for isolation. The <code class=\"docutils literal\">getinput</code> API, described in next task, should generally put student codes in the <code class=\"docutils literal\">/student</code> directory to allow <em>student container</em> to access them.</p>\n</div>\n<div class=\"section\" id=\"retry-to-break-the-code\">\n<h4>Retry to break the code</h4>\n<p class=\"text-justify\">The current task <code class=\"docutils literal\">run</code> script has been corrected to reflect the need for student process isolation. Try to break the grading script again ! You will not be able to modify the feedback or result anymore !</p>\n</div>\n</div>\n"
+	},
+	{
+		"file": "infra/tasks/tutorial/04_run_student/task.yaml",
+		"key": "thecode.header",
+		"rst": "Here you are asked to provide a basic Python 3 program displaying ``Hello World!`` on standard output.\n\n*Hint :* to display something on standard output, use the built-in ``print`` method.",
+		"html": "<p>Here you are asked to provide a basic Python 3 program displaying <code class=\"docutils literal\">Hello World!</code> on standard output.</p>\n<p><em>Hint :</em> to display something on standard output, use the built-in <code class=\"docutils literal\">print</code> method.</p>\n"
+	},
+	{
+		"file": "infra/tasks/tutorial/06_parsing_template/task.yaml",
+		"key": "context",
+		"rst": ".. container:: row\n\n    .. container:: col-md-10 text-justify\n\n        Sometimes you'll only ask students for a little piece of code which will be part of a partial implementation. You'll then need to put the student input into what is called a template file.\n\n\n\nThe ``parsetemplate`` API\n-------------------------\n\n.. class:: text-justify\n\n    Problem input can be inserted easily into existing code by inserting ``@[indent_chars]@problem_id@[ident_chars]@`` tags into those files. For instance, the following Python template will be used to load a student implemented into an existing function:\n\n    .. code-block:: python\n\n            def signature(arg1, arg2):\n                print(\"Start of student code...\")\n            @    @studentcode@@\n                print(\"End of student code...\")\n\n\n\n.. class:: text-justify\n\n        The ``parsetemplate`` API is used with a template file as argument as well as the optional ``--output OUTPUTFILE`` argument if the output file should be different than the input file.\n\n        For instance, the following command will parse the ``template.py`` file into a new ``studentcode.py`` file:\n\n        .. code-block:: bash\n\n            parsetemplate --output studentcode.py template.py\n\n\n\nLet's have a try\n-----------------\n\n.. class:: text-justify\n\n    This following simple template was put in this task directory as ``template.py``:\n\n    .. code-block:: python\n\n            #!/usr/bin/python3\n\n            #A function computing the absolute value\n            def abs(x):\n            @    @studentcode@@\n\n            test1 = abs(-1)\n            test2 = abs(10)\n            test3 = abs(-100)\n\n            if test1==1 and test2==10 and test3==100:\n                print(\"success\")\n            else:\n                print(\"failed\")\n\n\n.. class:: text-justify\n\n It simply tests the student function in a super basic way and prints success if the tests are passing.\n\n This task uses a small run script that simply parses ``template.py`` with the ``studentcode`` then runs it in a *student container* and grades as success if it outputs \"success\".\n Here is the run script:\n\n .. code-block:: bash\n\n     #!/bin/bash\n\n    parsetemplate --output student/code.py template.py\n    output=$(run_student python3 student/code.py)\n\n    if [ \"$output\" = \"success\" ]; then\n        feedback-result success\n        feedback-msg -em \"Your code is correct\"\n    else\n        feedback-result failed\n        feedback-msg -em \"Your code is not correct\"\n    fi\n\n.. class:: text-justify\n\n``template.py`` is parsed and the result, ``code.py``,is placed in the ``student`` directory to be accessible within the *student container*. Then it is simply run and the output is checked to grade the submission.\n\nLet's take a tour\n-----------------\n\n.. class:: text-justify\n\n    Once you successfully implemented the abs(x) function and succeed in this task, you can go back to task ``5. Fetching student input`` and play with the sandbox there. Indeed you can use the file upload to upload a template that you will fill with the ``studentcode`` and finally run with the sandbox code.\n\n",
+		"html": "<div class=\"row\">\n<div class=\"col-md-10 text-justify\">\nSometimes you'll only ask students for a little piece of code which will be part of a partial implementation. You'll then need to put the student input into what is called a template file.</div>\n</div>\n<div class=\"section\" id=\"the-parsetemplate-api\">\n<h3>The <code class=\"docutils literal\">parsetemplate</code> API</h3>\n<p class=\"text-justify\">Problem input can be inserted easily into existing code by inserting <code class=\"docutils literal\"><span class=\"pre\">&#64;[indent_chars]&#64;problem_id&#64;[ident_chars]&#64;</span></code> tags into those files. For instance, the following Python template will be used to load a student implemented into an existing function:</p>\n<pre class=\"code python text-justify literal-block\">\ndef signature(arg1, arg2):\n    print(&quot;Start of student code...&quot;)\n&#64;    &#64;studentcode&#64;&#64;\n    print(&quot;End of student code...&quot;)\n</pre>\n<p class=\"text-justify\">The <code class=\"docutils literal\">parsetemplate</code> API is used with a template file as argument as well as the optional <code class=\"docutils literal\"><span class=\"pre\">--output</span> OUTPUTFILE</code> argument if the output file should be different than the input file.</p>\n<p class=\"text-justify\">For instance, the following command will parse the <code class=\"docutils literal\">template.py</code> file into a new <code class=\"docutils literal\">studentcode.py</code> file:</p>\n<pre class=\"code bash text-justify literal-block\">\nparsetemplate --output studentcode.py template.py\n</pre>\n</div>\n<div class=\"section\" id=\"let-s-have-a-try\">\n<h3>Let's have a try</h3>\n<p class=\"text-justify\">This following simple template was put in this task directory as <code class=\"docutils literal\">template.py</code>:</p>\n<pre class=\"code python text-justify literal-block\">\n#!/usr/bin/python3\n\n#A function computing the absolute value\ndef abs(x):\n&#64;    &#64;studentcode&#64;&#64;\n\ntest1 = abs(-1)\ntest2 = abs(10)\ntest3 = abs(-100)\n\nif test1==1 and test2==10 and test3==100:\n    print(&quot;success&quot;)\nelse:\n    print(&quot;failed&quot;)\n</pre>\n<p class=\"text-justify\">It simply tests the student function in a super basic way and prints success if the tests are passing.</p>\n<p class=\"text-justify\">This task uses a small run script that simply parses <code class=\"docutils literal\">template.py</code> with the <code class=\"docutils literal\">studentcode</code> then runs it in a <em>student container</em> and grades as success if it outputs &quot;success&quot;.\nHere is the run script:</p>\n<pre class=\"code bash text-justify literal-block\">\n #!/bin/bash\n\nparsetemplate --output student/code.py template.py\noutput=$(run_student python3 student/code.py)\n\nif [ &quot;$output&quot; = &quot;success&quot; ]; then\n    feedback-result success\n    feedback-msg -em &quot;Your code is correct&quot;\nelse\n    feedback-result failed\n    feedback-msg -em &quot;Your code is not correct&quot;\nfi\n</pre>\n<p class=\"text-justify\"><code class=\"docutils literal\">template.py</code> is parsed and the result, <code class=\"docutils literal\">code.py</code>,is placed in the <code class=\"docutils literal\">student</code> directory to be accessible within the <em>student container</em>. Then it is simply run and the output is checked to grade the submission.</p>\n</div>\n<div class=\"section\" id=\"let-s-take-a-tour\">\n<h3>Let's take a tour</h3>\n<p class=\"text-justify\">Once you successfully implemented the abs(x) function and succeed in this task, you can go back to task <code class=\"docutils literal\">5. Fetching student input</code> and play with the sandbox there. Indeed you can use the file upload to upload a template that you will fill with the <code class=\"docutils literal\">studentcode</code> and finally run with the sandbox code.</p>\n</div>\n"
+	},
+	{
+		"file": "infra/tasks/tutorial/06_parsing_template/task.yaml",
+		"key": "studentcode.header",
+		"rst": "Enter your implementation for absolute value.\nThis code has the problem id ``studentcode`` and will be put in the template.\nStudent only has to enter the body of the function.\n\n*Hint :* the signature is abs(x)",
+		"html": "<p>Enter your implementation for absolute value.\nThis code has the problem id <code class=\"docutils literal\">studentcode</code> and will be put in the template.\nStudent only has to enter the body of the function.</p>\n<p><em>Hint :</em> the signature is abs(x)</p>\n"
+	},
+	{
+		"file": "infra/tasks/tutorial/07_random_inputs/task.yaml",
+		"key": "context",
+		"rst": ".. container:: row\n\n   .. container:: col-xs-8 col-md-9 text-justify\n\n      Typical INGInious tasks are displayed the same way for all the students. However, it is possible to display some parameters with random values for students to avoid copy/pasting their peers submissions. This can, for example, be a numerical value for a computation, or the name of a variable. This might be especially useful for mathematical exercises.\n\n\n\n``Random inputs``\n------------------\n\nOn the ``Edit task`` page , you can specify the number of desired random inputs.\nThese inputs can be configured to be generated once per student or even regenerated for each loading of the task page.\n\nFrom the task context\n---------------------\n\n\n.. class:: text-justify\n\n    The random parameters can be accessed through a ``input`` Javascript dictionary in the task and subproblems context. To show a random value to the student, declare a ``.. raw:: html`` and include some Javascript code via the HTML ``<script>`` tag.\n\nHere is a dummy example:\n\n.. code-block:: bash\n\n        .. raw:: html\n\n            <script>\n            document.write(input[\"@random\"]);\n            </script>\n\n.. class:: text-justify\n\nFrom the ``run`` script\n-----------------------\n\n    The random parameter can be accessed through the ``getinput`` API using the ``@random`` specific id. If multiple random parameters were desired, it will return a list.\n\n    Here is a dummy example of random input used in the evaluation script:\n\n    As a note, notice this is a IPython script which allows to use bash commands with the bang (!) magic command.\n\n.. code-block:: python\n\n        #Dummy example of ipython script to evaluate student answer for equation: 2x\u00b2-Value=0\n        import math\n\n        #Get the random input parameter and select a predifined value based on it\n        randomIndex=int(float(get_input(\"@random\")[0]*100))%6\n        values = [8, 18, 32, 50, 72, 98]\n        value=values[randomIndex]\n\n        #Get the student answer and the correct answer\n        student = int(get_input(\"student_code\"))\n        solution = int(math.sqrt(value/2))\n\n        #As an example, the two answers can be accessed from command line via temporary environment variables\n        #This is useful if you want to share the same variable for python commands and bash commands\n        %env MY_SOLUTION=$solution\n        %env STUDENT_SOLUTION=$student\n\n        #Compare student solution and correct solution.\n        #This could be implemeneted in python but here it uses bash for the Ipython features example\n        ! if [ \"$STUDENT_SOLUTION\" = \"$MY_SOLUTION\" ]; then feedback-result success; else feedback-result failed; fi\n\n.. class:: text-justify\n\n\nNote the script for this precise example could be simpler by directly getting the student solution with the\n``getinput`` API and compare it with the correct solution without even requiring to execute code in a *student container*. But this script example is more generic and could implement more complex tasks where student would have to implement some real code instead of a direct value.\n\nLet's directly use this script as an example !\n\nEnter the solution to the following equation:\n\n\n    .. container:: col-md-2 text-center\n\n\n        .. raw:: html\n\n            <script>\n            let a = parseInt(input[\"@random\"]*100 );\n            let index = ((a%6)+6)%6;\n            let values = [8,18,32,50,72,98]\n            let value = values[index]\n\n            document.write(\"2x\u00b2-\"); document.write(value);\n            document.write(\"=0\");\n            </script>\n\n\n",
+		"html": "<div class=\"row\">\n<div class=\"col-xs-8 col-md-9 text-justify\">\nTypical INGInious tasks are displayed the same way for all the students. However, it is possible to display some parameters with random values for students to avoid copy/pasting their peers submissions. This can, for example, be a numerical value for a computation, or the name of a variable. This might be especially useful for mathematical exercises.</div>\n</div>\n<div class=\"section\" id=\"random-inputs\">\n<h3><code class=\"docutils literal\">Random inputs</code></h3>\n<p>On the <code class=\"docutils literal\">Edit task</code> page , you can specify the number of desired random inputs.\nThese inputs can be configured to be generated once per student or even regenerated for each loading of the task page.</p>\n</div>\n<div class=\"section\" id=\"from-the-task-context\">\n<h3>From the task context</h3>\n<p class=\"text-justify\">The random parameters can be accessed through a <code class=\"docutils literal\">input</code> Javascript dictionary in the task and subproblems context. To show a random value to the student, declare a <code class=\"docutils literal\">.. raw:: html</code> and include some Javascript code via the HTML <code class=\"docutils literal\">&lt;script&gt;</code> tag.</p>\n<p>Here is a dummy example:</p>\n<pre class=\"code bash literal-block\">\n.. raw:: html\n\n    &lt;script&gt;\n    document.write(input[&quot;&#64;random&quot;]);\n    &lt;/script&gt;\n</pre>\n</div>\n<div class=\"text-justify section\" id=\"from-the-run-script\">\n<h3>From the <code class=\"docutils literal\">run</code> script</h3>\n<blockquote>\n<p>The random parameter can be accessed through the <code class=\"docutils literal\">getinput</code> API using the <code class=\"docutils literal\">&#64;random</code> specific id. If multiple random parameters were desired, it will return a list.</p>\n<p>Here is a dummy example of random input used in the evaluation script:</p>\n<p>As a note, notice this is a IPython script which allows to use bash commands with the bang (!) magic command.</p>\n</blockquote>\n<pre class=\"code python literal-block\">\n#Dummy example of ipython script to evaluate student answer for equation: 2x\u00b2-Value=0\nimport math\n\n#Get the random input parameter and select a predifined value based on it\nrandomIndex=int(float(get_input(&quot;&#64;random&quot;)[0]*100))%6\nvalues = [8, 18, 32, 50, 72, 98]\nvalue=values[randomIndex]\n\n#Get the student answer and the correct answer\nstudent = int(get_input(&quot;student_code&quot;))\nsolution = int(math.sqrt(value/2))\n\n#As an example, the two answers can be accessed from command line via temporary environment variables\n#This is useful if you want to share the same variable for python commands and bash commands\n%env MY_SOLUTION=$solution\n%env STUDENT_SOLUTION=$student\n\n#Compare student solution and correct solution.\n#This could be implemeneted in python but here it uses bash for the Ipython features example\n! if [ &quot;$STUDENT_SOLUTION&quot; = &quot;$MY_SOLUTION&quot; ]; then feedback-result success; else feedback-result failed; fi\n</pre>\n<p class=\"text-justify\">Note the script for this precise example could be simpler by directly getting the student solution with the\n<code class=\"docutils literal\">getinput</code> API and compare it with the correct solution without even requiring to execute code in a <em>student container</em>. But this script example is more generic and could implement more complex tasks where student would have to implement some real code instead of a direct value.</p>\n<p>Let's directly use this script as an example !</p>\n<p>Enter the solution to the following equation:</p>\n<blockquote>\n<div class=\"col-md-2 text-center\">\n<script>\nlet a = parseInt(input[\"@random\"]*100 );\nlet index = ((a%6)+6)%6;\nlet values = [8,18,32,50,72,98]\nlet value = values[index]\n\ndocument.write(\"2x\u00b2-\"); document.write(value);\ndocument.write(\"=0\");\n</script></div>\n</blockquote>\n</div>\n"
+	},
+	{
+		"file": "infra/tasks/tutorial/07_random_inputs/task.yaml",
+		"key": "student_code.header",
+		"rst": "Simply enter the numerical value for x. For example 6. This box has problem id: ``student_code``.\n\nNotice everytime you reload this page, the equation changes in the task description and the solution is adapted.\n",
+		"html": "<p>Simply enter the numerical value for x. For example 6. This box has problem id: <code class=\"docutils literal\">student_code</code>.</p>\n<p>Notice everytime you reload this page, the equation changes in the task description and the solution is adapted.</p>\n"
+	},
+	{
+		"file": "infra/tasks/tutorial/08_feedback/task.yaml",
+		"key": "context",
+		"rst": ".. container:: row\n\n    .. container:: col-md-10 text-justify\n\n        In this section you'll see how to actually grade student submissions by providing a result, score, and detailed feedback. Feedback should be provided for at least the whole task (or assignment), and can be provided for each of the subproblem too.\n\n        Detailed feedback is one of the main INGInious assets. INGInious is not designed to coldly return success or failed messages but also to provide an extensive feedback for the students to understand their mistake and improve their submissions.\n\n    .. container:: col-md-2 text-center\n\n        .. raw:: html\n\n           <i style=\"font-size:120px;\" class=\"fa fa-comments\"></i>\n\n.. class:: text-justify\n\n    Therefore, writing feedback may become a challenging task for the assignment designer, requiring an extensive testbench. But the most extensive is the testbench and feedback, the most you'll get from INGInious : the teaching assistants will save a huge amount of time and the students will actually learn from their mistakes.\n\nThe ``feedback-result`` API\n---------------------------\n\n.. class:: text-justify\n\n    The task result is **mandatory** and is provided via the ``feedback-result`` API which takes as positional argument the status and accepts an optional argument the specific *problem id* ``--id PROBLEMID`` to which the status apply. Even if you call it to specify result for subproblems, you must call it at least once for the entire problem without specifying subproblem.\n\n    The result is used by the frontends to indicate whether it is considered as succeeded or not, and whether the test execution failed or not.\n\n    The available results are listed below:\n\n    - ``success`` : The submission is considered as succeeded. This status can be displayed if the student submission is considered as sufficient, or perfect, according to your appreciation.\n    - ``failed`` : The submission is considered as failed. This status can be displayed if the student submission was evaluated without inconvenient but does not match your success criteria. This typically means that the student should improve the submission to pass.\n    - ``timeout`` : The submission timed out. This status is typically returned by forwarding the exit code of a process spawned in a *student container*.\n    - ``overflow`` : The submission overflowed. This status is typically returned by forwarding the exit code of a process spawned in a *student container*.\n    - ``crash`` : **Your code crashed.** This status is typically returned when the grading script is not able to end correctly. This helps distinguish INGInious internal errors from ``run`` script errors.\n\n    INGInious internal errors results in a submission stored with no ``result`` field attached. An internal error status is associated with those submissions in order to differentiate the error origins.\n\n    For instance, to set the task global feedback to ``failed`` and the ``thecode`` subproblem to ``success``:\n\n    .. code-block:: bash\n\n        feedback-result failed\n        feedback-result --id thecode success\n\nThe ``feedback-grade`` API\n--------------------------\n\n.. class:: text-justify\n\n    The task grade, or score, is an optional task-wide value to return by the grading script. If not specified, a successful submission will be scored 100%, while a failed submission will be scored 0%. The score you provide is the only parameter taken into account to select the *best* submission. Therefore, if the student always fails, the *best* submission will always be the most favorable (highest score).\n\n    The score is provided via the ``feedback-grade`` API which takes the score as unique positional argument. This value is expressed in percents, and a dot (``.``) is used as decimal mark.\n\n    For instance, to set a score of 75.4% for the submission:\n\n    .. code-block:: bash\n\n        feedback-grade 75.4\n\nThe ``feedback-msg`` API\n------------------------\n\n.. class:: text-justify\n\n    The feedback message is the way you provide students with an extensive feedback that can be provided for the whole task or each of the subproblems. Based on the result of your test suite, you'll be able to tell the students what is going wrong with the submission and give some indication to unlock the situation.\n\n    Feedback messages use the reStructuredText syntax and |latex| syntax for mathematical expressions, as for problem descriptions, and are provided through the ``feedback-msg`` API.\n\n    .. |latex| raw:: html latex\n\n        \\( \\LaTeX \\)\n\n    By default, this command reads the message from standard input, but can also be used with an inline message. The complete set of optional arguments are:\n\n    --append\n        Append to current feedback, if not specified, replace the current feedback.\n    --escape\n        Interprets backslash escapes\n    --id PROBLEM_ID\n         Problem id to which associate the feedback, leave empty for the whole task.\n    --message MESSAGE\n        Feedback message\n\n    For instance, to provide a simple feedback message:\n\n    .. code-block:: bash\n\n        feedback-msg --message \"Your code could not be run. Check that you've defined the ``main`` function.\"\n\nLet's take a tour\n-----------------\n\n.. class:: text-justify\n\n    Use the code input defined below along with the sandbox to find out in details the feedback APIs features. The feedback you produce in the sandbox will be directly returned as the submission feedback.",
+		"html": "<div class=\"row\">\n<div class=\"col-md-10 text-justify\">\n<p>In this section you'll see how to actually grade student submissions by providing a result, score, and detailed feedback. Feedback should be provided for at least the whole task (or assignment), and can be provided for each of the subproblem too.</p>\n<p>Detailed feedback is one of the main INGInious assets. INGInious is not designed to coldly return success or failed messages but also to provide an extensive feedback for the students to understand their mistake and improve their submissions.</p>\n</div>\n<div class=\"col-md-2 text-center\">\n<i style=\"font-size:120px;\" class=\"fa fa-comments\"></i></div>\n</div>\n<p class=\"text-justify\">Therefore, writing feedback may become a challenging task for the assignment designer, requiring an extensive testbench. But the most extensive is the testbench and feedback, the most you'll get from INGInious : the teaching assistants will save a huge amount of time and the students will actually learn from their mistakes.</p>\n<div class=\"section\" id=\"the-feedback-result-api\">\n<h3>The <code class=\"docutils literal\"><span class=\"pre\">feedback-result</span></code> API</h3>\n<p class=\"text-justify\">The task result is <strong>mandatory</strong> and is provided via the <code class=\"docutils literal\"><span class=\"pre\">feedback-result</span></code> API which takes as positional argument the status and accepts an optional argument the specific <em>problem id</em> <code class=\"docutils literal\"><span class=\"pre\">--id</span> PROBLEMID</code> to which the status apply. Even if you call it to specify result for subproblems, you must call it at least once for the entire problem without specifying subproblem.</p>\n<p class=\"text-justify\">The result is used by the frontends to indicate whether it is considered as succeeded or not, and whether the test execution failed or not.</p>\n<p class=\"text-justify\">The available results are listed below:</p>\n<ul class=\"text-justify simple\">\n<li><code class=\"docutils literal\">success</code> : The submission is considered as succeeded. This status can be displayed if the student submission is considered as sufficient, or perfect, according to your appreciation.</li>\n<li><code class=\"docutils literal\">failed</code> : The submission is considered as failed. This status can be displayed if the student submission was evaluated without inconvenient but does not match your success criteria. This typically means that the student should improve the submission to pass.</li>\n<li><code class=\"docutils literal\">timeout</code> : The submission timed out. This status is typically returned by forwarding the exit code of a process spawned in a <em>student container</em>.</li>\n<li><code class=\"docutils literal\">overflow</code> : The submission overflowed. This status is typically returned by forwarding the exit code of a process spawned in a <em>student container</em>.</li>\n<li><code class=\"docutils literal\">crash</code> : <strong>Your code crashed.</strong> This status is typically returned when the grading script is not able to end correctly. This helps distinguish INGInious internal errors from <code class=\"docutils literal\">run</code> script errors.</li>\n</ul>\n<p class=\"text-justify\">INGInious internal errors results in a submission stored with no <code class=\"docutils literal\">result</code> field attached. An internal error status is associated with those submissions in order to differentiate the error origins.</p>\n<p class=\"text-justify\">For instance, to set the task global feedback to <code class=\"docutils literal\">failed</code> and the <code class=\"docutils literal\">thecode</code> subproblem to <code class=\"docutils literal\">success</code>:</p>\n<pre class=\"code bash text-justify literal-block\">\nfeedback-result failed\nfeedback-result --id thecode success\n</pre>\n</div>\n<div class=\"section\" id=\"the-feedback-grade-api\">\n<h3>The <code class=\"docutils literal\"><span class=\"pre\">feedback-grade</span></code> API</h3>\n<p class=\"text-justify\">The task grade, or score, is an optional task-wide value to return by the grading script. If not specified, a successful submission will be scored 100%, while a failed submission will be scored 0%. The score you provide is the only parameter taken into account to select the <em>best</em> submission. Therefore, if the student always fails, the <em>best</em> submission will always be the most favorable (highest score).</p>\n<p class=\"text-justify\">The score is provided via the <code class=\"docutils literal\"><span class=\"pre\">feedback-grade</span></code> API which takes the score as unique positional argument. This value is expressed in percents, and a dot (<code class=\"docutils literal\">.</code>) is used as decimal mark.</p>\n<p class=\"text-justify\">For instance, to set a score of 75.4% for the submission:</p>\n<pre class=\"code bash text-justify literal-block\">\nfeedback-grade 75.4\n</pre>\n</div>\n<div class=\"section\" id=\"the-feedback-msg-api\">\n<h3>The <code class=\"docutils literal\"><span class=\"pre\">feedback-msg</span></code> API</h3>\n<p class=\"text-justify\">The feedback message is the way you provide students with an extensive feedback that can be provided for the whole task or each of the subproblems. Based on the result of your test suite, you'll be able to tell the students what is going wrong with the submission and give some indication to unlock the situation.</p>\n<p class=\"text-justify\">Feedback messages use the reStructuredText syntax and \\( \\LaTeX \\) syntax for mathematical expressions, as for problem descriptions, and are provided through the <code class=\"docutils literal\"><span class=\"pre\">feedback-msg</span></code> API.</p>\n<p class=\"text-justify\">By default, this command reads the message from standard input, but can also be used with an inline message. The complete set of optional arguments are:</p>\n<table class=\"text-justify docutils option-list\" frame=\"void\" rules=\"none\">\n<col class=\"option\" />\n<col class=\"description\" />\n<tbody valign=\"top\">\n<tr><td class=\"option-group\">\n<kbd><span class=\"option\">--append</span></kbd></td>\n<td>Append to current feedback, if not specified, replace the current feedback.</td></tr>\n<tr><td class=\"option-group\">\n<kbd><span class=\"option\">--escape</span></kbd></td>\n<td>Interprets backslash escapes</td></tr>\n<tr><td class=\"option-group\" colspan=\"2\">\n<kbd><span class=\"option\">--id <var>PROBLEM_ID</var></span></kbd></td>\n</tr>\n<tr><td>&nbsp;</td><td>Problem id to which associate the feedback, leave empty for the whole task.</td></tr>\n<tr><td class=\"option-group\" colspan=\"2\">\n<kbd><span class=\"option\">--message <var>MESSAGE</var></span></kbd></td>\n</tr>\n<tr><td>&nbsp;</td><td>Feedback message</td></tr>\n</tbody>\n</table>\n<p class=\"text-justify\">For instance, to provide a simple feedback message:</p>\n<pre class=\"code bash text-justify literal-block\">\nfeedback-msg --message &quot;Your code could not be run. Check that you've defined the ``main`` function.&quot;\n</pre>\n</div>\n<div class=\"section\" id=\"let-s-take-a-tour\">\n<h3>Let's take a tour</h3>\n<p class=\"text-justify\">Use the code input defined below along with the sandbox to find out in details the feedback APIs features. The feedback you produce in the sandbox will be directly returned as the submission feedback.</p>\n</div>\n"
+	},
+	{
+		"file": "infra/tasks/tutorial/08_feedback/task.yaml",
+		"key": "studentcode.header",
+		"rst": "This optional field can be used inside the sandbox below as *problem id* ``studentcode``.",
+		"html": "<p>This optional field can be used inside the sandbox below as <em>problem id</em> <code class=\"docutils literal\">studentcode</code>.</p>\n"
+	},
+	{
+		"file": "infra/tasks/tutorial/08_feedback/task.yaml",
+		"key": "thecode.header",
+		"rst": "Use this code box as a sandbox for testing both the feedback APIs. **Here you'll write an executable script**, so do not forget beginning your code, for instance, by:\n\n.. code-block:: bash\n\n    #!/bin/bash\n\nThe displayed feedback will reflect the APIs you invoke.",
+		"html": "<p>Use this code box as a sandbox for testing both the feedback APIs. <strong>Here you'll write an executable script</strong>, so do not forget beginning your code, for instance, by:</p>\n<pre class=\"code bash literal-block\">\n#!/bin/bash\n</pre>\n<p>The displayed feedback will reflect the APIs you invoke.</p>\n"
+	},
+	{
+		"file": "infra/tasks/tutorial/09_advance_feedback/task.yaml",
+		"key": "context",
+		"rst": ".. container:: row\n\n    .. container:: col-md-10 text-justify\n\n        The more information you'll provide to students, the more they will understand what is going wrong with their work and be able to improve it. A bunch of textual information may be somewhat limiting, or boring for the students.\n\n        You may want to return complex feedback, such as code snippet to highlight some errors, formatted terminal output, links to some material to review to better understand the assignment concepts, or even generated images or files based on the student input.\n\n    .. container:: col-md-2 text-center\n\n        .. raw:: html\n\n           <i style=\"font-size:120px;\" class=\"fa fa-paragraph\"></i>\n\n.. class:: text-justify\n\n        In this section you'll be introduced to some built-in reStructuredText tools shipped with INGInious to help you deal with feedback formatting in a faster way.\n\nThe ``rst-code`` API\n--------------------\n\n.. class:: text-justify\n\n    The ``rst-code`` API is used to produce a reStructuredText code-block on standard output with a code snippet passed on standard input of via an optional argument. The complete list of arguments is detailed below:\n\n    --code CODE\n        snippet code\n    --escape\n        interprets backslash escapes\n    --language LANGUAGE\n        snippet language, leave empty to disable syntax highlighting\n\n    For instance, to add the content of a file to the feedback:\n\n    .. code-block:: bash\n\n        cat myfile.java | rst-code --language java | feedback-msg -a\n\n\nThe ``rst-msgblock`` API\n------------------------\n.. class:: text-justify\n\n    The ``rst-msgblock`` API is used to produce an alert message, or admonition, on standard output. The admonition content can be passed on standard input or as an optional argument. The complete list of optional arguments is detailed below:\n\n    --escape\n        interprets backslash escapes\n    --class CSS_CLASS\n        Bootstrap alert CSS class\n    --message MESSAGE\n        message text\n    --title THE_TITLE\n        message title\n\n    The Bootstrap CSS alert class can be chosen among: ``success``, ``info``, ``warning``, and ``danger``. For instance, to add a ``warning`` alert message to the feedback:\n\n    .. code-block:: bash\n\n        rst-msgblock --class warning --message \"lol\" | feedback-msg -a\n\nThe ``rst-image`` API\n---------------------\n\n.. class:: text-justify\n\n    Returning images into submission feedback can be achieved using the ``rst-image`` API which print the reStructuredText code on standard output. This command takes the filepath to the generated image file inside the *grading container* as well as an optional ``--format`` parameter for specifying the image type if different from the file extension.\n\n    For instance, to add the ``result.jpg`` image file to the feedback:\n\n    .. code-block:: bash\n\n        rst-image result.jpg | feedback-msg -a\n\n\nThe ``rst-indent`` API\n----------------------\n\n.. class:: text-justify\n\n    You may need to add some indentation level when using the above APIs, for instance, to add a code block inside a bulleted list. This is achieved using the ``rst-indent`` API. This reads the text to indent from standard input or from the optional arguments and outputs the indented text on the standard output. The complete list of arguments are :\n\n    --escape\n        interprets backslash escapes\n    --indent-char INDENT_CHAR\n        indentation char, by default default, tabulation\n    --amount AMOUNT\n        amount of indentation, by default, 1\n    --message MESSAGE\n        message text\n\n    For instance, to add a four-space indentation to a code-block and add it to the feedback:\n\n    .. code-block:: bash\n\n        cat myfile.java | rst-code --language java | rst-indent --indent-char \"    \" | feedback-msg -a\n\n\nThe ``Tag`` API\n---------------\n\n.. class:: text-justify\n\n   To write advance feedback you may need to know precisely what went wrong in the student solution, for example in the case of student code implementation. The Tags can make this easier. Indeed, you can create tags in advance in the Tag_ page with an id, a description, the option to show it to students and tags categories. These tags can then be set to True based on the student inputs directly in the grading script code and allow to provide more precise feedbacks.\n\n   .. _`Tag`: /admin/tutorial/tags\n\n   .. code-block:: python\n\n        set_tag(\"my_tag\", True)\n\nLet's take a tour\n-----------------\n\n.. class:: text-justify\n\n    Use the code input defined below along with the sandbox to find out in details the reStructuredText APIs features. A ``logo.png`` file is provided at the task folder root. The feedback you produce in the sandbox will be directly returned as the submission feedback.",
+		"html": "<div class=\"row\">\n<div class=\"col-md-10 text-justify\">\n<p>The more information you'll provide to students, the more they will understand what is going wrong with their work and be able to improve it. A bunch of textual information may be somewhat limiting, or boring for the students.</p>\n<p>You may want to return complex feedback, such as code snippet to highlight some errors, formatted terminal output, links to some material to review to better understand the assignment concepts, or even generated images or files based on the student input.</p>\n</div>\n<div class=\"col-md-2 text-center\">\n<i style=\"font-size:120px;\" class=\"fa fa-paragraph\"></i></div>\n</div>\n<p class=\"text-justify\">In this section you'll be introduced to some built-in reStructuredText tools shipped with INGInious to help you deal with feedback formatting in a faster way.</p>\n<div class=\"section\" id=\"the-rst-code-api\">\n<h3>The <code class=\"docutils literal\"><span class=\"pre\">rst-code</span></code> API</h3>\n<p class=\"text-justify\">The <code class=\"docutils literal\"><span class=\"pre\">rst-code</span></code> API is used to produce a reStructuredText code-block on standard output with a code snippet passed on standard input of via an optional argument. The complete list of arguments is detailed below:</p>\n<table class=\"text-justify docutils option-list\" frame=\"void\" rules=\"none\">\n<col class=\"option\" />\n<col class=\"description\" />\n<tbody valign=\"top\">\n<tr><td class=\"option-group\">\n<kbd><span class=\"option\">--code <var>CODE</var></span></kbd></td>\n<td>snippet code</td></tr>\n<tr><td class=\"option-group\">\n<kbd><span class=\"option\">--escape</span></kbd></td>\n<td>interprets backslash escapes</td></tr>\n<tr><td class=\"option-group\" colspan=\"2\">\n<kbd><span class=\"option\">--language <var>LANGUAGE</var></span></kbd></td>\n</tr>\n<tr><td>&nbsp;</td><td>snippet language, leave empty to disable syntax highlighting</td></tr>\n</tbody>\n</table>\n<p class=\"text-justify\">For instance, to add the content of a file to the feedback:</p>\n<pre class=\"code bash text-justify literal-block\">\ncat myfile.java | rst-code --language java | feedback-msg -a\n</pre>\n</div>\n<div class=\"section\" id=\"the-rst-msgblock-api\">\n<h3>The <code class=\"docutils literal\"><span class=\"pre\">rst-msgblock</span></code> API</h3>\n<p class=\"text-justify\">The <code class=\"docutils literal\"><span class=\"pre\">rst-msgblock</span></code> API is used to produce an alert message, or admonition, on standard output. The admonition content can be passed on standard input or as an optional argument. The complete list of optional arguments is detailed below:</p>\n<table class=\"text-justify docutils option-list\" frame=\"void\" rules=\"none\">\n<col class=\"option\" />\n<col class=\"description\" />\n<tbody valign=\"top\">\n<tr><td class=\"option-group\">\n<kbd><span class=\"option\">--escape</span></kbd></td>\n<td>interprets backslash escapes</td></tr>\n<tr><td class=\"option-group\" colspan=\"2\">\n<kbd><span class=\"option\">--class <var>CSS_CLASS</var></span></kbd></td>\n</tr>\n<tr><td>&nbsp;</td><td>Bootstrap alert CSS class</td></tr>\n<tr><td class=\"option-group\" colspan=\"2\">\n<kbd><span class=\"option\">--message <var>MESSAGE</var></span></kbd></td>\n</tr>\n<tr><td>&nbsp;</td><td>message text</td></tr>\n<tr><td class=\"option-group\" colspan=\"2\">\n<kbd><span class=\"option\">--title <var>THE_TITLE</var></span></kbd></td>\n</tr>\n<tr><td>&nbsp;</td><td>message title</td></tr>\n</tbody>\n</table>\n<p class=\"text-justify\">The Bootstrap CSS alert class can be chosen among: <code class=\"docutils literal\">success</code>, <code class=\"docutils literal\">info</code>, <code class=\"docutils literal\">warning</code>, and <code class=\"docutils literal\">danger</code>. For instance, to add a <code class=\"docutils literal\">warning</code> alert message to the feedback:</p>\n<pre class=\"code bash text-justify literal-block\">\nrst-msgblock --class warning --message &quot;lol&quot; | feedback-msg -a\n</pre>\n</div>\n<div class=\"section\" id=\"the-rst-image-api\">\n<h3>The <code class=\"docutils literal\"><span class=\"pre\">rst-image</span></code> API</h3>\n<p class=\"text-justify\">Returning images into submission feedback can be achieved using the <code class=\"docutils literal\"><span class=\"pre\">rst-image</span></code> API which print the reStructuredText code on standard output. This command takes the filepath to the generated image file inside the <em>grading container</em> as well as an optional <code class=\"docutils literal\"><span class=\"pre\">--format</span></code> parameter for specifying the image type if different from the file extension.</p>\n<p class=\"text-justify\">For instance, to add the <code class=\"docutils literal\">result.jpg</code> image file to the feedback:</p>\n<pre class=\"code bash text-justify literal-block\">\nrst-image result.jpg | feedback-msg -a\n</pre>\n</div>\n<div class=\"section\" id=\"the-rst-indent-api\">\n<h3>The <code class=\"docutils literal\"><span class=\"pre\">rst-indent</span></code> API</h3>\n<p class=\"text-justify\">You may need to add some indentation level when using the above APIs, for instance, to add a code block inside a bulleted list. This is achieved using the <code class=\"docutils literal\"><span class=\"pre\">rst-indent</span></code> API. This reads the text to indent from standard input or from the optional arguments and outputs the indented text on the standard output. The complete list of arguments are :</p>\n<table class=\"text-justify docutils option-list\" frame=\"void\" rules=\"none\">\n<col class=\"option\" />\n<col class=\"description\" />\n<tbody valign=\"top\">\n<tr><td class=\"option-group\">\n<kbd><span class=\"option\">--escape</span></kbd></td>\n<td>interprets backslash escapes</td></tr>\n<tr><td class=\"option-group\" colspan=\"2\">\n<kbd><span class=\"option\">--indent-char <var>INDENT_CHAR</var></span></kbd></td>\n</tr>\n<tr><td>&nbsp;</td><td>indentation char, by default default, tabulation</td></tr>\n<tr><td class=\"option-group\" colspan=\"2\">\n<kbd><span class=\"option\">--amount <var>AMOUNT</var></span></kbd></td>\n</tr>\n<tr><td>&nbsp;</td><td>amount of indentation, by default, 1</td></tr>\n<tr><td class=\"option-group\" colspan=\"2\">\n<kbd><span class=\"option\">--message <var>MESSAGE</var></span></kbd></td>\n</tr>\n<tr><td>&nbsp;</td><td>message text</td></tr>\n</tbody>\n</table>\n<p class=\"text-justify\">For instance, to add a four-space indentation to a code-block and add it to the feedback:</p>\n<pre class=\"code bash text-justify literal-block\">\ncat myfile.java | rst-code --language java | rst-indent --indent-char &quot;    &quot; | feedback-msg -a\n</pre>\n</div>\n<div class=\"section\" id=\"the-tag-api\">\n<h3>The <code class=\"docutils literal\">Tag</code> API</h3>\n<p class=\"text-justify\">To write advance feedback you may need to know precisely what went wrong in the student solution, for example in the case of student code implementation. The Tags can make this easier. Indeed, you can create tags in advance in the <a class=\"reference external\" href=\"/admin/tutorial/tags\" target=\"_blank\">Tag</a> page with an id, a description, the option to show it to students and tags categories. These tags can then be set to True based on the student inputs directly in the grading script code and allow to provide more precise feedbacks.</p>\n<pre class=\"code python text-justify literal-block\">\nset_tag(&quot;my_tag&quot;, True)\n</pre>\n</div>\n<div class=\"section\" id=\"let-s-take-a-tour\">\n<h3>Let's take a tour</h3>\n<p class=\"text-justify\">Use the code input defined below along with the sandbox to find out in details the reStructuredText APIs features. A <code class=\"docutils literal\">logo.png</code> file is provided at the task folder root. The feedback you produce in the sandbox will be directly returned as the submission feedback.</p>\n</div>\n"
+	},
+	{
+		"file": "infra/tasks/tutorial/10_archive/task.yaml",
+		"key": "context",
+		"rst": ".. container:: row\n\n    .. container:: col-md-10 text-justify\n\n        Sometimes providing students with scores is not sufficient : you may want to archive some files that were generated during the execution of the test suite in order to later analyze some (possibly debugging) files, or to run a plagiarism detection tool on the submissions.\n\n        In this section, you'll see how to export some generated files into an archive that will be downloadable along with the submission metadata. When this feature is not used, only the input/output fields accessible and shown to the student are downloadable.\n\n    .. container:: col-md-2 text-center\n\n        .. raw:: html\n\n           <i style=\"font-size:120px;\" class=\"fa fa-archive\"></i>\n\nThe ``archive`` folder\n----------------------\n\n.. class:: text-justify\n\n    The run script that is executed in the *grading container* can generate files and store them in the ``archive`` folder. The submissions admin page allows to download student submissions including these archives files.\n\n    For instance, to generate a very stupid file and put it in the archive:\n\n    .. code-block:: shell\n\n        #!/bin/bash\n        echo 'This is a stupid file content' > /archive/stupid_file.txt\n\nThe ``Submissions`` page\n-----------------------------\n\nOn the ``Submissions`` page you can have an overview of the students submissions with the options to filter for specific tasks and classrooms with even advanced filters such as submission date or minimum grade.\n\nFor the submissions found, you can see submissions metadata such as the student ``username`` or ``result`` with score.\nNote that this kind of metadata such as username and submission date are also accessible directly within the grading script with the input API (using @username, @email, @time...).\n\nOn the ``Submissions`` page you also have the option to download a specific submission or to ``replay`` the submission which can be useful if you modified the run script and want to evalute submissions again.\nIf you download submissions, it will be packed as a ``.tgz`` file containing a ``submission.test`` for every submission with all its metadata and the associated ``archive`` folder.\n\nAnswer to the small assignment below. Then, go to your submission summary page in order to download the submission archive. You should find the file in the ``archive`` subdirectory.",
+		"html": "<div class=\"row\">\n<div class=\"col-md-10 text-justify\">\n<p>Sometimes providing students with scores is not sufficient : you may want to archive some files that were generated during the execution of the test suite in order to later analyze some (possibly debugging) files, or to run a plagiarism detection tool on the submissions.</p>\n<p>In this section, you'll see how to export some generated files into an archive that will be downloadable along with the submission metadata. When this feature is not used, only the input/output fields accessible and shown to the student are downloadable.</p>\n</div>\n<div class=\"col-md-2 text-center\">\n<i style=\"font-size:120px;\" class=\"fa fa-archive\"></i></div>\n</div>\n<div class=\"section\" id=\"the-archive-folder\">\n<h3>The <code class=\"docutils literal\">archive</code> folder</h3>\n<p class=\"text-justify\">The run script that is executed in the <em>grading container</em> can generate files and store them in the <code class=\"docutils literal\">archive</code> folder. The submissions admin page allows to download student submissions including these archives files.</p>\n<p class=\"text-justify\">For instance, to generate a very stupid file and put it in the archive:</p>\n<pre class=\"code shell text-justify literal-block\">\n#!/bin/bash\necho 'This is a stupid file content' &gt; /archive/stupid_file.txt\n</pre>\n</div>\n<div class=\"section\" id=\"the-submissions-page\">\n<h3>The <code class=\"docutils literal\">Submissions</code> page</h3>\n<p>On the <code class=\"docutils literal\">Submissions</code> page you can have an overview of the students submissions with the options to filter for specific tasks and classrooms with even advanced filters such as submission date or minimum grade.</p>\n<p>For the submissions found, you can see submissions metadata such as the student <code class=\"docutils literal\">username</code> or <code class=\"docutils literal\">result</code> with score.\nNote that this kind of metadata such as username and submission date are also accessible directly within the grading script with the input API (using &#64;username, &#64;email, &#64;time...).</p>\n<p>On the <code class=\"docutils literal\">Submissions</code> page you also have the option to download a specific submission or to <code class=\"docutils literal\">replay</code> the submission which can be useful if you modified the run script and want to evalute submissions again.\nIf you download submissions, it will be packed as a <code class=\"docutils literal\">.tgz</code> file containing a <code class=\"docutils literal\">submission.test</code> for every submission with all its metadata and the associated <code class=\"docutils literal\">archive</code> folder.</p>\n<p>Answer to the small assignment below. Then, go to your submission summary page in order to download the submission archive. You should find the file in the <code class=\"docutils literal\">archive</code> subdirectory.</p>\n</div>\n"
+	},
+	{
+		"file": "infra/tasks/tutorial/10_archive/task.yaml",
+		"key": "thecode.header",
+		"rst": "Write an executable script (do not forget ``#!``) which generates some dummy ``generated.txt`` file and stores it in the submission archive.",
+		"html": "<p>Write an executable script (do not forget <code class=\"docutils literal\">#!</code>) which generates some dummy <code class=\"docutils literal\">generated.txt</code> file and stores it in the submission archive.</p>\n"
+	},
+	{
+		"file": "infra/tasks/tutorial/11_ssh_debug/task.yaml",
+		"key": "context",
+		"rst": ".. container:: row\n\n    .. container:: col-md-10 text-justify\n\n        Sometimes, when designing your assignments on INGInious, you may face some issues because you use a different software set on your local machine than the available environments, or because you did not take a specific student input into account. As your script are run at the server side, this may be difficult to find the solution only with a set of input/output.\n\n        INGInious comes with an embedded debugging facility that will help you fix some undesired behaviour that may arise while running your test suite.\n\n    .. container:: col-md-2 text-center\n\n        .. raw:: html\n\n           <i style=\"font-size:120px;\" class=\"fa fa-terminal\"></i>\n\nThe SSH debugging facility\n--------------------------\n\n.. class:: text-justify\n\n    SSH (Secure Shell) is a common remote-access protocol used on Unix platforms. SSH clients are widely available on the mostly used platforms, and will give you access to a shell on the remote server.\n\n    INGInious offers the ability to launch an SSH server inside the *grading container* and to access it remotely. This is achieved via the admin-only *Start remote SSH console* (``>_``) button next to the *Submit* button. Two configurations are available:\n\n    - **Default** : By default, when pressing the ``>_`` button, a command line and password will be provided to you in order to access the remote shell.\n    - **Web terminal** : If set up (see complete documentation for more information), an embedded web terminal will open a shell session in the browser. No SSH client is needed in this configuration.\n\nLet's take a tour\n-----------------\n\nThis task provided with some input fields as well as a basic ``run`` file. To open an SSH debug session:\n\n#. Click on the *>_* button to start a debugging session.\n#. If prompted, copy and paste the command line to connect to the server in a local shell and type the given password.\n#. Once connected, you are able to do anything you want. To run the test suite normally, just type ``./run``. You will be able to diretly inspect the outputs or potential error messages.\n#. When you are done, type ``exit`` to close the remote SSH session. Feedback will be displayed as if the submission was done normally.\n\nIf something goes wrong here, you'll be able to run your test suite command by command.",
+		"html": "<div class=\"row\">\n<div class=\"col-md-10 text-justify\">\n<p>Sometimes, when designing your assignments on INGInious, you may face some issues because you use a different software set on your local machine than the available environments, or because you did not take a specific student input into account. As your script are run at the server side, this may be difficult to find the solution only with a set of input/output.</p>\n<p>INGInious comes with an embedded debugging facility that will help you fix some undesired behaviour that may arise while running your test suite.</p>\n</div>\n<div class=\"col-md-2 text-center\">\n<i style=\"font-size:120px;\" class=\"fa fa-terminal\"></i></div>\n</div>\n<div class=\"section\" id=\"the-ssh-debugging-facility\">\n<h3>The SSH debugging facility</h3>\n<p class=\"text-justify\">SSH (Secure Shell) is a common remote-access protocol used on Unix platforms. SSH clients are widely available on the mostly used platforms, and will give you access to a shell on the remote server.</p>\n<p class=\"text-justify\">INGInious offers the ability to launch an SSH server inside the <em>grading container</em> and to access it remotely. This is achieved via the admin-only <em>Start remote SSH console</em> (<code class=\"docutils literal\">&gt;_</code>) button next to the <em>Submit</em> button. Two configurations are available:</p>\n<ul class=\"text-justify simple\">\n<li><strong>Default</strong> : By default, when pressing the <code class=\"docutils literal\">&gt;_</code> button, a command line and password will be provided to you in order to access the remote shell.</li>\n<li><strong>Web terminal</strong> : If set up (see complete documentation for more information), an embedded web terminal will open a shell session in the browser. No SSH client is needed in this configuration.</li>\n</ul>\n</div>\n<div class=\"section\" id=\"let-s-take-a-tour\">\n<h3>Let's take a tour</h3>\n<p>This task provided with some input fields as well as a basic <code class=\"docutils literal\">run</code> file. To open an SSH debug session:</p>\n<ol class=\"arabic simple\">\n<li>Click on the <em>&gt;_</em> button to start a debugging session.</li>\n<li>If prompted, copy and paste the command line to connect to the server in a local shell and type the given password.</li>\n<li>Once connected, you are able to do anything you want. To run the test suite normally, just type <code class=\"docutils literal\">./run</code>. You will be able to diretly inspect the outputs or potential error messages.</li>\n<li>When you are done, type <code class=\"docutils literal\">exit</code> to close the remote SSH session. Feedback will be displayed as if the submission was done normally.</li>\n</ol>\n<p>If something goes wrong here, you'll be able to run your test suite command by command.</p>\n</div>\n"
+	},
+	{
+		"file": "infra/tasks/tutorial/11_ssh_debug/task.yaml",
+		"key": "thecode.header",
+		"rst": "This unique optional input box is provided with *problem id*  ``thecode``.",
+		"html": "<p>This unique optional input box is provided with <em>problem id</em>  <code class=\"docutils literal\">thecode</code>.</p>\n"
+	},
+	{
+		"file": "infra/tasks/tutorial/12_environments/task.yaml",
+		"key": "context",
+		"rst": ".. container:: row\n\n    .. container:: col-md-10 text-justify\n\n        You have now reached the end of this tutorial and should be able to design assignments using INGInious. Some things remain uncovered like batch jobs and plugins. Those are advanced features for the superadministrator; please refer to the complete documentation.\n\n        In this last section you'll find out how to add some environments to your INGInious installation. Indeed, our default environment only provides Python 2/3 along with some standard command-line tools. **Please note that this is only accessible to the superadministrator, who has access to the INGInious installation.**\n\n    .. container:: col-md-2 text-center\n\n        .. raw:: html\n\n           <i style=\"font-size:120px;\" class=\"fa fa-trophy\"></i>\n\nSupported environments\n----------------------\n\n.. class:: text-justify\n\n    Some environments based on free and open source software are provided by the INGInious authors:\n\n    :``default``:\n        Default Python 2/3 environment.\n    :``cpp``:\n        Includes GCC toolchain for C/C++ development.\n    :``java7``:\n        Includes Java 7 and JUnit.\n    :``java8scala``:\n        Includes Java 8 and Scala.\n    :``math``:\n        Includes Octave and Julia.\n    :``mono``:\n        Includes the Mono framework for cross-platform dotnet development.\n    :``oz``:\n        Includes Mozart/Oz v2.0.0alpha.\n    :``php``:\n        Includes PHP5.\n    :``r``:\n        Includes R.\n    :``sekexe``:\n        Includes Sekexe to run process in user-mode Linux.\n    :``verilog``:\n        Includes Icarus Verilog.\n\n    INGInious supported environments are available through the Docker hub, and can be downloaded via the following command on your INGInious instances:\n\n    .. code-block:: shell\n\n        docker pull ingi/inginious-c-ENVIRONMENT_NAME\n\n    Then, restart the INGInious agent in order to see the new environment on the environment list.\n\nCustom environments\n-------------------\n\n.. class:: text-justify\n\n    All INGInious environment containers inherits from the ``ingi/inginious-c-base`` container which provides the INGInious API on CentOS distribution. To define a new environment, you'll need to:\n\n    - Define a Docker container that inherits from ``ingi/inginious-c-base`` using a ``Dockerfile``.\n    - Name the environment using the ``org.inginious.grading.name`` label.\n\n    For instance, these basic ``Dockerfile`` will provide you with GCC for C/C++ development with environment name ``cpp``:\n\n    .. code-block::\n\n        FROM  ingi/inginious-c-base\n        LABEL org.inginious.grading.name=\"cpp\"\n        RUN   yum install -y gcc cpp make binutils libstdc++ && yum clean all\n\n    This new container can be built and used inside INGInious (after INGInious restart) by using the following command:\n\n    .. code-block:: shell\n\n        docker build -t ingi/inginious-c-ENVIRONMENT_NAME FOLDER_TO_DOCKERFILE\n\nLet's review\n------------\n\nBelow you'll find a small MCQ to review and better understand how to make additional INGInious environments.",
+		"html": "<div class=\"row\">\n<div class=\"col-md-10 text-justify\">\n<p>You have now reached the end of this tutorial and should be able to design assignments using INGInious. Some things remain uncovered like batch jobs and plugins. Those are advanced features for the superadministrator; please refer to the complete documentation.</p>\n<p>In this last section you'll find out how to add some environments to your INGInious installation. Indeed, our default environment only provides Python 2/3 along with some standard command-line tools. <strong>Please note that this is only accessible to the superadministrator, who has access to the INGInious installation.</strong></p>\n</div>\n<div class=\"col-md-2 text-center\">\n<i style=\"font-size:120px;\" class=\"fa fa-trophy\"></i></div>\n</div>\n<div class=\"section\" id=\"supported-environments\">\n<h3>Supported environments</h3>\n<p class=\"text-justify\">Some environments based on free and open source software are provided by the INGInious authors:</p>\n<table class=\"text-justify docutils field-list\" frame=\"void\" rules=\"none\">\n<col class=\"field-name\" />\n<col class=\"field-body\" />\n<tbody valign=\"top\">\n<tr class=\"field\"><th class=\"field-name\"><code class=\"docutils literal\">default</code>:</th><td class=\"field-body\">Default Python 2/3 environment.</td>\n</tr>\n<tr class=\"field\"><th class=\"field-name\"><code class=\"docutils literal\">cpp</code>:</th><td class=\"field-body\">Includes GCC toolchain for C/C++ development.</td>\n</tr>\n<tr class=\"field\"><th class=\"field-name\"><code class=\"docutils literal\">java7</code>:</th><td class=\"field-body\">Includes Java 7 and JUnit.</td>\n</tr>\n<tr class=\"field\"><th class=\"field-name\"><code class=\"docutils literal\">java8scala</code>:</th><td class=\"field-body\">Includes Java 8 and Scala.</td>\n</tr>\n<tr class=\"field\"><th class=\"field-name\"><code class=\"docutils literal\">math</code>:</th><td class=\"field-body\">Includes Octave and Julia.</td>\n</tr>\n<tr class=\"field\"><th class=\"field-name\"><code class=\"docutils literal\">mono</code>:</th><td class=\"field-body\">Includes the Mono framework for cross-platform dotnet development.</td>\n</tr>\n<tr class=\"field\"><th class=\"field-name\"><code class=\"docutils literal\">oz</code>:</th><td class=\"field-body\">Includes Mozart/Oz v2.0.0alpha.</td>\n</tr>\n<tr class=\"field\"><th class=\"field-name\"><code class=\"docutils literal\">php</code>:</th><td class=\"field-body\">Includes PHP5.</td>\n</tr>\n<tr class=\"field\"><th class=\"field-name\"><code class=\"docutils literal\">r</code>:</th><td class=\"field-body\">Includes R.</td>\n</tr>\n<tr class=\"field\"><th class=\"field-name\"><code class=\"docutils literal\">sekexe</code>:</th><td class=\"field-body\">Includes Sekexe to run process in user-mode Linux.</td>\n</tr>\n<tr class=\"field\"><th class=\"field-name\"><code class=\"docutils literal\">verilog</code>:</th><td class=\"field-body\">Includes Icarus Verilog.</td>\n</tr>\n</tbody>\n</table>\n<p class=\"text-justify\">INGInious supported environments are available through the Docker hub, and can be downloaded via the following command on your INGInious instances:</p>\n<pre class=\"code shell text-justify literal-block\">\ndocker pull ingi/inginious-c-ENVIRONMENT_NAME\n</pre>\n<p class=\"text-justify\">Then, restart the INGInious agent in order to see the new environment on the environment list.</p>\n</div>\n<div class=\"section\" id=\"custom-environments\">\n<h3>Custom environments</h3>\n<p class=\"text-justify\">All INGInious environment containers inherits from the <code class=\"docutils literal\"><span class=\"pre\">ingi/inginious-c-base</span></code> container which provides the INGInious API on CentOS distribution. To define a new environment, you'll need to:</p>\n<ul class=\"text-justify simple\">\n<li>Define a Docker container that inherits from <code class=\"docutils literal\"><span class=\"pre\">ingi/inginious-c-base</span></code> using a <code class=\"docutils literal\">Dockerfile</code>.</li>\n<li>Name the environment using the <code class=\"docutils literal\">org.inginious.grading.name</code> label.</li>\n</ul>\n<p class=\"text-justify\">For instance, these basic <code class=\"docutils literal\">Dockerfile</code> will provide you with GCC for C/C++ development with environment name <code class=\"docutils literal\">cpp</code>:</p>\n<pre class=\"code text-justify literal-block\">\nFROM  ingi/inginious-c-base\nLABEL org.inginious.grading.name=&quot;cpp&quot;\nRUN   yum install -y gcc cpp make binutils libstdc++ &amp;&amp; yum clean all\n</pre>\n<p class=\"text-justify\">This new container can be built and used inside INGInious (after INGInious restart) by using the following command:</p>\n<pre class=\"code shell text-justify literal-block\">\ndocker build -t ingi/inginious-c-ENVIRONMENT_NAME FOLDER_TO_DOCKERFILE\n</pre>\n</div>\n<div class=\"section\" id=\"let-s-review\">\n<h3>Let's review</h3>\n<p>Below you'll find a small MCQ to review and better understand how to make additional INGInious environments.</p>\n</div>\n"
+	},
+	{
+		"file": "infra/tasks/tutorial/12_environments/task.yaml",
+		"key": "q1.header",
+		"rst": "You want to download the provided ``cpp`` environment. What should you type into your shell ?",
+		"html": "<p>You want to download the provided <code class=\"docutils literal\">cpp</code> environment. What should you type into your shell ?</p>\n"
+	},
+	{
+		"file": "infra/tasks/tutorial/12_environments/task.yaml",
+		"key": "q1.choices.0",
+		"rst": ".. code-block:: shell\n\n    docker pull ingi/inginious-c-cpp",
+		"html": "<pre class=\"code shell literal-block\">\ndocker pull ingi/inginious-c-cpp\n</pre>\n"
+	},
+	{
+		"file": "infra/tasks/tutorial/12_environments/task.yaml",
+		"key": "q1.choices.1",
+		"rst": ".. code-block:: shell\n\n    docker pull cpp",
+		"html": "<pre class=\"code shell literal-block\">\ndocker pull cpp\n</pre>\n"
+	},
+	{
+		"file": "infra/tasks/tutorial/12_environments/task.yaml",
+		"key": "q2.header",
+		"rst": "How is the INGInious environment name provided from the container ?",
+		"html": "<p>How is the INGInious environment name provided from the container ?</p>\n"
+	},
+	{
+		"file": "infra/tasks/tutorial/12_environments/task.yaml",
+		"key": "q2.choices.0",
+		"rst": "Via the ``org.inginious.grading.name`` label.",
+		"html": "<p>Via the <code class=\"docutils literal\">org.inginious.grading.name</code> label.</p>\n"
+	},
+	{
+		"file": "infra/tasks/tutorial/12_environments/task.yaml",
+		"key": "q2.choices.1",
+		"rst": "Via the container tag suffix.",
+		"html": "<p>Via the container tag suffix.</p>\n"
+	},
+	{
+		"file": "infra/tasks/tutorial/12_environments/task.yaml",
+		"key": "q2.choices.2",
+		"rst": "Both.",
+		"html": "<p>Both.</p>\n"
+	},
+	{
+		"file": "infra/tasks/tutorial/12_environments/task.yaml",
+		"key": "q3.header",
+		"rst": "You want to build a new ``go`` environment. The path to your *Dockerfile* is ``/home/tux/go/Dockerfile``. What would you type in yourterminal ?",
+		"html": "<p>You want to build a new <code class=\"docutils literal\">go</code> environment. The path to your <em>Dockerfile</em> is <code class=\"docutils literal\">/home/tux/go/Dockerfile</code>. What would you type in yourterminal ?</p>\n"
+	},
+	{
+		"file": "infra/tasks/tutorial/12_environments/task.yaml",
+		"key": "q3.choices.0",
+		"rst": ".. code-block:: shell\n\n    docker build -t ingi/inginious-c-go /home/tux/go",
+		"html": "<pre class=\"code shell literal-block\">\ndocker build -t ingi/inginious-c-go /home/tux/go\n</pre>\n"
+	},
+	{
+		"file": "infra/tasks/tutorial/12_environments/task.yaml",
+		"key": "q3.choices.1",
+		"rst": ".. code-block:: shell\n\n    docker build -t ingi/inginious-c-go /home/tux/go/Dockerfile",
+		"html": "<pre class=\"code shell literal-block\">\ndocker build -t ingi/inginious-c-go /home/tux/go/Dockerfile\n</pre>\n"
+	},
+	{
+		"file": "infra/tasks/tutorial/12_environments/task.yaml",
+		"key": "q4.header",
+		"rst": "Can you define a new environment ``lamp`` by inheriting from an existing environment container, such as ``ingi/inginious-c-php`` ?",
+		"html": "<p>Can you define a new environment <code class=\"docutils literal\">lamp</code> by inheriting from an existing environment container, such as <code class=\"docutils literal\"><span class=\"pre\">ingi/inginious-c-php</span></code> ?</p>\n"
+	},
+	{
+		"file": "infra/tasks/tutorial/12_environments/task.yaml",
+		"key": "q4.choices.0",
+		"rst": "Yes.",
+		"html": "<p>Yes.</p>\n"
+	},
+	{
+		"file": "infra/tasks/tutorial/12_environments/task.yaml",
+		"key": "q4.choices.1",
+		"rst": "No.",
+		"html": "<p>No.</p>\n"
+	},
+	{
+		"file": "infra/tasks/tutorial/13_ssh_student/task.yaml",
+		"key": "context",
+		"rst": ".. container:: row\n\n    .. container:: col-md-10 text-justify\n\n        To allow students to learn how to use shells and bash commands, it may be useful to allow students to directly interact with their own container. This is possible with the *ssh_student* command. It will start a ssh server on the student_container and kill the container after the ssh session ended.\n\n        Some setup and teardown actions may be specified, for example, to start a process before starting the ssh server or to snapshot the running process before killing the container.\n\nTo illustrate its principle, a very basic example of run script is provided below:\n\n        .. code-block:: bash\n\n            #!/bin/bash\n\n            ssh_student --setup-script \"touch /task/student/delete_me.txt\"\n\n            if [ -f /task/student/delete_me.txt ]; then\n                feedback-result failed\n                feedback-msg -em \"You did not delete the file!\"\n            else\n                feedback-result success\n            fi\n\n        There are however some important limitations to bear in mind:\n\n        | -The setup and teardown scripts will not be run as root (for security reasons)\n        | -Only the modifications to the files in the student subdirectory will be reflected in the grading container\n\n\nNotes and limitations:\n----------------------\n\n        | -Setup and teardown scripts are not run as root for security reasons.\n        | -The student will not be able to run commands as root for security reasons.\n        | -Internet access must be allowed in the environment configuration tab.\n\n\nExamples:\n---------\n\nSome examples including more complexe exercises can be found at https://github.com/darkyne/ssh_student_examples including starting background process during setup and snapshotting the running process during teardown.\n\n\nLet's have a try !\n------------------\n\n| Simply press *submit* and you will be granted an ssh access.\n| Your job is to delete the \"delete_me.txt\" file then to exit the ssh session.\n| Note, this specific exercise is configured wih a 180sec hard time out, so you only have 3min to connect, delete the file and exit. Good luck.\n| You should succeed in this quite easily !",
+		"html": "<div class=\"row\">\n<div class=\"col-md-10 text-justify\">\n<p>To allow students to learn how to use shells and bash commands, it may be useful to allow students to directly interact with their own container. This is possible with the <em>ssh_student</em> command. It will start a ssh server on the student_container and kill the container after the ssh session ended.</p>\n<p>Some setup and teardown actions may be specified, for example, to start a process before starting the ssh server or to snapshot the running process before killing the container.</p>\n</div>\n</div>\n<p>To illustrate its principle, a very basic example of run script is provided below:</p>\n<blockquote>\n<pre class=\"code bash literal-block\">\n#!/bin/bash\n\nssh_student --setup-script &quot;touch /task/student/delete_me.txt&quot;\n\nif [ -f /task/student/delete_me.txt ]; then\n    feedback-result failed\n    feedback-msg -em &quot;You did not delete the file!&quot;\nelse\n    feedback-result success\nfi\n</pre>\n<p>There are however some important limitations to bear in mind:</p>\n<div class=\"line-block\">\n<div class=\"line\">-The setup and teardown scripts will not be run as root (for security reasons)</div>\n<div class=\"line\">-Only the modifications to the files in the student subdirectory will be reflected in the grading container</div>\n</div>\n</blockquote>\n<div class=\"section\" id=\"notes-and-limitations\">\n<h3>Notes and limitations:</h3>\n<blockquote>\n<div class=\"line-block\">\n<div class=\"line\">-Setup and teardown scripts are not run as root for security reasons.</div>\n<div class=\"line\">-The student will not be able to run commands as root for security reasons.</div>\n<div class=\"line\">-Internet access must be allowed in the environment configuration tab.</div>\n</div>\n</blockquote>\n</div>\n<div class=\"section\" id=\"examples\">\n<h3>Examples:</h3>\n<p>Some examples including more complexe exercises can be found at <a class=\"reference external\" href=\"https://github.com/darkyne/ssh_student_examples\" target=\"_blank\">https://github.com/darkyne/ssh_student_examples</a> including starting background process during setup and snapshotting the running process during teardown.</p>\n</div>\n<div class=\"section\" id=\"let-s-have-a-try\">\n<h3>Let's have a try !</h3>\n<div class=\"line-block\">\n<div class=\"line\">Simply press <em>submit</em> and you will be granted an ssh access.</div>\n<div class=\"line\">Your job is to delete the &quot;delete_me.txt&quot; file then to exit the ssh session.</div>\n<div class=\"line\">Note, this specific exercise is configured wih a 180sec hard time out, so you only have 3min to connect, delete the file and exit. Good luck.</div>\n<div class=\"line\">You should succeed in this quite easily !</div>\n</div>\n</div>\n"
+	}
+]

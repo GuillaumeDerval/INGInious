@@ -1,0 +1,37 @@
+{
+  "name": "NAV ACL email accept",
+  "admins": [
+    "superadmin"
+  ],
+  "tutors": [],
+  "description": "Course NAV ACL email accept",
+  "accessible": true,
+  "registration": true,
+  "allow_unregister": true,
+  "task_dispenser": "toc",
+  "dispenser_data": {
+    "toc": [
+      {
+        "title": "Tasks",
+        "tasks_list": [
+          "t1",
+          "t2"
+        ]
+      }
+    ],
+    "config": {
+      "t1": {
+        "accessibility": true
+      },
+      "t2": {
+        "accessibility": true
+      }
+    }
+  },
+  "registration_ac": "email",
+  "registration_ac_accept": true,
+  "registration_ac_list": [
+    "*@ok.org",
+    "nav_bob@x.org"
+  ]
+}

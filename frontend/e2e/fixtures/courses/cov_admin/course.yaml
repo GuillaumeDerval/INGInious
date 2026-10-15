@@ -1,0 +1,37 @@
+name: COV admin course
+description: Course of the administration coverage tests
+admins:
+  - e2e_admin
+tutors:
+  - e2e_tutor
+tags:
+  t1:
+    name: Tag one
+task_dispenser: toc
+dispenser_data:
+  toc:
+    - title: Week 1
+      config:
+        closed: false
+      tasks_list:
+        - task1
+        - code1
+        - odd1
+        - ghost
+        - noconf
+    - title: Week 2
+      tasks_list: []
+  config:
+    task1:
+      accessibility: true
+      weight: 2
+      submission_limit:
+        amount: 3
+        period: -1
+      group_submission: true
+    code1:
+      accessibility: true
+    odd1:
+      accessibility: true
+    ghost:
+      accessibility: true

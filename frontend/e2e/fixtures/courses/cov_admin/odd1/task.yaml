@@ -1,0 +1,7 @@
+name: Odd one
+environment_type: mcq
+environment_id: mcq
+problems:
+  w:
+    type: custom_widget
+    name: Widget

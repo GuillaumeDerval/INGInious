@@ -1,0 +1,57 @@
+# Integration coverage of rich text rendering (RST/Markdown) and of the task page
+# (e2e/coverage/text-task.e2e.ts). rst_gallery / md_gallery / rst_extra / md_extra /
+# editors / broken_* were generated from the golden examples of tests/fixtures/rst
+# and from the constructs those examples miss.
+name: '[COV] Rich text and task page'
+description: |
+  #MD
+  Course **description** in Markdown.
+admins:
+  - superadmin
+  - e2e_admin
+tutors:
+  - e2e_tutor
+accessible: true
+registration: true
+registration_password: null
+registration_ac: null
+registration_ac_list: []
+allow_unregister: true
+allow_preview: true
+groups_student_choice: true
+is_lti: false
+lti_send_back_grade: false
+tags:
+  skill_ok:
+    name: Good skill
+    description: A visible skill
+    type: 0
+    visible: true
+  mis_bad:
+    name: Misconception
+    description: A visible misconception
+    type: 1
+    visible: true
+  skill_hidden:
+    name: Hidden skill
+    description: Only staff
+    type: 0
+    visible: false
+task_dispenser: toc
+dispenser_data:
+  toc:
+    - title: Galleries
+      tasks_list: [rst_gallery, md_gallery, rst_extra, md_extra, editors, feedback, limited_group, stored_one, slow]
+  config:
+    rst_gallery: { accessibility: true }
+    md_gallery: { accessibility: true }
+    rst_extra: { accessibility: true }
+    md_extra: { accessibility: true }
+    editors: { accessibility: true }
+    feedback: { accessibility: true, evaluation_mode: best }
+    limited_group:
+      accessibility: true
+      group_submission: true
+      submission_limit: { amount: 1, period: 2 }
+    stored_one: { accessibility: true, no_stored_submissions: 1 }
+    slow: { accessibility: true }

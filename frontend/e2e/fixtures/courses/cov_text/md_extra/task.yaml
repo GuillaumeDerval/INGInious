@@ -1,0 +1,88 @@
+# Generated from tests/fixtures/rst (golden examples): one problem header per example.
+name: Markdown extra constructs
+author: INGInious test-suite
+context: ''
+environment_type: mcq
+environment_id: mcq
+input_random: 2
+regenerate_input_random: true
+problems:
+  dollar_space:
+    type: match
+    name: dollar_space
+    header: |-
+      #MD
+      Costs $ 5 and $6 $x$ and $$y$$ and \(z\)
+    answer: x
+  math_in_link:
+    type: match
+    name: math_in_link
+    header: |-
+      #MD
+      [link $x$](https://example.org) and [\(y\)](https://example.org)
+    answer: x
+  unclosed_block:
+    type: match
+    name: unclosed_block
+    header: |-
+      #MD
+      $$
+      never closed
+    answer: x
+  alert_inline:
+    type: match
+    name: alert_inline
+    header: |-
+      #MD
+      > [!TIP] same line tip
+    answer: x
+  alert_unknown:
+    type: match
+    name: alert_unknown
+    header: |-
+      #MD
+      > [!FOO]
+      > not an alert
+    answer: x
+  alert_empty:
+    type: match
+    name: alert_empty
+    header: |-
+      #MD
+      > [!NOTE]
+    answer: x
+  block_math_multiline:
+    type: match
+    name: block_math_multiline
+    header: |-
+      #MD
+      \[
+      a + b
+      \]
+    answer: x
+  empty_heading_block:
+    type: match
+    name: empty_heading_block
+    header: |-
+      #MD
+      $$
+
+      $$ x
+    answer: x
+  paragraph_then_math:
+    type: match
+    name: paragraph_then_math
+    header: |-
+      #MD
+      text
+      $$
+      x
+      $$
+    answer: x
+  random_md:
+    type: match
+    name: random_md
+    header: |-
+      #MD
+      <span class="rnd"><script>document.write(input["@random"][1])</script></span>
+    answer: x

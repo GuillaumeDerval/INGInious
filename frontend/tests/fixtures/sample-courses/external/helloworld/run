@@ -1,0 +1,8 @@
+#!/usr/bin/python3
+from inginious_container_api import feedback, input
+code = input.get_input("question1")
+if "Hello World!" in code:
+    feedback.set_global_result("success"); feedback.set_global_feedback("Well done")
+else:
+    feedback.set_global_result("failed"); feedback.set_global_feedback("Expected Hello World!")
+feedback.set_custom_value("score", len(code))

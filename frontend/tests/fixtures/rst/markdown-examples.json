@@ -1,0 +1,92 @@
+[
+	{
+		"name": "paragraph",
+		"markdown": "Hello **world** and *it* and `code --x` & <b>bold</b>.\n\nSecond.",
+		"html": "<p>Hello <strong>world</strong> and <em>it</em> and <code>code --x</code> &amp; <b>bold</b>.</p>\n<p>Second.</p>\n"
+	},
+	{
+		"name": "headings_start_at_h3",
+		"markdown": "# Title\n\n## Sub\n\ntext",
+		"html": "<h3>Title</h3>\n<h4>Sub</h4>\n<p>text</p>\n"
+	},
+	{
+		"name": "fenced_code",
+		"markdown": "```python\ndef f(x):\n    return x < 2\n```",
+		"html": "<pre class=\"code python literal-block\">\ndef f(x):\n    return x &lt; 2\n</pre>\n"
+	},
+	{
+		"name": "fenced_code_no_language",
+		"markdown": "```\nplain\n```",
+		"html": "<pre class=\"code literal-block\">\nplain\n</pre>\n"
+	},
+	{
+		"name": "indented_code",
+		"markdown": "para\n\n    code block",
+		"html": "<p>para</p>\n<pre class=\"literal-block\">\ncode block\n</pre>\n"
+	},
+	{
+		"name": "gfm_table",
+		"markdown": "| A | B |\n|---|---|\n| 1 | 2 |",
+		"html": "<table class=\"table table-bordered\">\n<thead class=\"thead-light\">\n<tr>\n<th>A</th>\n<th>B</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>1</td>\n<td>2</td>\n</tr>\n</tbody>\n</table>\n"
+	},
+	{
+		"name": "math_inline",
+		"markdown": "Inline $a^2$ and \\(b_1\\) but $5 and $6.",
+		"html": "<p>Inline <span class=\"math\">\\(a^2\\)</span> and <span class=\"math\">\\(b_1\\)</span> but $5 and $6.</p>\n"
+	},
+	{
+		"name": "math_block_dollars",
+		"markdown": "$$\n\\int_0^1 x\\,dx\n$$",
+		"html": "<div class=\"math\">\n\\[\\int_0^1 x\\,dx\\]\n</div>\n"
+	},
+	{
+		"name": "math_block_brackets",
+		"markdown": "\\[ x = 1 \\]",
+		"html": "<div class=\"math\">\n\\[x = 1\\]\n</div>\n"
+	},
+	{
+		"name": "links",
+		"markdown": "[INGInious](https://inginious.org), [anchor](#top), <https://example.com> and [js](javascript:alert(1))",
+		"html": "<p><a href=\"https://inginious.org\" target=\"_blank\" rel=\"noopener noreferrer\">INGInious</a>, <a href=\"#top\">anchor</a>, <a href=\"https://example.com\" target=\"_blank\" rel=\"noopener noreferrer\">https://example.com</a> and [js](javascript:alert(1))</p>\n"
+	},
+	{
+		"name": "image",
+		"markdown": "![alt text](img.png)",
+		"html": "<p><img src=\"img.png\" alt=\"alt text\" /></p>\n"
+	},
+	{
+		"name": "github_alert_warning",
+		"markdown": "> [!WARNING]\n> Be careful.",
+		"html": "<div class=\"admonition warning alert alert-warning\">\n<p>Be careful.</p>\n</div>\n"
+	},
+	{
+		"name": "github_alert_note",
+		"markdown": "> [!NOTE]\n> Note body\n> more",
+		"html": "<div class=\"admonition note alert alert-light\">\n<p>Note body\nmore</p>\n</div>\n"
+	},
+	{
+		"name": "blockquote",
+		"markdown": "> just a quote",
+		"html": "<blockquote>\n<p>just a quote</p>\n</blockquote>\n"
+	},
+	{
+		"name": "lists",
+		"markdown": "- one\n- two\n  1. nested",
+		"html": "<ul>\n<li>one</li>\n<li>two\n<ol>\n<li>nested</li>\n</ol>\n</li>\n</ul>\n"
+	},
+	{
+		"name": "raw_html_sanitized",
+		"markdown": "<div class=\"row\"><script>alert(1)</script><span onclick=\"x()\">hi</span></div>",
+		"html": "<div class=\"row\"><span>hi</span></div>"
+	},
+	{
+		"name": "random_idiom",
+		"markdown": "Value: <script>document.write(input[\"@random\"][0])</script>",
+		"html": "<p>Value: 0.5</p>\n"
+	},
+	{
+		"name": "strikethrough",
+		"markdown": "~~gone~~",
+		"html": "<p><s>gone</s></p>\n"
+	}
+]

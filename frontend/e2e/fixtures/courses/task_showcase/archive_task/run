@@ -1,0 +1,8 @@
+#!/bin/bash
+# Grading script of task_showcase/archive_task
+getinput text > /tmp/report.txt
+archive -a /tmp/report.txt
+echo "nested" > /tmp/nested.txt
+archive -a /tmp/nested.txt -s sub
+feedback-result success
+feedback-msg -m "Archive written: \`\`report.txt\`\` and \`\`sub/nested.txt\`\`."

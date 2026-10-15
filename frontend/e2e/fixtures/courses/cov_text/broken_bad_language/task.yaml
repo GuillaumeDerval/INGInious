@@ -1,0 +1,8 @@
+# Generated from tests/fixtures/rst (golden examples): one problem header per example.
+name: bad_language
+environment_type: mcq
+environment_id: mcq
+problems:
+  p:
+    type: code
+    language: py thon

@@ -1,0 +1,32 @@
+name: SITE main course
+admins:
+  - e2e_admin
+tutors:
+  - e2e_tutor
+accessible: true
+registration: true
+allow_unregister: true
+task_dispenser: toc
+dispenser_data:
+  toc:
+    - id: s1
+      title: Exercises
+      rank: 0
+      tasks_list:
+        mcq1: 0
+        code1: 1
+        code2: 2
+        hidden: 3
+  config:
+    mcq1: { accessibility: true }
+    code1: { accessibility: true }
+    code2: { accessibility: true }
+    hidden: { accessibility: false }
+scoreboard:
+  - name: Code 1 only
+    content: code1
+  - name: Both code tasks
+    content: [code1, code2]
+  - name: Weighted reverse
+    content: { code1: 2, code2: -1 }
+    reverse: true

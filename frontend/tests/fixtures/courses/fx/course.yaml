@@ -1,0 +1,60 @@
+name: Fixture course
+description: |
+  Hello *world*
+admins:
+  - admin1
+tutors:
+  - tutor1
+accessible: true
+registration: true
+registration_password: pwd
+groups_student_choice: true
+text_format: markdown
+custom_key: kept
+tags:
+  skill:
+    name: Skill
+    description: A skill
+    visible: true
+    type: 0
+  orga:
+    name: Week 1
+task_dispenser: toc
+dispenser_data:
+  toc:
+    - title: Part 1
+      config:
+        closed: true
+      sections_list:
+        - title: Basics
+          tasks_list:
+            - code1
+            - mcq1
+    - title: Files
+      tasks_list:
+        - upload
+        - missing
+  config:
+    code1:
+      weight: 1
+      accessibility: true
+      categories:
+        - easy
+    mcq1:
+      weight: 3
+      accessibility: 2020-01-01 / 2021-01-01
+      categories:
+        - hard
+        - easy
+      group_submission: true
+      submission_limit:
+        amount: 2
+        period: -1
+    upload:
+      weight: 2
+      accessibility: true
+      submission_limit:
+        amount: 1
+        period: 1
+    future:
+      accessibility: '2999-01-01'

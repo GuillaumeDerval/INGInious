@@ -1,0 +1,41 @@
+#!/usr/bin/env python3
+# Grading script of task_showcase/code_python
+import json
+import subprocess
+from inginious_container_api import feedback, input
+
+code = input.get_input("code")
+open("student.py", "w").write(code + "\n")
+tests = [0, 1, 3, 10]
+passed = 0
+lines = []
+results = []
+for n in tests:
+    proc = subprocess.run(["python3", "-c", "import json, student; print(json.dumps(student.count_to(%d)))" % n],
+                          capture_output=True, text=True, timeout=5)
+    try:
+        got = json.loads(proc.stdout.strip())
+    except Exception:
+        got = None
+    results.append(got)
+    ok = got == list(range(1, n + 1))
+    passed += ok
+    lines.append("* ``count_to(%d)``: %s" % (n, "OK" if ok else "expected ``%s``, got ``%s``" % (list(range(1, n + 1)), got)))
+    print("test", n, ok)
+
+grade = 100.0 * passed / len(tests)
+feedback.set_grade(grade)
+feedback.set_global_result("success" if passed == len(tests) else "failed")
+feedback.set_global_feedback("%d/%d tests passed." % (passed, len(tests)))
+feedback.set_problem_result("success" if passed == len(tests) else "failed", "code")
+feedback.set_problem_feedback("\n".join(lines), "code")
+feedback.set_tag("skill_loop", ("for " in code or "while " in code) and passed == len(tests))
+feedback.set_tag("skill_hidden", True)
+off_by_one = any(r is not None and r in (list(range(0, n)), list(range(1, n)), list(range(0, n + 1)))
+                 and r != list(range(1, n + 1)) for r, n in zip(results, tests))
+feedback.set_tag("misc_off_by_one", off_by_one)
+feedback.tag("auto tag: %d tests passed" % passed)
+feedback.set_custom_value("passed", passed)
+feedback.set_state(str(passed))
+import sys
+print("this goes to stderr", file=sys.stderr)

@@ -1,0 +1,15 @@
+name: Legacy one
+environment_type: mcq
+environment_id: mcq
+weight: 4
+submission_limit:
+  amount: 2
+  period: -1
+stored_submissions: 1
+groups: true
+evaluate: last
+accessible: 2025-01-01 00:00:00/2030-01-01 00:00:00
+categories:
+  - old
+custom_key: keep me
+problems: {}

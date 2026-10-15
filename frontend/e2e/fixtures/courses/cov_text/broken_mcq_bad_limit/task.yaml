@@ -1,0 +1,11 @@
+# Generated from tests/fixtures/rst (golden examples): one problem header per example.
+name: mcq_bad_limit
+environment_type: mcq
+environment_id: mcq
+problems:
+  p:
+    type: multiple_choice
+    limit: -1
+    choices:
+      - text: a
+        valid: true

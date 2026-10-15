@@ -1,0 +1,18 @@
+name: Never accessible task
+author: INGInious test-suite
+context: |
+    Accessibility ``false``: never accessible to students.
+
+    Correct answer: **Yes**.
+environment_type: mcq
+environment_id: mcq
+problems:
+    q:
+        type: multiple_choice
+        name: Simple question
+        header: Answer *Yes* to succeed, *No* to fail.
+        unshuffle: true
+        choices:
+        -   text: 'Yes'
+            valid: true
+        -   text: 'No'

@@ -1,0 +1,19 @@
+#!/bin/bash
+ANS=$(getinput answer)
+mkdir -p /archive
+echo "answer=$ANS" > /archive/answer.txt
+echo "stdout line for $ANS"
+echo "stderr line for $ANS" 1>&2
+if [ "$ANS" = "42" ]; then
+  feedback-result success; feedback-grade 100; feedback-msg -m "Well done, **42**"
+  tag-set good true
+  tag "auto value 42"
+elif [ "$ANS" = "21" ]; then
+  feedback-result failed; feedback-grade 50; feedback-msg -m "Half"
+  tag-set misc true
+elif [ "$ANS" = "crash" ]; then
+  exit 3
+else
+  feedback-result failed; feedback-grade 0; feedback-msg -m "Wrong"
+  tag-set misc true
+fi

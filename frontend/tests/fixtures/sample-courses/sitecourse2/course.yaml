@@ -1,0 +1,6 @@
+name: SITE secret course
+admins: [superadmin]
+accessible: false
+registration: false
+task_dispenser: toc
+dispenser_data: {toc: [], config: {}}

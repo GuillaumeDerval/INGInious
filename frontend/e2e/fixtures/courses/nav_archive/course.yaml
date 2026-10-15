@@ -1,0 +1,17 @@
+{
+  'name': 'NAV Archived course',
+  'admins': ['superadmin'],
+  'tutors': [],
+  'description': 'Course NAV Archived course',
+  'accessible': true,
+  'registration': true,
+  'allow_unregister': true,
+  'task_dispenser': 'toc',
+  'dispenser_data':
+    {
+      'toc': [{ 'title': 'Tasks', 'tasks_list': ['t1', 't2'] }],
+      'config': { 't1': { 'accessibility': true }, 't2': { 'accessibility': true } }
+    },
+  'archived': true,
+  'archive_date': '2026-01-01T00:00:00+00:00'
+}

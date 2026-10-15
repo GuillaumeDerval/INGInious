@@ -1,0 +1,57 @@
+# Course of the site/nav/auth/LTI coverage tests (e2e/coverage/site.e2e.ts):
+# slow docker tasks (job queue), scoreboard variants, file and closed tasks (REST API).
+name: COV site course
+admins:
+  - e2e_admin
+tutors:
+  - e2e_tutor
+accessible: true
+registration: true
+allow_unregister: true
+tags:
+  cov_cat:
+    name: Cat
+    type: 2
+    visible: true
+task_dispenser: toc
+dispenser_data:
+  toc:
+    - id: s1
+      title: Exercises
+      rank: 0
+      tasks_list:
+        slow1: 0
+        slow2: 1
+        code1: 2
+        code2: 3
+        file1: 4
+        closed: 5
+    - id: s2
+      title: Others
+      rank: 1
+      tasks_list:
+        mcq1: 0
+        archive: 1
+  config:
+    slow1: { accessibility: true }
+    slow2: { accessibility: true }
+    code1: { accessibility: true, categories: [cov_cat] }
+    code2: { accessibility: '2020-01-01 00:00:00 / 2099-01-01 00:00:00', categories: [cov_cat], weight: 2 }
+    file1: { accessibility: true }
+    mcq1: { accessibility: true }
+    archive: { accessibility: true }
+    closed: { accessibility: '2020-01-01 00:00:00 / 2021-01-01 00:00:00' }
+scoreboard:
+  - name: Single
+    content: code1
+  - name: Pair
+    content: [code1, code2]
+  - name: Weighted
+    content: { code1: 2, code2: -1 }
+    reverse: true
+  - name: Slow only
+    content: slow1
+  - name: Broken
+    content: [code1, ghost]
+  - content: code1
+  - name: No content

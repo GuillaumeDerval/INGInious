@@ -1,0 +1,88 @@
+accessible: true
+name: CADM Course One
+description: desc
+admins:
+- cadm_admin
+tutors:
+- cadm_tutor
+groups_student_choice: true
+allow_unregister: true
+allow_preview: true
+registration: true
+registration_password: null
+registration_ac: null
+registration_ac_accept: true
+registration_ac_list: []
+is_lti: true
+lti_url: ''
+lti_keys:
+    key1: secret1
+lti_config:
+    https://lms.example:
+    -   auth_login_url: https://lms.example/auth
+        auth_token_url: https://lms.example/token
+        client_id: cid1
+        default: true
+        deployment_ids:
+        - dep1
+        - dep2
+        key_set_url: https://lms.example/jwks
+        private_key: |
+            -----BEGIN PRIVATE KEY-----
+            MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDJZAemVSPVDAl/
+            OGv8fN/5om75LGLdTK66FKebg/iYcwfLhZyGijK/8pGMzDI1IJ4RALkmVPppJO7i
+            QmVQGLP5R0GyflYWJGgz+TKWbNZ1V+8PBcQQl0EWXsXGZCmTe9Ioel7vUZN/thzl
+            g/svADDyhqmdUIAaCSTjQfO1yflKd/pl0A6DOEqitPNsHUeEYjpt6TNbtC+W2x3Z
+            P19FEgEdLe+E/0VtBXoGf5LvDdTGeziaf80fSXF4Ey1yHFC3EZVKM1RIclkva3lN
+            IZwMZrik3eFb2Qw7vwvpoOVtkN4vM1zerMLrlKyW0juhKcVZzEBu4+BYJYkp0xd9
+            ErJfpm5HAgMBAAECggEALN6SC7+VY66yYPtnp9IEruA/XFnEzyx6E3BtpWsCVKjw
+            WCp1JM6enwCC6D1IhGi3fu9L0RwGzK1TYerMGsveMVBsdUHLmVRUORww5q3qHCvS
+            0eSFefLRKBRGeTywvLDOMoGNLEHfHImtJ3+/04l13lsdaDTazbIy20VC8MJGvg3W
+            9eZgvr5apK9AJiIXV7AJfN+DBm78jtmngpxHMFmk/Sl43UOuCTXG4Qhfy9oY4IR7
+            VgusrlO605BLmyHFc7miysYtVa7G57rn/rAxOhjyBmGMakIru/neMxxTJiVSjbRP
+            m3bozIBQO5SSPE3xigb8XKVMr3Jhr/mlFouyNoSz8QKBgQDmlxPHNpmtZ1Qqd1NX
+            rI65dfrS4UazSof9nYgwfPlEYSqg0EsebWj92SB+OV022bLkZKRBMHZdiuv4z2B+
+            0qqMkld4jL0x3DTDHjAAhWET67b8AzrMyIsLdQ1+OMu/EGUN33IuQdZBQtAS/2oy
+            IVyaXBJ/cj0brqHISYWkPGoX8QKBgQDflT2aozylFfc3XmrnFuj4HJ4osOIcjCyV
+            Ua28fEESzfnAdgQEIN1luvNCZTNIPeqZQu2H6v7IlZXQmMlBzUaQTFU3TIPQ1l5U
+            vsJXb2KiJiZdXi7mQEmAkvfFl7KEIg9/XTqO/i2Y3twtiwgrwNRQLgRCuG12JQ8D
+            yn3ZnY1htwKBgBXdIUz0SmH8uChGpCpd/DJtk1jHb3K0kGxlsXIXh3MKW4Zf+Z9q
+            9FeNbN1LByGaRrINMN3VgIOiFnnC//1GcFFf1tdhUNcXcBFIHXkPLIM9CF6g18Rv
+            B3AQqzTaocb+APbtxt/H8k7BzQTgHuud6i/gpwhahpzHVCOvhPJroAuhAoGBAKPm
+            uMlivvNaXec2DPIpJlG0UPENckRxMcGopc8V23JYkqzXFuyb1xFbcjaLD4P298Kw
+            gIZx66LJnZDUYD0fqYngm1u1eLAgZfiD+t2z5r9tbhRmFcVu/TMHCiHMqe4ZNfkt
+            M99dT7nQLeIpGK1SZ5H7md37ayr/0bj6uTVNPTaTAoGBAKkkKydCL+xgngtan0Ig
+            wkpFMKiSxboojKAebQS2dOGDdGDYrfvhJ7lDAHqr6P3VjAqLwQneBbGI9aCqOaJ4
+            /oyvhWIgsiAOLVIlcd5Eof78jx1QfCsNYlcAIq0nDkhOqQNtfikyTZuQd0KvYz4a
+            SMIIs2DQy9izsv3mjCTaScrp
+            -----END PRIVATE KEY-----
+        public_key: |
+            -----BEGIN PUBLIC KEY-----
+            MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAyWQHplUj1QwJfzhr/Hzf
+            +aJu+Sxi3UyuuhSnm4P4mHMHy4Wchooyv/KRjMwyNSCeEQC5JlT6aSTu4kJlUBiz
+            +UdBsn5WFiRoM/kylmzWdVfvDwXEEJdBFl7FxmQpk3vSKHpe71GTf7Yc5YP7LwAw
+            8oapnVCAGgkk40Hztcn5Snf6ZdAOgzhKorTzbB1HhGI6bekzW7Qvltsd2T9fRRIB
+            HS3vhP9FbQV6Bn+S7w3Uxns4mn/NH0lxeBMtchxQtxGVSjNUSHJZL2t5TSGcDGa4
+            pN3hW9kMO78L6aDlbZDeLzNc3qzC65SsltI7oSnFWcxAbuPgWCWJKdMXfRKyX6Zu
+            RwIDAQAB
+            -----END PUBLIC KEY-----
+lti_secrets:
+    https://lms.example/cid1/dep1: abc123
+lti_send_back_grade: false
+tags: {}
+task_dispenser: toc
+dispenser_data:
+    config:
+        ghost: {}
+        task1: {}
+        task2: {}
+    imported: false
+    toc:
+    -   config:
+            closed: false
+            hidden_if_empty: false
+        tasks_list:
+        - task1
+        - task2
+        - ghost
+        title: Week 1

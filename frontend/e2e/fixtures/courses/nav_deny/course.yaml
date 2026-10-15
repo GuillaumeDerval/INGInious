@@ -1,0 +1,18 @@
+{
+  'name': 'NAV ACL username deny',
+  'admins': ['superadmin'],
+  'tutors': [],
+  'description': 'Course NAV ACL username deny',
+  'accessible': true,
+  'registration': true,
+  'allow_unregister': true,
+  'task_dispenser': 'toc',
+  'dispenser_data':
+    {
+      'toc': [{ 'title': 'Tasks', 'tasks_list': ['t1', 't2'] }],
+      'config': { 't1': { 'accessibility': true }, 't2': { 'accessibility': true } }
+    },
+  'registration_ac': 'username',
+  'registration_ac_accept': false,
+  'registration_ac_list': ['nav_bob', 'nav_c*']
+}

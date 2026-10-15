@@ -1,0 +1,12 @@
+name: Code one
+environment_type: docker
+environment_id: default
+environment_parameters:
+  limits:
+    time: 10
+    memory: 128
+problems:
+  c:
+    type: code
+    language: python
+    default: print(1)

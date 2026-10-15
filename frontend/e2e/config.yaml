@@ -1,0 +1,34 @@
+# Configuration of the new frontend during integration (Playwright) tests.
+# playwright.config.ts sets the run's database, tasks_directory (E2E_TASKS_DIR, shared with
+# the grading agents) and backup_directory (e2e/.generated/backups) before using it.
+backend: tcp://127.0.0.1:2000
+mongo_opt:
+  database: INGInious_e2e
+  host: localhost
+tasks_directory: set-by-playwright-config
+backup_directory: set-by-playwright-config
+session_parameters:
+  secret_key: e2e-secret-key-0123456789abcdef0123456789abcdef
+  secure: false
+  timeout: 86400
+superadmins:
+  - superadmin
+allow_registration: true
+allow_deletion: true
+maintenance: false
+smtp:
+  sendername: 'INGInious <no-reply@inginious.local>'
+  host: localhost
+  port: 1025
+  starttls: false
+plugins:
+  - plugin_module: inginious.frontend.plugins.scoreboard
+  - plugin_module: inginious.frontend.plugins.contests
+  - plugin_module: inginious.frontend.plugins.demo
+  - plugin_module: inginious.frontend.plugins.simple_grader
+    courseid: e2e_site_main
+    api_key: e2e-grader-key
+  - plugin_module: inginious.frontend.plugins.git_repo
+    repo_directory: e2e/.generated/git-repo
+  - plugin_module: inginious.frontend.plugins.upcoming_tasks
+  - plugin_module: inginious.frontend.plugins.ltibestsubmission

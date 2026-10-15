@@ -1,0 +1,321 @@
+/*
+ * INGInious component layer (docs/design-system.md), imported by routes/layout.css after Skeleton.
+ *
+ * 1. Base: focus ring, native form controls, code font.
+ * 2. Overrides of Skeleton utilities (`btn`, `btn-icon`, `badge`, `chip`, `input`, `select`,
+ *    `textarea`, `checkbox`, `radio`, `table`) so that every existing page gets consistent
+ *    sizes: controls are 36px high (32px with `btn-sm`/`field-sm`), text 14px, badges 12px.
+ *    They are plain rules placed after the generated utilities: Tailwind cannot override a
+ *    property of an imported `@utility`, so these rules only set geometry/colour properties
+ *    callers do not normally change (size modifiers keep working through `--btn-size`).
+ * 3. New semantic utilities: `panel` (card surface), `eyebrow` (small section label),
+ *    `kv` (key/value list), `kbd`.
+ */
+
+/* ---- 1. Base ------------------------------------------------------------------------ */
+@layer base {
+	:focus-visible {
+		outline: 2px solid var(--color-primary-500);
+		outline-offset: 2px;
+	}
+	/* Unclassed native checkboxes/radios/ranges get the brand colour. */
+	:where(input[type='checkbox'], input[type='radio'], input[type='range'], progress) {
+		accent-color: var(--color-primary-500);
+	}
+	:where(kbd, samp, pre) {
+		font-family: var(--font-mono);
+		font-size: 0.9em;
+	}
+	/* Standalone <code> (ids, paths): neutral tint instead of Skeleton's brand tint. */
+	code {
+		background-color: color-mix(in oklab, var(--color-surface-500) 12%, transparent);
+		color: inherit;
+		font-size: 0.85em;
+		padding-inline: 0.35em;
+		padding-block: 0.1em;
+		border-radius: 0.3rem;
+	}
+	:where(h1, h2, h3, h4, h5, h6) {
+		font-weight: var(--typo-heading--font-weight);
+		letter-spacing: var(--typo-heading--letter-spacing);
+	}
+	summary {
+		cursor: pointer;
+	}
+}
+
+/* ---- 2. Skeleton overrides ---------------------------------------------------------- */
+@layer utilities {
+	/* Buttons: height = 2.25 × --btn-size (36px default, 31px btn-sm, 40px btn-lg). */
+	.btn,
+	.btn-icon {
+		font-size: max(0.8125rem, calc(var(--btn-size) * 0.875));
+		font-weight: 500;
+		line-height: 1.25rem;
+		height: calc(var(--btn-size) * 2.25);
+		flex-shrink: 0;
+		& > :where(svg) {
+			width: 1rem;
+			height: 1rem;
+		}
+	}
+	.btn {
+		padding-block: 0;
+		padding-inline: calc(var(--btn-size) * 0.8);
+		gap: 0.5rem;
+	}
+	.btn-icon {
+		width: calc(var(--btn-size) * 2.25);
+		padding: 0;
+	}
+	/* Filled buttons get a hairline inner highlight and a soft shadow (depth without borders). */
+	:is(.btn, .btn-icon):is(
+		.preset-filled-primary-500,
+		.preset-filled-error-500,
+		.preset-filled-success-500,
+		.preset-filled-warning-500
+	) {
+		box-shadow:
+			inset 0 1px 0 0 rgb(255 255 255 / 0.12),
+			0 1px 2px 0 rgb(0 0 0 / 0.12);
+	}
+	/* Busy button (its form is being submitted, toastEnhance): a spinner replaces the icon, no more clicks. */
+	:is(.btn, .btn-icon)[aria-busy='true'] {
+		pointer-events: none;
+		cursor: progress;
+		&::before {
+			content: '';
+			width: 1rem;
+			height: 1rem;
+			flex-shrink: 0;
+			border: 2px solid currentColor;
+			border-inline-end-color: transparent;
+			border-radius: 9999px;
+			animation: busy-spin 0.7s linear infinite;
+		}
+		& > svg {
+			display: none;
+		}
+	}
+	form[aria-busy='true'] {
+		cursor: progress;
+	}
+
+	/* Badges and chips: readable (12px / 14px), medium weight. */
+	.badge {
+		font-size: 0.75rem;
+		line-height: 1rem;
+		font-weight: 500;
+		padding: 0.125rem 0.5rem;
+		gap: 0.25rem;
+		& > :where(svg) {
+			width: 0.875rem;
+			height: 0.875rem;
+		}
+	}
+	.chip {
+		font-size: 0.8125rem;
+		line-height: 1.25rem;
+		font-weight: 500;
+		padding: 0.25rem 0.75rem;
+		border-radius: 9999px;
+	}
+
+	/* Text fields: 36px high, 14px text, 1px border and a soft focus halo. */
+	.input,
+	.select,
+	.textarea {
+		font-size: max(0.8125rem, calc(var(--field-size) * 0.875));
+		line-height: 1.25rem;
+		padding-block: calc(var(--field-size) * 0.5);
+		padding-inline: 0.75rem;
+		border-radius: var(--radius-base);
+		box-shadow: inset 0 0 0 1px var(--tw-ring-color);
+		transition: box-shadow 120ms ease;
+		&:is(:focus, :focus-within) {
+			outline: none;
+			box-shadow:
+				inset 0 0 0 1px var(--color-primary-500),
+				0 0 0 3px color-mix(in oklab, var(--color-primary-500) 22%, transparent);
+		}
+		&[aria-invalid='true'] {
+			--tw-ring-color: var(--color-error-500);
+		}
+	}
+	.textarea {
+		line-height: 1.5;
+	}
+	.select:not([multiple], [size]) {
+		appearance: none;
+		padding-inline-end: 2.25rem;
+		background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%238a93a3' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3e%3cpath d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+		background-position: right 0.6rem center;
+		background-repeat: no-repeat;
+		background-size: 1.1rem;
+	}
+	[dir='rtl'] .select:not([multiple], [size]) {
+		background-position: left 0.6rem center;
+	}
+
+	/* Field labels (Skeleton `label-text` is 12px): 13px medium, high contrast. */
+	.label-text {
+		font-size: 0.8125rem;
+		line-height: 1.25rem;
+		font-weight: 500;
+		color: var(--color-surface-800-200);
+	}
+	/* Secondary buttons/surfaces: a lighter neutral tint than Skeleton's 10% black. */
+	.preset-tonal {
+		background-color: color-mix(in oklab, var(--color-surface-500) 13%, transparent);
+	}
+
+	/* Checkboxes and radios: white box with a border, brand fill with a white mark when checked. */
+	.checkbox,
+	.radio {
+		appearance: none;
+		flex-shrink: 0;
+		display: inline-grid;
+		place-content: center;
+		width: 1.125rem;
+		height: 1.125rem;
+		vertical-align: -0.2em;
+		background-color: var(--color-surface-50-950);
+		border: 1px solid var(--color-surface-300-700);
+		border-radius: 0.3rem;
+		box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+		background-position: center;
+		background-repeat: no-repeat;
+		background-size: 100%;
+		transition:
+			background-color 120ms ease,
+			border-color 120ms ease;
+		&:hover:not(:disabled) {
+			border-color: var(--color-primary-500);
+		}
+		&:is(:checked, :indeterminate) {
+			background-color: var(--color-primary-500);
+			border-color: var(--color-primary-500);
+		}
+	}
+	.radio {
+		border-radius: 9999px;
+		&:checked {
+			background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3ccircle cx='8' cy='8' r='3'/%3e%3c/svg%3e");
+		}
+	}
+	.checkbox:checked {
+		background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3e%3c/svg%3e");
+	}
+	.checkbox:indeterminate {
+		background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3crect x='4' y='7' width='8' height='2' rx='1'/%3e%3c/svg%3e");
+	}
+
+	/* Tables: header band, comfortable rows, hover highlight. */
+	.table {
+		& :where(thead) {
+			background-color: var(--color-surface-100-900);
+			border-color: var(--color-surface-200-800);
+		}
+		& :where(th) {
+			font-size: 0.75rem;
+			font-weight: 600;
+			letter-spacing: 0.02em;
+			color: var(--color-surface-600-400);
+			padding: 0.625rem 0.875rem;
+			white-space: nowrap;
+		}
+		& :where(td) {
+			padding: 0.625rem 0.875rem;
+			vertical-align: middle;
+		}
+		& :where(tbody > tr) {
+			border-color: var(--color-surface-200-800);
+			transition: background-color 100ms ease;
+		}
+		& :where(tbody > tr:hover) {
+			background-color: color-mix(in oklab, var(--color-primary-500) 5%, transparent);
+		}
+	}
+}
+
+/* Rotation of the busy button spinner (own keyframes: Tailwind only emits `spin` when `animate-spin` is used). */
+@keyframes busy-spin {
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+/* ---- 3. Semantic utilities ---------------------------------------------------------- */
+
+/** Elevated card surface (Card component, list rows, popovers). */
+@utility panel {
+	background-color: var(--color-surface-50-950);
+	border: 1px solid var(--color-surface-200-800);
+	border-radius: var(--radius-container);
+	box-shadow:
+		0 1px 2px 0 rgb(15 23 42 / 0.04),
+		0 1px 3px 0 rgb(15 23 42 / 0.03);
+}
+
+/** Small uppercase label above a group (sidebar groups, card sections, info lists). */
+@utility eyebrow {
+	font-size: 0.6875rem;
+	line-height: 1rem;
+	font-weight: 600;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	color: var(--color-surface-600-400);
+}
+
+/** Key/value list: `<dl class="kv"><dt>Key</dt><dd>Value</dd>...</dl>` in two columns. */
+@utility kv {
+	display: grid;
+	grid-template-columns: minmax(6rem, auto) 1fr;
+	column-gap: 1rem;
+	row-gap: 0.5rem;
+	font-size: var(--text-sm);
+	line-height: 1.25rem;
+	& > dt {
+		color: var(--color-surface-600-400);
+	}
+	& > dd {
+		font-weight: 500;
+		min-width: 0;
+		overflow-wrap: anywhere;
+	}
+}
+
+/** Keyboard key hint, e.g. `<kbd class="kbd">⌘ Enter</kbd>`. */
+@utility kbd {
+	font-family: inherit;
+	font-size: 0.6875rem;
+	line-height: 1rem;
+	padding-inline: 0.3rem;
+	border-radius: 0.25rem;
+	border: 1px solid currentColor;
+	opacity: 0.75;
+}
+
+/** Entry of a dropdown menu (MoreMenu content): full-width row with an optional leading icon. */
+@utility menu-item {
+	display: flex;
+	width: 100%;
+	align-items: center;
+	gap: 0.625rem;
+	border-radius: calc(var(--radius-base) - 2px);
+	padding: 0.4375rem 0.625rem;
+	font-size: var(--text-sm);
+	line-height: 1.25rem;
+	text-align: start;
+	color: var(--color-surface-800-200);
+	&:hover:not(:disabled) {
+		background-color: var(--color-surface-100-900);
+		color: var(--color-surface-950-50);
+	}
+	& > svg {
+		width: 1rem;
+		height: 1rem;
+		flex-shrink: 0;
+		color: var(--color-surface-500);
+	}
+}

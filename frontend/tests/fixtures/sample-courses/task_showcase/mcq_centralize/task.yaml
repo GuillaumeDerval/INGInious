@@ -1,0 +1,36 @@
+name: MCQ - centralized feedback, partial grade
+author: INGInious test-suite
+context: |
+    Three sub-problems with ``centralize: true``: no "Wrong answer"/"Correct answer"
+    message is attached to each problem; only the global message
+    "You have N wrong answer(s)." is displayed. Grade = 100 * correct / 3.
+environment_type: mcq
+environment_id: mcq
+problems:
+    q1:
+        type: multiple_choice
+        name: Colour of the sky
+        header: What colour is a clear daytime sky?
+        centralize: true
+        choices:
+        -   text: Blue
+            valid: true
+        -   text: Green
+    q2:
+        type: multiple_choice
+        name: Even numbers
+        header: Select the even numbers.
+        multiple: true
+        centralize: true
+        choices:
+        -   text: '2'
+            valid: true
+        -   text: '4'
+            valid: true
+        -   text: '5'
+    q3:
+        type: match
+        name: Two plus two
+        header: How much is 2 + 2 ?
+        answer: '4'
+        centralize: true

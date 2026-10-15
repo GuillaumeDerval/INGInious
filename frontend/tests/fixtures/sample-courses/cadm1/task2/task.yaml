@@ -1,0 +1,53 @@
+author: Alice, Bob
+contact_url: mailto:x@y.z
+context: |-
+    Some *rst* context
+    line 2
+environment_id: mcq
+environment_parameters: {}
+environment_type: mcq
+example_field: test
+example_task_hint: hint!
+input_random: 2
+name: Task One
+network_grading: false
+problems:
+    q1:
+        type: code
+        name: Code Q
+        header: ''
+        language: python
+        optional: 'on'
+        default: ''
+        offset: 3
+    q2:
+        type: code_single_line
+        name: ''
+        header: ''
+        default: ''
+    q3:
+        type: file
+        name: File Q
+        header: ''
+        allowed_exts:
+        - .py
+        - .txt
+        max_size: 1000
+    q4:
+        type: match
+        name: Match Q
+        header: ''
+        answer: '42'
+        centralize: true
+    q5:
+        type: multiple_choice
+        name: MCQ
+        header: ''
+        multiple: true
+        limit: 2
+        choices:
+        -   text: 'Yes'
+            feedback: good
+            valid: true
+        -   text: 'No'
+regenerate_input_random: 'on'

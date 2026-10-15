@@ -1,0 +1,25 @@
+name: Code task
+author: Tester
+contact_url: mailto:x@y?subject={course_id}
+context: |
+  Write *code*.
+text_format: rst
+environment_type: docker
+environment_id: default
+environment_parameters:
+  run_cmd: ''
+  limits:
+    time: '10'
+    memory: 256
+    disk: 100
+problems:
+  code:
+    type: code
+    name: Your code
+    header: Implement it.
+    language: python
+    offset: 3
+    default: pass
+  opt:
+    type: code
+    optional: true

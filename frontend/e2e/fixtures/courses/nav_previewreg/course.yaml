@@ -1,0 +1,16 @@
+{
+  'name': 'NAV Preview with registration',
+  'admins': ['superadmin'],
+  'tutors': [],
+  'description': 'Course NAV Preview course',
+  'accessible': true,
+  'registration': true,
+  'allow_unregister': true,
+  'task_dispenser': 'toc',
+  'dispenser_data':
+    {
+      'toc': [{ 'title': 'Tasks', 'tasks_list': ['t1', 't2'] }],
+      'config': { 't1': { 'accessibility': true }, 't2': { 'accessibility': true } }
+    },
+  'allow_preview': true
+}

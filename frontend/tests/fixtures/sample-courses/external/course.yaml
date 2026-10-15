@@ -1,0 +1,6 @@
+name: External grader course (simple_grader)
+admins: [superadmin]
+accessible: false
+registration: false
+task_dispenser: toc
+dispenser_data: {toc: [], config: {}}

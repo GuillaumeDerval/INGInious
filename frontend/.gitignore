@@ -1,0 +1,34 @@
+node_modules
+
+# Output
+.output
+.vercel
+.netlify
+.wrangler
+/.svelte-kit
+/build
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Env
+.env
+.env.*
+!.env.example
+!.env.test
+
+# Vite
+vite.config.js.timestamp-*
+vite.config.ts.timestamp-*
+# Playwright
+test-results
+/build-*
+/.svelte-kit-*
+/coverage
+/e2e/.generated
+# Scale suite: generated data set and per-run results
+/perf/.data
+/perf/results
+# Course fixtures installed by the tests (mounted by the agents of e2e/compose.yml)
+/e2e/.tasks

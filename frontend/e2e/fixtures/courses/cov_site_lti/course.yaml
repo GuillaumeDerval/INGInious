@@ -1,0 +1,31 @@
+name: '[COV] LTI coverage course'
+admins:
+  - superadmin
+tutors: []
+description: 'LTI course of e2e/coverage/site.e2e.ts (registrations written by the test)'
+accessible: true
+registration: true
+is_lti: true
+lti_keys:
+  ltikey: ltisecret
+lti_send_back_grade: true
+lti_url: 'http://lms.example/course/42'
+task_dispenser: toc
+dispenser_data:
+  toc:
+    - config:
+        closed: false
+      id: sec1
+      rank: 0
+      tasks_list:
+        mcq1: 0
+        mcq2: 1
+      title: Tasks
+  config:
+    mcq1:
+      accessibility: true
+      evaluation_mode: best
+    mcq2:
+      accessibility: true
+lti_secrets:
+  https://platform.example/tool-client-1/dep-1: s3cr3t

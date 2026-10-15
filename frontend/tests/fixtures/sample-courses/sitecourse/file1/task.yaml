@@ -1,0 +1,15 @@
+name: File task
+author: SITE
+context: Upload a file.
+environment_type: docker
+environment_id: default
+environment_parameters:
+  limits: {time: 10, memory: 128, disk: 100}
+  run_cmd: ''
+problems:
+  f:
+    type: file
+    name: Upload
+    header: Any .txt file
+    allowed_exts: ['.txt']
+    max_size: 10000

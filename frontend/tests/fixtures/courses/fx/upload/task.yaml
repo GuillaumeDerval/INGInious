@@ -1,0 +1,16 @@
+name: Upload task
+environment_type: docker-ssh
+problems:
+  report:
+    type: file
+    allowed_exts:
+      - .txt
+    max_size: 10
+  any:
+    type: file
+  answer:
+    type: match
+    answer: 42
+  line:
+    type: code_single_line
+    default: x

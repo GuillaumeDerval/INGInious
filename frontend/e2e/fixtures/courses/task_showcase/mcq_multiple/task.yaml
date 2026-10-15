@@ -1,0 +1,25 @@
+name: MCQ - multiple answers
+author: INGInious test-suite
+context: |
+  A **multiple-answer** question (checkboxes), not shuffled (``unshuffle: true``),
+  without custom error message: the mcq agent then prepends the internal message
+  *"Wrong answer. Make sure to select all the valid possibilities"*.
+environment_type: mcq
+environment_id: mcq
+problems:
+  primes:
+    type: multiple_choice
+    name: Prime numbers
+    header: Select **all** the prime numbers.
+    multiple: true
+    unshuffle: true
+    choices:
+      - text: '2'
+        valid: true
+      - text: '3'
+        valid: true
+        feedback: 3 is prime.
+      - text: '4'
+        feedback: 4 = 2 x 2.
+      - text: '9'
+        feedback: 9 = 3 x 3.

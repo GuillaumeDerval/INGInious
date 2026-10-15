@@ -1,0 +1,15 @@
+name: CLI tools course
+admins:
+  - e2e_admin
+accessible: true
+registration: true
+task_dispenser: toc
+dispenser_data:
+  toc:
+    - id: s1
+      title: Exercises
+      rank: 0
+      tasks_list:
+        mcq: 0
+        ignored: 1
+  config: {}

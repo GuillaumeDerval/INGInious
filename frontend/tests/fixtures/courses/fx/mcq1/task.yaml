@@ -1,0 +1,25 @@
+name: MCQ task
+environment_type: mcq
+environment_id: mcq
+problems:
+  capital:
+    type: multiple_choice
+    name: Capital
+    header: What is the capital of *Belgium*?
+    limit: 3
+    choices:
+      - text: Brussels
+        valid: true
+      - text: Antwerp
+      - text: Liège
+      - text: Paris
+  primes:
+    type: multiple_choice
+    multiple: true
+    unshuffle: true
+    choices:
+      - text: '2'
+        valid: true
+      - text: '3'
+        valid: true
+      - text: '4'

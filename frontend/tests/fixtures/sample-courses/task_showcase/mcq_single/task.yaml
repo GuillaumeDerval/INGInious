@@ -1,0 +1,27 @@
+name: MCQ - single answer
+author: INGInious test-suite
+context: |
+    A **single-answer** multiple choice question graded by the ``mcq`` agent.
+
+    The choices are shuffled per user (seed = problem id + language + username) and only
+    ``limit: 3`` of the 4 choices are shown (at least one valid choice is always kept).
+environment_type: mcq
+environment_id: mcq
+problems:
+    capital:
+        type: multiple_choice
+        name: Capital of Belgium
+        header: What is the capital of *Belgium*?
+        multiple: false
+        limit: 3
+        success_message: Well done, **Brussels** it is.
+        error_message: Not quite. Think about the *European* capital.
+        choices:
+        -   text: Brussels
+            valid: true
+            feedback: Brussels is the capital since 1830.
+        -   text: Antwerp
+            feedback: Antwerp is the largest city of Flanders.
+        -   text: Liège
+            feedback: Liège is in Wallonia.
+        -   text: Paris

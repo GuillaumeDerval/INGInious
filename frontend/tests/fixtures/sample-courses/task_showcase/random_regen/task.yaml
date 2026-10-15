@@ -1,0 +1,24 @@
+name: Random inputs (regenerated on each page load)
+author: INGInious test-suite
+context: |
+    ``input_random: 1`` and ``regenerate_input_random: true``: a new random value is drawn at
+    **every** page load (seed includes ``time.time()``) and overwrites ``user_tasks.random``.
+    Submitting from an older tab is rejected with
+    *"Your task has been regenerated. This current task is outdated."*
+
+    .. raw:: html
+
+        <p>Your value: <b id="rnd"></b></p>
+        <script>document.getElementById("rnd").textContent = Math.floor(input["@random"][0] * 1000);</script>
+
+    Type the value shown above.
+environment_type: docker
+environment_id: default
+environment_parameters:
+    limits: {time: 10, memory: 128}
+input_random: 1
+regenerate_input_random: true
+problems:
+    value:
+        type: code_single_line
+        name: Value

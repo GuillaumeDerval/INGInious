@@ -1,0 +1,9 @@
+name: Legacy six
+author:
+  - Ada
+  - Bob
+environment: default
+limits:
+  time: 5
+run_cmd: ''
+problems: {}

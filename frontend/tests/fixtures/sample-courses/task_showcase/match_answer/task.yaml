@@ -1,0 +1,18 @@
+name: Match - exact answer
+author: INGInious test-suite
+context: |
+    ``match`` problems: the answer is compared (after ``strip()``) with ``answer``,
+    case-sensitive. Feedback is "Correct answer" / "Wrong answer" per problem.
+environment_type: mcq
+environment_id: mcq
+problems:
+    answer:
+        type: match
+        name: The answer
+        header: What is the answer to life, the universe and everything?
+        answer: 42
+    city:
+        type: match
+        name: City of light
+        header: Which city is called *la Ville Lumière*? (case-sensitive)
+        answer: Paris

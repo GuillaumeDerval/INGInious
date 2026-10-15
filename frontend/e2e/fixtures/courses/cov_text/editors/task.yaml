@@ -1,0 +1,716 @@
+# Generated from tests/fixtures/rst (golden examples): one problem header per example.
+name: Editors
+author: INGInious test-suite
+context: ''
+environment_type: mcq
+environment_id: mcq
+problems:
+  code_python:
+    type: code
+    name: python
+    header: ''
+    language: python
+    default: python code
+    optional: true
+  code_py:
+    type: code
+    name: py
+    header: ''
+    language: py
+    default: py code
+    optional: true
+  code_c:
+    type: code
+    name: c
+    header: ''
+    language: c
+    default: c code
+    optional: true
+  code_cpp:
+    type: code
+    name: cpp
+    header: ''
+    language: cpp
+    default: cpp code
+    optional: true
+  code_java:
+    type: code
+    name: java
+    header: ''
+    language: java
+    default: java code
+    optional: true
+  code_javascript:
+    type: code
+    name: javascript
+    header: ''
+    language: javascript
+    default: javascript code
+    optional: true
+  code_typescript:
+    type: code
+    name: typescript
+    header: ''
+    language: typescript
+    default: typescript code
+    optional: true
+  code_sql:
+    type: code
+    name: sql
+    header: ''
+    language: sql
+    default: sql code
+    optional: true
+  code_yaml:
+    type: code
+    name: yaml
+    header: ''
+    language: yaml
+    default: yaml code
+    optional: true
+  code_markdown:
+    type: code
+    name: markdown
+    header: ''
+    language: markdown
+    default: markdown code
+    optional: true
+  code_shell:
+    type: code
+    name: shell
+    header: ''
+    language: shell
+    default: shell code
+    optional: true
+  code_ocaml:
+    type: code
+    name: ocaml
+    header: ''
+    language: ocaml
+    default: ocaml code
+    optional: true
+  code_scala:
+    type: code
+    name: scala
+    header: ''
+    language: scala
+    default: scala code
+    optional: true
+  code_kotlin:
+    type: code
+    name: kotlin
+    header: ''
+    language: kotlin
+    default: kotlin code
+    optional: true
+  code_csharp:
+    type: code
+    name: csharp
+    header: ''
+    language: csharp
+    default: csharp code
+    optional: true
+  code_rust:
+    type: code
+    name: rust
+    header: ''
+    language: rust
+    default: rust code
+    optional: true
+  code_haskell:
+    type: code
+    name: haskell
+    header: ''
+    language: haskell
+    default: haskell code
+    optional: true
+  code_octave:
+    type: code
+    name: octave
+    header: ''
+    language: octave
+    default: octave code
+    optional: true
+  code_oz:
+    type: code
+    name: oz
+    header: ''
+    language: oz
+    default: oz code
+    optional: true
+  code_go:
+    type: code
+    name: go
+    header: ''
+    language: go
+    default: go code
+    optional: true
+  code_scheme:
+    type: code
+    name: scheme
+    header: ''
+    language: scheme
+    default: scheme code
+    optional: true
+  code_latex:
+    type: code
+    name: latex
+    header: ''
+    language: latex
+    default: latex code
+    optional: true
+  code_xml:
+    type: code
+    name: xml
+    header: ''
+    language: xml
+    default: xml code
+    optional: true
+  code_plain:
+    type: code
+    name: plain
+    header: ''
+    language: plain
+    default: plain code
+    optional: true
+  upload:
+    type: file
+    name: Upload
+    header: ''
+    max_size: 10
+  nameless:
+    type: code
+    header: No name
+    optional: true
+  required:
+    type: code_single_line
+    name: Required
+    header: ''
+  many:
+    type: multiple_choice
+    name: Many choices
+    header: ''
+    limit: 0
+    unshuffle: true
+    choices:
+      - text: Choice **0**
+        valid: true
+      - text: Choice **1**
+      - text: Choice **2**
+      - text: Choice **3**
+      - text: Choice **4**
+      - text: Choice **5**
+      - text: Choice **6**
+      - text: Choice **7**
+      - text: Choice **8**
+      - text: Choice **9**
+      - text: Choice **10**
+      - text: Choice **11**
+      - text: Choice **12**
+      - text: Choice **13**
+      - text: Choice **14**
+      - text: Choice **15**
+      - text: Choice **16**
+      - text: Choice **17**
+      - text: Choice **18**
+      - text: Choice **19**
+      - text: Choice **20**
+      - text: Choice **21**
+      - text: Choice **22**
+      - text: Choice **23**
+      - text: Choice **24**
+      - text: Choice **25**
+      - text: Choice **26**
+      - text: Choice **27**
+      - text: Choice **28**
+      - text: Choice **29**
+      - text: Choice **30**
+      - text: Choice **31**
+      - text: Choice **32**
+      - text: Choice **33**
+      - text: Choice **34**
+      - text: Choice **35**
+      - text: Choice **36**
+      - text: Choice **37**
+      - text: Choice **38**
+      - text: Choice **39**
+      - text: Choice **40**
+      - text: Choice **41**
+      - text: Choice **42**
+      - text: Choice **43**
+      - text: Choice **44**
+      - text: Choice **45**
+      - text: Choice **46**
+      - text: Choice **47**
+      - text: Choice **48**
+      - text: Choice **49**
+      - text: Choice **50**
+      - text: Choice **51**
+      - text: Choice **52**
+      - text: Choice **53**
+      - text: Choice **54**
+      - text: Choice **55**
+      - text: Choice **56**
+      - text: Choice **57**
+      - text: Choice **58**
+      - text: Choice **59**
+      - text: Choice **60**
+      - text: Choice **61**
+      - text: Choice **62**
+      - text: Choice **63**
+      - text: Choice **64**
+      - text: Choice **65**
+      - text: Choice **66**
+      - text: Choice **67**
+      - text: Choice **68**
+      - text: Choice **69**
+      - text: Choice **70**
+      - text: Choice **71**
+      - text: Choice **72**
+      - text: Choice **73**
+      - text: Choice **74**
+      - text: Choice **75**
+      - text: Choice **76**
+      - text: Choice **77**
+      - text: Choice **78**
+      - text: Choice **79**
+      - text: Choice **80**
+      - text: Choice **81**
+      - text: Choice **82**
+      - text: Choice **83**
+      - text: Choice **84**
+      - text: Choice **85**
+      - text: Choice **86**
+      - text: Choice **87**
+      - text: Choice **88**
+      - text: Choice **89**
+      - text: Choice **90**
+      - text: Choice **91**
+      - text: Choice **92**
+      - text: Choice **93**
+      - text: Choice **94**
+      - text: Choice **95**
+      - text: Choice **96**
+      - text: Choice **97**
+      - text: Choice **98**
+      - text: Choice **99**
+      - text: Choice **100**
+      - text: Choice **101**
+      - text: Choice **102**
+      - text: Choice **103**
+      - text: Choice **104**
+      - text: Choice **105**
+      - text: Choice **106**
+      - text: Choice **107**
+      - text: Choice **108**
+      - text: Choice **109**
+      - text: Choice **110**
+      - text: Choice **111**
+      - text: Choice **112**
+      - text: Choice **113**
+      - text: Choice **114**
+      - text: Choice **115**
+      - text: Choice **116**
+      - text: Choice **117**
+      - text: Choice **118**
+      - text: Choice **119**
+      - text: Choice **120**
+      - text: Choice **121**
+      - text: Choice **122**
+      - text: Choice **123**
+      - text: Choice **124**
+      - text: Choice **125**
+      - text: Choice **126**
+      - text: Choice **127**
+      - text: Choice **128**
+      - text: Choice **129**
+      - text: Choice **130**
+      - text: Choice **131**
+      - text: Choice **132**
+      - text: Choice **133**
+      - text: Choice **134**
+      - text: Choice **135**
+      - text: Choice **136**
+      - text: Choice **137**
+      - text: Choice **138**
+      - text: Choice **139**
+      - text: Choice **140**
+      - text: Choice **141**
+      - text: Choice **142**
+      - text: Choice **143**
+      - text: Choice **144**
+      - text: Choice **145**
+      - text: Choice **146**
+      - text: Choice **147**
+      - text: Choice **148**
+      - text: Choice **149**
+      - text: Choice **150**
+      - text: Choice **151**
+      - text: Choice **152**
+      - text: Choice **153**
+      - text: Choice **154**
+      - text: Choice **155**
+      - text: Choice **156**
+      - text: Choice **157**
+      - text: Choice **158**
+      - text: Choice **159**
+      - text: Choice **160**
+      - text: Choice **161**
+      - text: Choice **162**
+      - text: Choice **163**
+      - text: Choice **164**
+      - text: Choice **165**
+      - text: Choice **166**
+      - text: Choice **167**
+      - text: Choice **168**
+      - text: Choice **169**
+      - text: Choice **170**
+      - text: Choice **171**
+      - text: Choice **172**
+      - text: Choice **173**
+      - text: Choice **174**
+      - text: Choice **175**
+      - text: Choice **176**
+      - text: Choice **177**
+      - text: Choice **178**
+      - text: Choice **179**
+      - text: Choice **180**
+      - text: Choice **181**
+      - text: Choice **182**
+      - text: Choice **183**
+      - text: Choice **184**
+      - text: Choice **185**
+      - text: Choice **186**
+      - text: Choice **187**
+      - text: Choice **188**
+      - text: Choice **189**
+      - text: Choice **190**
+      - text: Choice **191**
+      - text: Choice **192**
+      - text: Choice **193**
+      - text: Choice **194**
+      - text: Choice **195**
+      - text: Choice **196**
+      - text: Choice **197**
+      - text: Choice **198**
+      - text: Choice **199**
+      - text: Choice **200**
+      - text: Choice **201**
+      - text: Choice **202**
+      - text: Choice **203**
+      - text: Choice **204**
+      - text: Choice **205**
+      - text: Choice **206**
+      - text: Choice **207**
+      - text: Choice **208**
+      - text: Choice **209**
+      - text: Choice **210**
+      - text: Choice **211**
+      - text: Choice **212**
+      - text: Choice **213**
+      - text: Choice **214**
+      - text: Choice **215**
+      - text: Choice **216**
+      - text: Choice **217**
+      - text: Choice **218**
+      - text: Choice **219**
+      - text: Choice **220**
+      - text: Choice **221**
+      - text: Choice **222**
+      - text: Choice **223**
+      - text: Choice **224**
+      - text: Choice **225**
+      - text: Choice **226**
+      - text: Choice **227**
+      - text: Choice **228**
+      - text: Choice **229**
+      - text: Choice **230**
+      - text: Choice **231**
+      - text: Choice **232**
+      - text: Choice **233**
+      - text: Choice **234**
+      - text: Choice **235**
+      - text: Choice **236**
+      - text: Choice **237**
+      - text: Choice **238**
+      - text: Choice **239**
+      - text: Choice **240**
+      - text: Choice **241**
+      - text: Choice **242**
+      - text: Choice **243**
+      - text: Choice **244**
+      - text: Choice **245**
+      - text: Choice **246**
+      - text: Choice **247**
+      - text: Choice **248**
+      - text: Choice **249**
+      - text: Choice **250**
+      - text: Choice **251**
+      - text: Choice **252**
+      - text: Choice **253**
+      - text: Choice **254**
+      - text: Choice **255**
+      - text: Choice **256**
+      - text: Choice **257**
+      - text: Choice **258**
+      - text: Choice **259**
+      - text: Choice **260**
+      - text: Choice **261**
+      - text: Choice **262**
+      - text: Choice **263**
+      - text: Choice **264**
+      - text: Choice **265**
+      - text: Choice **266**
+      - text: Choice **267**
+      - text: Choice **268**
+      - text: Choice **269**
+      - text: Choice **270**
+      - text: Choice **271**
+      - text: Choice **272**
+      - text: Choice **273**
+      - text: Choice **274**
+      - text: Choice **275**
+      - text: Choice **276**
+      - text: Choice **277**
+      - text: Choice **278**
+      - text: Choice **279**
+      - text: Choice **280**
+      - text: Choice **281**
+      - text: Choice **282**
+      - text: Choice **283**
+      - text: Choice **284**
+      - text: Choice **285**
+      - text: Choice **286**
+      - text: Choice **287**
+      - text: Choice **288**
+      - text: Choice **289**
+      - text: Choice **290**
+      - text: Choice **291**
+      - text: Choice **292**
+      - text: Choice **293**
+      - text: Choice **294**
+      - text: Choice **295**
+      - text: Choice **296**
+      - text: Choice **297**
+      - text: Choice **298**
+      - text: Choice **299**
+      - text: Choice **300**
+      - text: Choice **301**
+      - text: Choice **302**
+      - text: Choice **303**
+      - text: Choice **304**
+      - text: Choice **305**
+      - text: Choice **306**
+      - text: Choice **307**
+      - text: Choice **308**
+      - text: Choice **309**
+      - text: Choice **310**
+      - text: Choice **311**
+      - text: Choice **312**
+      - text: Choice **313**
+      - text: Choice **314**
+      - text: Choice **315**
+      - text: Choice **316**
+      - text: Choice **317**
+      - text: Choice **318**
+      - text: Choice **319**
+      - text: Choice **320**
+      - text: Choice **321**
+      - text: Choice **322**
+      - text: Choice **323**
+      - text: Choice **324**
+      - text: Choice **325**
+      - text: Choice **326**
+      - text: Choice **327**
+      - text: Choice **328**
+      - text: Choice **329**
+      - text: Choice **330**
+      - text: Choice **331**
+      - text: Choice **332**
+      - text: Choice **333**
+      - text: Choice **334**
+      - text: Choice **335**
+      - text: Choice **336**
+      - text: Choice **337**
+      - text: Choice **338**
+      - text: Choice **339**
+      - text: Choice **340**
+      - text: Choice **341**
+      - text: Choice **342**
+      - text: Choice **343**
+      - text: Choice **344**
+      - text: Choice **345**
+      - text: Choice **346**
+      - text: Choice **347**
+      - text: Choice **348**
+      - text: Choice **349**
+      - text: Choice **350**
+      - text: Choice **351**
+      - text: Choice **352**
+      - text: Choice **353**
+      - text: Choice **354**
+      - text: Choice **355**
+      - text: Choice **356**
+      - text: Choice **357**
+      - text: Choice **358**
+      - text: Choice **359**
+      - text: Choice **360**
+      - text: Choice **361**
+      - text: Choice **362**
+      - text: Choice **363**
+      - text: Choice **364**
+      - text: Choice **365**
+      - text: Choice **366**
+      - text: Choice **367**
+      - text: Choice **368**
+      - text: Choice **369**
+      - text: Choice **370**
+      - text: Choice **371**
+      - text: Choice **372**
+      - text: Choice **373**
+      - text: Choice **374**
+      - text: Choice **375**
+      - text: Choice **376**
+      - text: Choice **377**
+      - text: Choice **378**
+      - text: Choice **379**
+      - text: Choice **380**
+      - text: Choice **381**
+      - text: Choice **382**
+      - text: Choice **383**
+      - text: Choice **384**
+      - text: Choice **385**
+      - text: Choice **386**
+      - text: Choice **387**
+      - text: Choice **388**
+      - text: Choice **389**
+      - text: Choice **390**
+      - text: Choice **391**
+      - text: Choice **392**
+      - text: Choice **393**
+      - text: Choice **394**
+      - text: Choice **395**
+      - text: Choice **396**
+      - text: Choice **397**
+      - text: Choice **398**
+      - text: Choice **399**
+      - text: Choice **400**
+      - text: Choice **401**
+      - text: Choice **402**
+      - text: Choice **403**
+      - text: Choice **404**
+      - text: Choice **405**
+      - text: Choice **406**
+      - text: Choice **407**
+      - text: Choice **408**
+      - text: Choice **409**
+      - text: Choice **410**
+      - text: Choice **411**
+      - text: Choice **412**
+      - text: Choice **413**
+      - text: Choice **414**
+      - text: Choice **415**
+      - text: Choice **416**
+      - text: Choice **417**
+      - text: Choice **418**
+      - text: Choice **419**
+      - text: Choice **420**
+      - text: Choice **421**
+      - text: Choice **422**
+      - text: Choice **423**
+      - text: Choice **424**
+      - text: Choice **425**
+      - text: Choice **426**
+      - text: Choice **427**
+      - text: Choice **428**
+      - text: Choice **429**
+      - text: Choice **430**
+      - text: Choice **431**
+      - text: Choice **432**
+      - text: Choice **433**
+      - text: Choice **434**
+      - text: Choice **435**
+      - text: Choice **436**
+      - text: Choice **437**
+      - text: Choice **438**
+      - text: Choice **439**
+      - text: Choice **440**
+      - text: Choice **441**
+      - text: Choice **442**
+      - text: Choice **443**
+      - text: Choice **444**
+      - text: Choice **445**
+      - text: Choice **446**
+      - text: Choice **447**
+      - text: Choice **448**
+      - text: Choice **449**
+      - text: Choice **450**
+      - text: Choice **451**
+      - text: Choice **452**
+      - text: Choice **453**
+      - text: Choice **454**
+      - text: Choice **455**
+      - text: Choice **456**
+      - text: Choice **457**
+      - text: Choice **458**
+      - text: Choice **459**
+      - text: Choice **460**
+      - text: Choice **461**
+      - text: Choice **462**
+      - text: Choice **463**
+      - text: Choice **464**
+      - text: Choice **465**
+      - text: Choice **466**
+      - text: Choice **467**
+      - text: Choice **468**
+      - text: Choice **469**
+      - text: Choice **470**
+      - text: Choice **471**
+      - text: Choice **472**
+      - text: Choice **473**
+      - text: Choice **474**
+      - text: Choice **475**
+      - text: Choice **476**
+      - text: Choice **477**
+      - text: Choice **478**
+      - text: Choice **479**
+      - text: Choice **480**
+      - text: Choice **481**
+      - text: Choice **482**
+      - text: Choice **483**
+      - text: Choice **484**
+      - text: Choice **485**
+      - text: Choice **486**
+      - text: Choice **487**
+      - text: Choice **488**
+      - text: Choice **489**
+      - text: Choice **490**
+      - text: Choice **491**
+      - text: Choice **492**
+      - text: Choice **493**
+      - text: Choice **494**
+      - text: Choice **495**
+      - text: Choice **496**
+      - text: Choice **497**
+      - text: Choice **498**
+      - text: Choice **499**
+      - text: Choice **500**
+      - text: Choice **501**
+      - text: Choice **502**
+      - text: Choice **503**
+      - text: Choice **504**
+      - text: Choice **505**
+      - text: Choice **506**
+      - text: Choice **507**
+      - text: Choice **508**
+      - text: Choice **509**
+      - text: Choice **510**
+      - text: Choice **511**
+      - text: Choice **512**
+      - text: Choice **513**
+      - text: Choice **514**
+      - text: Choice **515**
+      - text: Choice **516**
+      - text: Choice **517**
+      - text: Choice **518**
+      - text: Choice **519**

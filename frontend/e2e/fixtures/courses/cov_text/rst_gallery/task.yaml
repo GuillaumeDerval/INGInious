@@ -1,0 +1,587 @@
+# Generated from tests/fixtures/rst (golden examples): one problem header per example.
+name: RST gallery
+author: INGInious test-suite
+context: ''
+environment_type: mcq
+environment_id: mcq
+problems:
+  paragraph:
+    type: match
+    name: paragraph
+    header: |-
+      Hello world.
+
+      Second paragraph with <b>html</b> & entities.
+    answer: x
+  bold_italics:
+    type: match
+    name: bold_italics
+    header: This is **bold**, *italic* and ``literal --opt``. Also `interpreted`.
+    answer: x
+  inline_literal_spaces:
+    type: match
+    name: inline_literal_spaces
+    header: '``a  b   c``'
+    answer: x
+  code_role:
+    type: match
+    name: code_role
+    header: |-
+      .. role:: python(code)
+         :language: python
+
+      Inline :python:`print(1)` and :code:`x = 1`.
+    answer: x
+  code_block_lang:
+    type: match
+    name: code_block_lang
+    header: |-
+      .. code-block:: python
+
+          def f(x):
+              return x < 2
+    answer: x
+  code_block_nolang:
+    type: match
+    name: code_block_nolang
+    header: |-
+      .. code-block::
+
+          plain code
+    answer: x
+  code_block_empty:
+    type: match
+    name: code_block_empty
+    header: '.. code-block:: java'
+    answer: x
+  code_directive:
+    type: match
+    name: code_directive
+    header: |-
+      .. code:: c
+
+          int main() { return 0; }
+    answer: x
+  sourcecode_directive:
+    type: match
+    name: sourcecode_directive
+    header: |-
+      .. sourcecode:: python
+
+          x = 1
+    answer: x
+  literal_block:
+    type: match
+    name: literal_block
+    header: |-
+      Example::
+
+          for i in range(3):
+              print(i)
+    answer: x
+  bullet_list:
+    type: match
+    name: bullet_list
+    header: |-
+      - one
+      - two
+
+        - nested
+    answer: x
+  enum_list:
+    type: match
+    name: enum_list
+    header: |-
+      1. first
+      2. second
+
+      #. auto
+    answer: x
+  grid_table:
+    type: match
+    name: grid_table
+    header: |-
+      +-----+-----+
+      | A   | B   |
+      +=====+=====+
+      | 1   | 2   |
+      +-----+-----+
+    answer: x
+  simple_table:
+    type: match
+    name: simple_table
+    header: |-
+      ===  ===
+      A    B
+      ===  ===
+      1    2
+      ===  ===
+    answer: x
+  list_table:
+    type: match
+    name: list_table
+    header: |-
+      .. list-table:: Title
+         :header-rows: 1
+
+         * - A
+           - B
+         * - 1
+           - 2
+    answer: x
+  note:
+    type: match
+    name: note
+    header: |-
+      .. note::
+
+          This is a note.
+    answer: x
+  warning:
+    type: match
+    name: warning
+    header: '.. warning:: Be careful.'
+    answer: x
+  tip_titled:
+    type: match
+    name: tip_titled
+    header: |-
+      .. tip::
+          :title: My title
+
+          Tip body.
+    answer: x
+  danger_titled:
+    type: match
+    name: danger_titled
+    header: |-
+      .. danger::
+          :title: Danger!
+
+          Body.
+    answer: x
+  generic_admonition:
+    type: match
+    name: generic_admonition
+    header: |-
+      .. admonition:: Custom Title
+          :class: success
+
+          Body text.
+    answer: x
+  generic_admonition_title_opt:
+    type: match
+    name: generic_admonition_title_opt
+    header: |-
+      .. admonition:: ignored
+          :title: Shown title
+          :class: success
+
+          Body text.
+    answer: x
+  hint:
+    type: match
+    name: hint
+    header: '.. hint:: hint text'
+    answer: x
+  error_adm:
+    type: match
+    name: error_adm
+    header: '.. error:: err text'
+    answer: x
+  external_link:
+    type: match
+    name: external_link
+    header: |-
+      See `INGInious <https://inginious.org>`_ and https://example.com and `anchor`_.
+
+      .. _anchor:
+
+      Target para.
+    answer: x
+  relative_link:
+    type: match
+    name: relative_link
+    header: '`file <files/a.txt>`_'
+    answer: x
+  image:
+    type: match
+    name: image
+    header: |-
+      .. image:: img.png
+         :alt: an image
+         :width: 100px
+    answer: x
+  figure:
+    type: match
+    name: figure
+    header: |-
+      .. figure:: img.png
+
+         Caption text.
+    answer: x
+  math_role:
+    type: match
+    name: math_role
+    header: Inline :math:`a^2 + b^2 = c^2`.
+    answer: x
+  math_directive:
+    type: match
+    name: math_directive
+    header: |-
+      .. math::
+
+          \int_0^1 x\,dx
+    answer: x
+  raw_html:
+    type: match
+    name: raw_html
+    header: |-
+      .. raw:: html
+
+          <div class="x"><script>alert(1)</script></div>
+    answer: x
+  inline_html_escaped:
+    type: match
+    name: inline_html_escaped
+    header: <script>alert(1)</script>
+    answer: x
+  headings:
+    type: match
+    name: headings
+    header: |-
+      Title
+      =====
+
+      Sub
+      ---
+
+      text
+
+      Sub2
+      ----
+
+      more
+    answer: x
+  single_title_doc:
+    type: match
+    name: single_title_doc
+    header: |-
+      Only Title
+      ==========
+
+      text
+    answer: x
+  container:
+    type: match
+    name: container
+    header: |-
+      .. container:: myclass
+
+          inside
+    answer: x
+  time_role:
+    type: match
+    name: time_role
+    header: Due :time:`2024-01-01T10:00:00+00:00`.
+    answer: x
+  hidden_until_past:
+    type: match
+    name: hidden_until_past
+    header: |-
+      .. hidden-until:: 2000-01-01 10:00:00
+
+          Secret visible.
+    answer: x
+  hidden_until_future:
+    type: match
+    name: hidden_until_future
+    header: |-
+      .. hidden-until:: 2999-01-01 10:00:00
+
+          Secret hidden.
+    answer: x
+  syntax_error_title_underline:
+    type: match
+    name: syntax_error_title_underline
+    header: |-
+      Title
+      ==
+
+      text
+    answer: x
+  syntax_error_unknown_directive:
+    type: match
+    name: syntax_error_unknown_directive
+    header: |-
+      .. foo:: bar
+
+          baz
+    answer: x
+  syntax_error_inline:
+    type: match
+    name: syntax_error_inline
+    header: '*unclosed emphasis'
+    answer: x
+  syntax_error_bad_table:
+    type: match
+    name: syntax_error_bad_table
+    header: |-
+      +---+
+      | a |
+      +--
+    answer: x
+  include_disabled:
+    type: match
+    name: include_disabled
+    header: '.. include:: /etc/passwd'
+    answer: x
+  line_block:
+    type: match
+    name: line_block
+    header: |-
+      | line one
+      | line two
+    answer: x
+  definition_list:
+    type: match
+    name: definition_list
+    header: |-
+      term
+          definition
+    answer: x
+  field_list_docinfo:
+    type: match
+    name: field_list_docinfo
+    header: |-
+      :author: me
+
+      text
+    answer: x
+  block_quote:
+    type: match
+    name: block_quote
+    header: |-
+      para
+
+          quoted
+    answer: x
+  footnote:
+    type: match
+    name: footnote
+    header: |-
+      Text [#]_.
+
+      .. [#] Note.
+    answer: x
+  csv_table:
+    type: match
+    name: csv_table
+    header: |-
+      .. csv-table::
+         :header: a, b
+
+         1, 2
+    answer: x
+  substitution:
+    type: match
+    name: substitution
+    header: |-
+      |x| here
+
+      .. |x| replace:: replaced
+    answer: x
+  empty:
+    type: match
+    name: empty
+    header: ''
+    answer: x
+  doctest:
+    type: match
+    name: doctest
+    header: |-
+      >>> 1+1
+      2
+    answer: x
+  hidden_until_future_show_everything:
+    type: match
+    name: hidden_until_future_show_everything
+    header: |-
+      .. hidden-until:: 2999-01-01 10:00:00
+
+          Secret hidden.
+    answer: x
+  lti_rewrite:
+    type: match
+    name: lti_rewrite
+    header: |-
+      `rel <files/a.txt>`_ and `abs <https://x.org/>`_
+
+      .. image:: img.png
+    answer: x
+  static_page_level2:
+    type: match
+    name: static_page_level2
+    header: |-
+      Title
+      =====
+
+      text
+
+      Sub
+      ---
+
+      x
+    answer: x
+  note_two_paras:
+    type: match
+    name: note_two_paras
+    header: |-
+      .. note::
+
+          First para.
+
+          Second para.
+    answer: x
+  rst_msgblock_with_title_class_danger_con:
+    type: match
+    name: rst-msgblock with title, class danger (container API get_admonition)
+    header: |-
+
+
+      .. admonition:: Oops
+      	:class: alert alert-danger
+
+      	Something failed
+    answer: x
+  rst_msgblock_without_title_class_success:
+    type: match
+    name: rst-msgblock without title, class success (container API get_admonition)
+    header: |-
+
+
+      .. note:: 
+      	:class: alert alert-success
+
+      	All good
+    answer: x
+  rst_code_container_API_get_codeblock_tab:
+    type: match
+    name: rst-code (container API get_codeblock, tab-indented)
+    header: |-
+
+
+      .. code-block:: python
+
+      	print(1)
+      	if x:
+      	    y
+    answer: x
+  rst_image_container_API_get_imageblock:
+    type: match
+    name: rst-image (container API get_imageblock)
+    header: |-
+
+
+      .. raw:: html
+
+      	<img src="data:image/png;base64,iVBORw0KGgo=">
+    answer: x
+  class_directive:
+    type: match
+    name: class_directive
+    header: |-
+      .. class:: text-muted
+
+          A paragraph with a custom class.
+    answer: x
+  admonition_class_danger:
+    type: match
+    name: admonition_class_danger
+    header: |-
+      .. admonition:: T
+          :class: danger
+
+          body
+    answer: x
+  note_custom_class:
+    type: match
+    name: note_custom_class
+    header: |-
+      .. note::
+          :class: success
+
+          body
+    answer: x
+  anchor_link:
+    type: match
+    name: anchor_link
+    header: '`anchor <#task_alert>`_'
+    answer: x
+  mailto:
+    type: match
+    name: mailto
+    header: Contact me@example.com
+    answer: x
+  image_target:
+    type: match
+    name: image_target
+    header: |-
+      .. image:: a.png
+         :target: https://x.org
+    answer: x
+  raw_role:
+    type: match
+    name: raw_role
+    header: |-
+      .. role:: raw-html(raw)
+         :format: html
+
+      X :raw-html:`<br/>` Y
+    answer: x
+  transition:
+    type: match
+    name: transition
+    header: |-
+      a
+
+      ----
+
+      b
+    answer: x
+  javascript_link:
+    type: match
+    name: javascript_link
+    header: '`x <javascript:alert(1)>`_'
+    answer: x
+  severe_error_inconsistent_titles_excepti:
+    type: match
+    name: severe_error_inconsistent_titles (exception -> fallback)
+    header: |-
+      A
+      =====
+
+      B
+      -----
+
+      C
+      =====
+
+      D
+      ~~~~~
+    answer: x
+  hidden_until_bad_date:
+    type: match
+    name: hidden_until_bad_date
+    header: |-
+      x
+
+      .. hidden-until:: notadate
+
+          secret
+    answer: x
+  note_without_content:
+    type: match
+    name: note_without_content
+    header: '.. note::'
+    answer: x

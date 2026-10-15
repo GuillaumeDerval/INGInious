@@ -1,0 +1,31 @@
+{
+  "name": "NAV Future course",
+  "admins": [
+    "superadmin"
+  ],
+  "tutors": [],
+  "description": "Course NAV Future course",
+  "accessible": "2030-01-01 / 2031-01-01",
+  "registration": true,
+  "allow_unregister": true,
+  "task_dispenser": "toc",
+  "dispenser_data": {
+    "toc": [
+      {
+        "title": "Tasks",
+        "tasks_list": [
+          "t1",
+          "t2"
+        ]
+      }
+    ],
+    "config": {
+      "t1": {
+        "accessibility": true
+      },
+      "t2": {
+        "accessibility": true
+      }
+    }
+  }
+}

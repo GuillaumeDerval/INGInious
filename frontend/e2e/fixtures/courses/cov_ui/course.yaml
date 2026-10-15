@@ -1,0 +1,28 @@
+# Integration coverage of the UI kit and of the client-side states of the task page
+# (e2e/coverage/ui-task2.e2e.ts): lone unnamed problems, action errors, editor options.
+name: '[COV] UI kit and task page states'
+description: Course used by the UI coverage tests.
+admins:
+  - superadmin
+  - e2e_admin
+tutors:
+  - e2e_tutor
+accessible: true
+registration: true
+registration_password: null
+registration_ac: null
+registration_ac_list: []
+allow_unregister: true
+allow_preview: false
+groups_student_choice: true
+is_lti: false
+lti_send_back_grade: false
+task_dispenser: toc
+dispenser_data:
+  toc:
+    - title: Tasks
+      tasks_list: [code, lone_mcq, lone_file]
+  config:
+    code: { accessibility: true }
+    lone_mcq: { accessibility: true }
+    lone_file: { accessibility: true }

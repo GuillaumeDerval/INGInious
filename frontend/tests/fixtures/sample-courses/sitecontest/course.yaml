@@ -1,0 +1,29 @@
+name: SITE contest course
+admins:
+- site_admin
+accessible: true
+registration: true
+task_dispenser: contest
+dispenser_data:
+    contest_settings:
+        enabled: true
+        start: '2026-10-14 04:42:01+00:00'
+        end: '2026-10-15 05:42:01+00:00'
+        blackout: 2
+        penalty: 30
+    toc_data:
+        config:
+            code1: {}
+            mcq1: {}
+        imported: false
+        settings:
+            blackout: '2'
+            enabled: true
+            end: '2026-10-15 05:42:01+00:00'
+            penalty: '30'
+            start: '2026-10-14 04:42:01+00:00'
+        toc:
+        -   tasks_list:
+            - mcq1
+            - code1
+            title: Problems

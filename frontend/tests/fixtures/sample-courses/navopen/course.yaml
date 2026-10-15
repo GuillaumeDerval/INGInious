@@ -1,0 +1,117 @@
+{
+  "name": "NAV Open course",
+  "admins": [
+    "superadmin",
+    "nav_admin"
+  ],
+  "tutors": [
+    "nav_tutor"
+  ],
+  "description": "This is the **NAV open course**.\n\n- item one\n- item two\n",
+  "accessible": true,
+  "registration": true,
+  "registration_password": null,
+  "allow_unregister": true,
+  "allow_preview": false,
+  "groups_student_choice": true,
+  "tags": {
+    "rec": {
+      "name": "Recursion",
+      "type": 0,
+      "visible": true,
+      "description": "Recursive things"
+    },
+    "miscon": {
+      "name": "Off by one",
+      "type": 1,
+      "visible": true
+    },
+    "orga": {
+      "name": "Week 1",
+      "type": 2
+    }
+  },
+  "task_dispenser": "toc",
+  "dispenser_data": {
+    "toc": [
+      {
+        "title": "Part 1",
+        "config": {
+          "closed": false
+        },
+        "sections_list": [
+          {
+            "title": "Basics",
+            "tasks_list": [
+              "t1",
+              "t2"
+            ]
+          },
+          {
+            "title": "Advanced",
+            "config": {
+              "closed": true
+            },
+            "tasks_list": [
+              "t3"
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Hidden if empty",
+        "config": {
+          "hidden_if_empty": true
+        },
+        "tasks_list": [
+          "tfuture"
+        ]
+      },
+      {
+        "title": "Deadlines",
+        "tasks_list": [
+          "tpast",
+          "tsoft",
+          "tnever"
+        ]
+      }
+    ],
+    "config": {
+      "t1": {
+        "weight": 1,
+        "accessibility": true,
+        "categories": [
+          "easy"
+        ]
+      },
+      "t2": {
+        "weight": 3,
+        "accessibility": true,
+        "categories": [
+          "hard",
+          "easy"
+        ]
+      },
+      "t3": {
+        "weight": 0,
+        "accessibility": true
+      },
+      "tfuture": {
+        "weight": 2,
+        "accessibility": "2030-01-01 00:00:00"
+      },
+      "tpast": {
+        "weight": 1,
+        "accessibility": "2020-01-01 / 2021-01-01"
+      },
+      "tsoft": {
+        "weight": 1,
+        "accessibility": "2020-01-01 / 2026-10-20 12:00:00 / 2027-01-01"
+      },
+      "textra": {
+        "weight": 5,
+        "accessibility": true
+      }
+    }
+  }
+}

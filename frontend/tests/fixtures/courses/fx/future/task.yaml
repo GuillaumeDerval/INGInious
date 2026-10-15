@@ -1,0 +1,7 @@
+environment_type: mcq
+regenerate_input_random: 'off'
+input_random: '2'
+problems:
+  m:
+    type: match
+    answer: x

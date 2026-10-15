@@ -1,0 +1,12 @@
+name: Hello world (external)
+environment_type: docker
+environment_id: default
+environment_parameters:
+  limits: {time: 10, memory: 128, disk: 100}
+  run_cmd: ''
+problems:
+  question1:
+    type: code
+    name: Code
+    header: print Hello World!
+    language: python

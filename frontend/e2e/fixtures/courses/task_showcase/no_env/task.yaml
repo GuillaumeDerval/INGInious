@@ -1,0 +1,15 @@
+# Grading environment unknown to every backend: the frontend refuses the job at once
+# ("Environment not available."), whatever the state of the grading stack (TASK-09 test).
+name: Unavailable environment
+author: INGInious test-suite
+context: Graded in the ``docker/doesnotexist`` environment, which no agent provides.
+environment_type: docker
+environment_id: doesnotexist
+problems:
+  q:
+    type: multiple_choice
+    name: Pick one
+    choices:
+      - text: 'Yes'
+        valid: true
+      - text: 'No'

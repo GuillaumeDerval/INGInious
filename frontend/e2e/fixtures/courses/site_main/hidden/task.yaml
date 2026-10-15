@@ -1,0 +1,22 @@
+name: Hidden MCQ
+author: SITE
+context: Pick the right answer.
+environment_type: mcq
+environment_id: mcq
+environment_parameters: {}
+problems:
+  q1:
+    type: multiple_choice
+    name: Question 1
+    header: What is 1+1?
+    limit: 0
+    choices:
+      - text: '2'
+        valid: true
+      - text: '3'
+      - text: '4'
+  q2:
+    type: match
+    name: Question 2
+    header: Type yes
+    answer: 'yes'

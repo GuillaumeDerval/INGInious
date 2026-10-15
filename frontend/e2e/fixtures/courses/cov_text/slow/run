@@ -1,0 +1,5 @@
+#!/bin/bash
+# Grading script of cov_text/slow: answers after a few seconds.
+sleep 4
+feedback-result success
+feedback-grade 100

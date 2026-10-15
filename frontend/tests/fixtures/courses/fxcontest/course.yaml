@@ -1,0 +1,16 @@
+name: Contest
+task_dispenser: contest
+dispenser_data:
+  contest_settings:
+    enabled: true
+    start: '2020-01-01 00:00:00+00:00'
+    end: '2020-01-02 00:00:00+00:00'
+    blackout: 0
+    penalty: 20
+  toc_data:
+    toc:
+      - title: Problems
+        tasks_list:
+          - p1
+    config:
+      p1: {}

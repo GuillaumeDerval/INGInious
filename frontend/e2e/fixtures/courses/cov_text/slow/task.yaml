@@ -1,0 +1,13 @@
+# Graded slowly by the docker agent (submission deleted while it is graded).
+name: Slow grading
+author: INGInious test-suite
+context: Anything.
+environment_type: docker
+environment_id: default
+environment_parameters:
+  limits: { time: 30, hard_time: 60, memory: 128 }
+problems:
+  q:
+    type: code_single_line
+    name: Q
+    header: Anything.

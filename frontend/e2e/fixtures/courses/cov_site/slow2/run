@@ -1,0 +1,5 @@
+#!/usr/bin/python3
+import time
+from inginious_container_api import feedback
+time.sleep(40)
+feedback.set_global_result("success")

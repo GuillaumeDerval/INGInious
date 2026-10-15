@@ -1,0 +1,20 @@
+{
+  'name': 'P2',
+  'author': 'NAV',
+  'context': 'Task *P2* for navigation tests.',
+  'environment_id': 'mcq',
+  'environment_type': 'mcq',
+  'environment_parameters': {},
+  'input_random': 0,
+  'problems':
+    {
+      'q1':
+        {
+          'type': 'multiple_choice',
+          'name': 'Q1',
+          'header': 'Pick the right one',
+          'limit': 0,
+          'choices': [{ 'text': 'Right', 'valid': true }, { 'text': 'Wrong' }]
+        }
+    }
+}

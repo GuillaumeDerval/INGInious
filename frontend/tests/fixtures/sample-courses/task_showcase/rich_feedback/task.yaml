@@ -1,0 +1,36 @@
+name: Rich RST feedback
+author: INGInious test-suite
+context: |
+    Submit anything: the grading script returns a feedback exercising every RST feature
+    supported by ``parsable_text.py``: admonitions rendered as Bootstrap alerts (no title) or
+    cards (``:title:``), ``hidden-until`` (one date in the past, one in 2099), ``code-block``
+    (also empty), ``:time:`` role, tables, raw HTML, ``container``/``class`` directives,
+    links (``target=_blank``), math, and per-problem feedback.
+
+    The context itself also uses RST:
+
+    .. note::
+        :title: A note with a title (card)
+
+        Card body.
+
+    .. tip:: A tip without title (alert-info).
+
+    +-------+-------+
+    | col A | col B |
+    +=======+=======+
+    | 1     | 2     |
+    +-------+-------+
+environment_type: docker
+environment_id: default
+environment_parameters:
+    limits: {time: 10, memory: 128}
+problems:
+    anything:
+        type: code_single_line
+        name: Anything
+        header: Type anything.
+    second:
+        type: code_single_line
+        name: Second box
+        header: Type anything here too.

@@ -1,0 +1,28 @@
+# Task whose submissions are inserted by the tests (feedback rendering, result kinds).
+name: Feedback rendering
+author: INGInious test-suite
+contact_url: 'javascript:alert(1)'
+context: |
+  #MD
+  Statement in **Markdown** with a table:
+
+  | a | b |
+  |---|---|
+  | 1 | 2 |
+environment_type: mcq
+environment_id: mcq
+problems:
+  one:
+    type: match
+    name: One
+    header: First problem.
+    answer: x
+  two:
+    type: multiple_choice
+    name: Two
+    header: Pick.
+    multiple: true
+    choices:
+      - text: '#MD **Yes**'
+        valid: true
+      - text: No *rst*

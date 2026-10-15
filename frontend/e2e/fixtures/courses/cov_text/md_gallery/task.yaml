@@ -1,0 +1,155 @@
+# Generated from tests/fixtures/rst (golden examples): one problem header per example.
+name: Markdown gallery
+author: INGInious test-suite
+context: ''
+environment_type: mcq
+environment_id: mcq
+problems:
+  paragraph:
+    type: match
+    name: paragraph
+    header: |-
+      #MD
+      Hello **world** and *it* and `code --x` & <b>bold</b>.
+
+      Second.
+    answer: x
+  headings_start_at_h3:
+    type: match
+    name: headings_start_at_h3
+    header: |-
+      #MD
+      # Title
+
+      ## Sub
+
+      text
+    answer: x
+  fenced_code:
+    type: match
+    name: fenced_code
+    header: |-
+      #MD
+      ```python
+      def f(x):
+          return x < 2
+      ```
+    answer: x
+  fenced_code_no_language:
+    type: match
+    name: fenced_code_no_language
+    header: |-
+      #MD
+      ```
+      plain
+      ```
+    answer: x
+  indented_code:
+    type: match
+    name: indented_code
+    header: |-
+      #MD
+      para
+
+          code block
+    answer: x
+  gfm_table:
+    type: match
+    name: gfm_table
+    header: |-
+      #MD
+      | A | B |
+      |---|---|
+      | 1 | 2 |
+    answer: x
+  math_inline:
+    type: match
+    name: math_inline
+    header: |-
+      #MD
+      Inline $a^2$ and \(b_1\) but $5 and $6.
+    answer: x
+  math_block_dollars:
+    type: match
+    name: math_block_dollars
+    header: |-
+      #MD
+      $$
+      \int_0^1 x\,dx
+      $$
+    answer: x
+  math_block_brackets:
+    type: match
+    name: math_block_brackets
+    header: |-
+      #MD
+      \[ x = 1 \]
+    answer: x
+  links:
+    type: match
+    name: links
+    header: |-
+      #MD
+      [INGInious](https://inginious.org), [anchor](#top), <https://example.com> and [js](javascript:alert(1))
+    answer: x
+  image:
+    type: match
+    name: image
+    header: |-
+      #MD
+      ![alt text](img.png)
+    answer: x
+  github_alert_warning:
+    type: match
+    name: github_alert_warning
+    header: |-
+      #MD
+      > [!WARNING]
+      > Be careful.
+    answer: x
+  github_alert_note:
+    type: match
+    name: github_alert_note
+    header: |-
+      #MD
+      > [!NOTE]
+      > Note body
+      > more
+    answer: x
+  blockquote:
+    type: match
+    name: blockquote
+    header: |-
+      #MD
+      > just a quote
+    answer: x
+  lists:
+    type: match
+    name: lists
+    header: |-
+      #MD
+      - one
+      - two
+        1. nested
+    answer: x
+  raw_html_sanitized:
+    type: match
+    name: raw_html_sanitized
+    header: |-
+      #MD
+      <div class="row"><script>alert(1)</script><span onclick="x()">hi</span></div>
+    answer: x
+  random_idiom:
+    type: match
+    name: random_idiom
+    header: |-
+      #MD
+      Value: <script>document.write(input["@random"][0])</script>
+    answer: x
+  strikethrough:
+    type: match
+    name: strikethrough
+    header: |-
+      #MD
+      ~~gone~~
+    answer: x

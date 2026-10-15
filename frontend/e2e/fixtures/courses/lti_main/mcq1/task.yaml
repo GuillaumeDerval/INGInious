@@ -1,0 +1,29 @@
+accessible: true
+author: lti agent
+context: |-
+  A task for LTI tests. Here is a relative image: |img| and a `relative link <public/hello.txt>`_ and an `absolute link <https://example.org/x>`_.
+
+  .. |img| image:: public/pixel.png
+environment_id: mcq
+environment_parameters: {}
+environment_type: mcq
+evaluate: best
+groups: false
+input_random: '0'
+name: LTI MCQ 1
+network_grading: false
+problems:
+  q1:
+    type: multiple_choice
+    name: Q1
+    header: Pick the right one
+    limit: 0
+    choices:
+      - text: Right
+        valid: true
+      - text: Wrong
+stored_submissions: 0
+submission_limit:
+  amount: -1
+  period: -1
+weight: 1.0
