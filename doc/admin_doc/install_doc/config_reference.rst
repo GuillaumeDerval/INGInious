@@ -67,9 +67,20 @@ The different entries are :
     When absent, the ``APP_ORIGIN`` environment variable is used; if neither is set, these actions are
     refused (except when the instance is accessed on ``localhost``) and an error is logged.
 
+``lti_allow_private_urls``
+    The frontend calls the LTI platforms (LTI 1.1 outcome service, LTI 1.3 key set, access token and score URLs) only
+    over HTTPS and only on public addresses, with a 10 s timeout and without following redirects. Set to ``true`` to
+    also allow ``http`` and loopback/private addresses (development, tests with a local platform). Defaults to
+    ``false``.
+
 ``lti_config``
     A dictionary containing the LTI v1.3 tool consumers configuration.
     See :ref:`lti13` for configuration details.
+
+``lti_frame_ancestors``
+    List of extra origins allowed to display the LTI pages in a frame, on top of the configured LTI 1.3 platforms and
+    of the LTI 1.1 consumer of the session. Needed when a platform serves its pages from other hosts than its
+    configured URLs, e.g. ``["https://*.instructure.com"]`` for Canvas.
 
 ``maintenance``
     Set to ``true`` to replace every page by a maintenance message.
@@ -90,6 +101,10 @@ The different entries are :
 
     The frontend refuses to start when the database version does not match the one it expects: run
     :ref:`inginious-database-update` first.
+
+``password_min_length``
+    Minimum length of new passwords (registration, reset, change, accounts created by a superadmin). Defaults to
+    ``10``. Passwords longer than 1024 characters are always refused.
 
 ``plugins``
     A list of plugin modules together with configuration options.
@@ -128,6 +143,11 @@ The different entries are :
 ``static_directory``
     Path to the directory where YAML-defined static pages are located. Defaults to ``./static``.
 
+``submissions_export_limit``
+    Maximum number of submissions of one archive download or bulk replay in the course administration (the CSV
+    export allows 20 times more). Larger selections are refused with a message asking to narrow the filters.
+    Defaults to ``10000``.
+
 ``superadmins``
     A list of super-administrators who have admin access on the whole stored content.
 
@@ -143,6 +163,10 @@ The different entries are :
     Link to the INGInious xterm app with the following syntax: ``http[s]://host:port``.
     If set, it allows to use in-browser task debug via ssh. (See :ref:`webterm_setup` for
     more information)
+
+``webdav_allow_http``
+    WebDAV access requires HTTPS (credentials are sent with HTTP Basic authentication), except on ``localhost``.
+    Set to ``true`` to allow it over plain HTTP. Defaults to ``false``.
 
 ``webdav_host``
     Public URL of the WebDAV access, served by the frontend under ``/dav``, e.g.
@@ -166,12 +190,13 @@ The different entries are :
             cookie_domain: null
             cookie_path: "/"
             samesite: "Lax"
-            timeout: 86400  # 24 * 60 * 60, # 24 hours in seconds
+            timeout: 86400  # 24 * 60 * 60, # 24 hours in seconds, extended at each visit
+            max_lifetime: 604800  # 7 days: sign in again after this time (0: no limit)
             httponly: true
-            secure: false
 
     Most value are as defined in standard HTTP cookies. The ``secret_key`` should be a long sequence of random
-    characters. Set ``secure`` to ``true`` when the instance is served over HTTPS.
+    characters. Without an explicit ``secure`` value, the cookie gets the ``Secure`` flag when ``base_url`` is
+    ``https`` and on every request served over HTTPS; set ``secure: false`` to disable it.
 
 ``reverse-proxy-config``
     A dictionary for reverse proxy configuration.

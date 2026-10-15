@@ -424,7 +424,8 @@ WebDAV setup
 
 Course administrators can access the files of their courses with a WebDAV client. WebDAV is served by the frontend
 itself under the ``/dav`` path: there is no separate service to run. Users authenticate with their username and
-their API key; only the administrators of a course (and the superadmins) can access it.
+their API key (created with the "Generate secret" button of the WebDAV box); only the administrators of a course (and
+the superadmins) can access it, and only over HTTPS (see ``webdav_allow_http`` in :ref:`ConfigReference`).
 
 To display the WebDAV URL and credentials to course administrators (on the task list page of the course
 administration), set ``webdav_host`` to the public URL of that path in the
