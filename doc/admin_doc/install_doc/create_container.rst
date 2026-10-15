@@ -110,7 +110,7 @@ If you are running on a dev environment (cloned from the repository), from the m
     $ docker build -t ghcr.io/inginious/env-default ./
 
 Note, this manual building step should not be necessary for a teacher.
-Of course, if you rebuilt your images, you will have to restart inginious-webapp.
+Of course, if you rebuilt your images, you will have to restart the Docker agent (``inginious-agent-docker``).
 
 Leveraging other runtimes
 -------------------------

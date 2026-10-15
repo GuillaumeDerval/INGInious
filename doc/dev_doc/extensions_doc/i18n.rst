@@ -1,28 +1,44 @@
 Localization
 ============
 
-Extracting new messages
+Frontend messages
+-----------------
+
+The messages of the web frontend are translated with the ``t()`` function of ``frontend/src/lib/i18n/index.ts``,
+usable both on the server and in the browser:
+
+.. code-block:: typescript
+
+    import { t } from '#lib/i18n/index.js';
+
+    t('Course administration');
+    t('Welcome {}', name);              // positional placeholder
+    t('{count} tasks', { count: 3 });   // named placeholder
+
+Messages are identified by their English text (as the gettext ``msgid`` of the former Python frontend, whose
+translations were converted and are reused). The translations are JSON catalogs, one per language, in
+``frontend/src/lib/i18n/locales/<lang>.json``, mapping each English message to its translation. English is the source
+language and has no catalog; a message missing from a catalog is displayed in English.
+
+To translate a new message, add an entry ``"<English text>": "<translation>"`` to each catalog. Keep the
+placeholders (``{}``, ``{name}``) of the English text. To add a language, add its catalog and its code and native
+name to ``LANGUAGES`` in ``frontend/src/lib/i18n/index.ts``.
+
+The language is stored in the session: it is the one of the user profile after login, the one chosen with the language
+selector, or else the best match of the browser languages (``Accept-Language``).
+
+See `frontend/docs/reference/i18n.md`_ for the details inherited from the former frontend.
+
+.. _frontend/docs/reference/i18n.md: https://github.com/INGInious/INGInious/blob/main/frontend/docs/reference/i18n.md
+
+Course and task content
 -----------------------
-Extract messages in a PO template file:
 
-.. code-block::
+The texts of the courses and tasks (``course.yaml``, ``task.yaml``) are translated with gettext ``.mo`` files stored
+in the ``$i18n`` folders of the course and the task, as before (see :doc:`/teacher_doc/translating`).
 
-    pybabel extract -F inginious/frontend/babel.cfg ./ -o inginious/frontend/i18n/messages.pot
+Agent messages
+--------------
 
-Then update the PO files for each language:
-
-.. code-block::
-
-    pybabel update -i messages.pot -o inginious/frontend/i18n/en/LC_MESSAGES/messages.po -l en
-    pybabel update -i messages.pot -o inginious/frontend/i18n/fr/LC_MESSAGES/messages.po -l fr
-    ...
-
-Updating translation
---------------------
-
-After modifying the .po file (example for the french translation):
-
-.. code-block::
-
-    pybabel compile -i inginious/frontend/i18n/fr/LC_MESSAGES/messages.po -o inginious/frontend/i18n/fr/LC_MESSAGES/messages.mo -l fr
-
+The messages of the MCQ agent are still translated with gettext/Babel in the Python package
+(``inginious/agent/mcq_agent/i18n``).

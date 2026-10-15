@@ -22,8 +22,8 @@ user experience as local development. To make this feature work remotely
 (regarding the INGInious Docker agent), please make sure you've correctly set up the debug
 hosts and ports (see :ref:`ConfigReference` if needed).
 
-Every administrator is able from the frontend to launch a debugging job. This is done by clicking
-on the *>_* (left-chevron, underscore) button next to the *Submit* button. According to your
+Every administrator is able from the frontend to launch a debugging job. This is done with the
+*SSH debug* button next to the *Submit* button. According to your
 configuration, either a SSH command-line with auto-generated password will be given you (you will,
 in this case, need an SSH client installed), or an embedded SSH console will pop up as the
 feedback position.
@@ -41,10 +41,10 @@ environment so there is no need to use a particular loader. ``source run.sh`` mi
 choice than running the script in a subshell to observe the state of variables after execution.
 
 Container debugging through an IDE
-------------------------------
+----------------------------------
 INGInious also supports container debugging through an IDE. This is currently only supported for the INGInious
 script and other scripts/APIs in the container by using Pycharm's debugging. You need to create a *Python Debug Server*
 in Pycharm Run/Debug configurations, listening on port 5678, and add one or several *Path Mapping* between the local 
 and remote files to enable checkpoints.
-To enable this feature, you need to start the agent with the ``--debugger`` option or start the webapp with the
-``debugger`` config in your configuration.yaml.
+To enable this feature, you need to start the Docker agent with the ``--debugger`` option
+(see :ref:`inginious-agent-docker`).

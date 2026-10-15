@@ -2,7 +2,7 @@ Course administration
 =====================
 
 As a course administrator, you can simply access its management
-page by clicking on "Course administration" in the main course page.
+pages with the *Course administration* link of the course menu.
 
 Students submissions
 --------------------
@@ -15,21 +15,15 @@ The administration page gives you several global list views :
 
 - All the tasks of a course, with  the number of students who viewed the
   task at least one time, who tried and the number of tries, as well as the
-  number of students who succeded the task. This view is the first
-  displayed when you click on "Manage" to enter the administration.
+  number of students who succeded the task.
 - All the students/groups of a course, with the number of tasks tried and done,
-  as well as its global progression for students. This view can be accessed by
-  switching to "Students"/"Groups" in the main administration page.
+  as well as its global progression for students.
 - All the students/groups who tried a given task, if they succeded it, and the
-  number of submissions they did. You can show these information by
-  clicking "View results" on the main administration page or by
-  clicking "Statistics" on the task page.
+  number of submissions they did. This view is also reachable from the task page.
 - All the tasks tried by a given student/group, if (s)he/they succeded it and the
-  number of submissions (s)he/they did. These information can be displayed by
-  clicking "View" in the student/group list of a course.
+  number of submissions (s)he/they did, reachable from the student/group list of a course.
 - All the submissions made by a student/group for a given tasks, with date of
-  submission and the global result. Submissions can be displayed by
-  clicking "View submissions" in tasks lists.
+  submission and the global result, reachable from these lists.
 
 All the tables can be downloaded in CSV format to make some further
 treatment in your favourite spreadsheet editor.
@@ -69,39 +63,41 @@ Student submissions can be replayed from the submission inspection page. You can
 Task edition
 ------------
 
-All tasks can be edited from the webapp. To access the task editor, just click
-on *Tasks* from the main administration page. Then click on *Edit task* for the concerned task. 
-You can also add new tasks from this *Tasks* page by clicking *Add tasks* for a tasks section and entering a new task id.
-When editing a task, you can enter basic informations and parameters in the *Basic settings* tab.
+All tasks can be edited from the webapp. The task editor is reached from the *Task list* page of the course
+administration, which also allows to add new tasks to a section by entering a new task id.
+When editing a task, you can enter basic informations and parameters in the *General* section.
 
-Based on the type of problem you want to put for the task, you can select one of the two available *grading environment* in the *Environment* tab:
+Based on the type of problem you want to put for the task, you can select one of the available *grading environments*
+in the *Grading environment* section:
 
 - Select **Multiple Choice Question solver** if you only want to add *mcq* or *match* types of problems. Note, the *math* problem type from the problems-math plugin also uses this grading environment.
-- Select **Docker container** if you want to add some more complex problems which requires to write a grading script to access the students inputs.
+- Select a container (**Standard container**, possibly with SSH or GPUs) if you want to add some more complex problems which requires to write a grading script to access the students inputs.
 
 Adding/removing problems
 ````````````````````````
-Adding and removing problems in a task is very easy with the task editor. Go to the *Subproblems* tab and add a new 
-problem-id (alphanumerical characters) and a problem type. You can configure the problem context from this page.
+Adding and removing problems in a task is very easy with the task editor. In the *Problems* section, add a new
+problem-id (alphanumerical characters) and a problem type. You can configure the problem context from this section.
 
 There are two ways to grade a problem:
 
  - Using **check_answer** which is only implemented for *mcq* and *match* problems
  - Using a specific **grading script** which is required for more complex problems
 
-**mcq** and **match** problems can be entirely configured from the *subproblem* page with the option to set up answers.
+**mcq** and **match** problems can be entirely configured from the task editor with the option to set up answers.
 When editing a multiple choice problem, you're asked if the student is
 shown a multiple-answers- or single-answer-problem and which of the
 possible choices is (are) good answer(s).
 
-**check_answer** is only available for *mcq* and *match* problems and is automatically used when using the *Multiple Choice Question Solver* environment. So if you are adding more complex problems such as asking students for code implementation, you will have to write your own grading script. If you are creating this kind of problems, remember to select *Docker container* as *grading environment* in the *Environment* tab.
+**check_answer** is only available for *mcq* and *match* problems and is automatically used when using the *Multiple Choice Question Solver* environment. So if you are adding more complex problems such as asking students for code implementation, you will have to write your own grading script. If you are creating this kind of problems, remember to select a container as *grading environment* in the *Grading environment* section.
 
-Note only a few types of problems are initially shipped with INGInious but many others are available via plugins. A list is available `here <https://github.com/INGInious/plugins>`_
+Note only a few types of problems are shipped with INGInious. The additional problem types of the
+`INGInious plugins repository <https://github.com/INGInious/plugins>`_ are Python plugins of the former frontend:
+they cannot be loaded by the current web frontend.
 
 Task files
 ``````````
 
-Task files can be created, uploaded and modified from the task edition page with the *Tasks files* tab.
+Task files can be created, uploaded and modified from the *Task files* of the task editor.
 Only text-base files can be edited from the webapp. Binary files can however be uploaded.
 
 The behaviour of the *Move* action is Unix-like : it can be used for renaming files.
@@ -122,15 +118,12 @@ Creation and edition
 Audiences are created and edited from the web app in the course
 administration.
 
-In the audiences list view, specify an audience description, and click on
-"*Create new audience*". The newly created audience will appear in the list.
+In the audiences list view, create a new audience by giving its description. The newly created audience will appear
+in the list.
 
-To edit an audience, click on the quick link "*Edit audience*" located on the
-right side of the table. You'll be able to change the audience description,
+When editing an audience, you'll be able to change the audience description,
 the associated teaching staff, and to specify the students.
 Assigning tutors will help them to retrieve their audience statistics.
-
-The student list is entirely managed by drag-and-drop.
 
 Course structure upload
 ```````````````````````
@@ -169,12 +162,9 @@ Creation and edition
 Groups are created and edited from the web app in the course
 administration.
 
-To create a new group,  simply press on the "*New group*" button in the group list
-view. You'll then be able to specify the group description, its maximum size,
-assigned tutors and students, as well as the required audiences to enter the group.
-
-The student list is entirely managed by drag-and-drop. Students can be moved
-from one group to another by simply moving his name to the new group.
+A new group is created from the group list view. You'll then be able to specify the group description, its maximum
+size, assigned tutors and students, as well as the required audiences to enter the group. Students can be moved
+from one group to another.
 
 Group attribution
 ``````````````````

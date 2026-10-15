@@ -38,15 +38,21 @@ This problem type simply verify that expected value and answer are strictly equa
 Custom exercises definition
 ---------------------------
 
-As previously said, it is possible to define custom problem by implementing the Problem class.
-This will require some method to implement to define the behavior of the custom problem.
-The most effective way to add your custom type is to do it in a `plugin <https://inginious.readthedocs.io/en/latest/dev_doc/plugins.html>`_.
+In the web frontend, a problem type is a ``ProblemType`` object registered with ``registerProblemType``
+(``frontend/src/lib/server/courses/problems.ts``). It defines how the answer is read from the submitted form, how the
+problem definition of ``task.yaml`` is validated, how an answer is checked before being stored, and the data given to
+the task page. The grading itself is done by the grading environment. A plugin (see
+:doc:`/dev_doc/extensions_doc/plugins`) can register a new type in its ``init`` function.
 
 
 Problem display
 ---------------
 
 Once your problem is defined, you'll probably need to display this in the frontend.
-Like the Problem implementation, all you have to do is to define your own class that implements ``DisplayableProblem``.
-This class is available only in the frontend as this is only use by the frontend.
-By writing custom edit box and input, you'll be able to define your own problem input.
+The problems are displayed by the Svelte components of ``frontend/src/lib/components/task/`` (``CodeProblem``,
+``FileProblem``, ``ChoiceProblem``, ...), and edited in the task editor with the field descriptions of
+``frontend/src/lib/components/course-admin/specs.ts``. A new type needs its own component and editor fields.
+
+Problem types of the former Python frontend (``DisplayableProblem`` subclasses provided by Python plugins) are not
+loaded. The command-line tools accept their type names so that the tasks using them can be tested
+(see :ref:`inginious-autotest`).
