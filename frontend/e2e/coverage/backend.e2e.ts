@@ -10,13 +10,11 @@ import { Router } from 'zeromq';
 import { encode, decode } from '@msgpack/msgpack';
 import { ObjectId } from 'mongodb';
 import { expect, installCourse, test, withDb } from '../fixtures.js';
-import { E2E, E2E_ID } from '../setup-data.js';
+import { E2E_ID } from '../setup-data.js';
 import { appUrl, sessionCookie, startApp, uid, type App } from '../auth/helpers.js';
 
 /** Index of the extra server of this file (see `startApp`). */
 const INDEX = 10;
-/** Port of the fake backend (distinct per run, like the extra servers). */
-const PORT = 40000 + (E2E.port - 4173) * 20 + INDEX;
 
 /** A message of the backend protocol. */
 type Message = Record<string, unknown>;
@@ -35,10 +33,14 @@ class FakeBackend {
 	/** When set, every new job is immediately answered with this result. */
 	autoDone: Message | null = null;
 
-	/** Binds the socket and serves the app until closed. */
-	async start(): Promise<void> {
-		await this.router.bind(`tcp://127.0.0.1:${PORT}`);
+	/**
+	 * Binds the socket on a free port chosen by the system (a fixed port may be taken by
+	 * an outgoing connection) and serves the app until closed. Returns the address.
+	 */
+	async start(): Promise<string> {
+		await this.router.bind('tcp://127.0.0.1:*');
 		void this.serve();
+		return this.router.lastEndpoint!;
 	}
 
 	/** Receive loop: answers the protocol messages of the app. */
@@ -84,7 +86,7 @@ test.describe.configure({ mode: 'serial' });
 test.use({ baseURL: url });
 
 test.beforeAll(async () => {
-	await backend.start();
+	const address = await backend.start();
 	course = installCourse('cov_site', `e2e_covfake_${uid()}`);
 	await withDb((db) =>
 		db
@@ -92,7 +94,7 @@ test.beforeAll(async () => {
 			.updateOne({ _id: course as never }, { $set: { students: ['e2e_student1'] } }, { upsert: true })
 	);
 	app = await startApp(INDEX, {
-		backend: `tcp://127.0.0.1:${PORT}`,
+		backend: address,
 		// A new repository: the plugin creates it (git init) at startup.
 		plugins: [
 			{
