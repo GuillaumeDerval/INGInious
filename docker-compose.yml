@@ -146,28 +146,12 @@ services:
       backend:
         condition: service_started
     environment:
-      - INGINIOUS_WEBAPP_HOST=0.0.0.0
+      # The public URL (origin checks of form submissions) comes from Caddy's X-Forwarded-* headers.
+      PROTOCOL_HEADER: "x-forwarded-proto"
+      HOST_HEADER: "x-forwarded-host"
     volumes:
       - ./configuration.deploy.yaml:/inginious/configuration.yaml:z
       - ./tasks:/inginious/tasks:z
-    networks:
-      - inginious
-
-  webdav:
-    image: ${REGISTRY}/inginious/core-webdav:${VERSION}
-    build:
-      dockerfile: deploy/Containerfile
-      target: webdav
-      args:
-        - VERSION=${VERSION}
-        - REGISTRY=${REGISTRY}
-    environment:
-      - INGINIOUS_WEBDAV_HOST=0.0.0.0
-    depends_on:
-      - db
-    volumes:
-      - ./configuration.deploy.yaml:/inginious/configuration.yaml:z
-      - ./tasks/:/inginious/tasks:z
     networks:
       - inginious
 
@@ -177,7 +161,6 @@ services:
       - ./deploy/Caddyfile:/etc/caddy/Caddyfile:z
     depends_on:
       - frontend
-      - webdav
     ports:
       - 443:443
     # For illustration purpose, not useful in real deployments.

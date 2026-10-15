@@ -34,20 +34,34 @@ CMD  ["sh", "-c", "python${PYTHON_VERSION} -m inginious.scripts.backend ${AGENT}
 ###########
 # FRONTEND
 ###########
-FROM core AS frontend 
+# The web frontend (SvelteKit, frontend/) is a Node.js application: it is built in a
+# separate stage and served by adapter-node on port 8000. It also serves WebDAV under /dav.
+FROM docker.io/library/node:24-bookworm-slim AS frontend_build
 
-ENV  PYTHON_VERSION="${PYTHON_VERSION}"
+WORKDIR /frontend
+COPY frontend/package.json frontend/package-lock.json ./
+RUN  npm ci
+COPY frontend/ ./
+# Optional fixed public URL (https://your.host); by default it comes from the proxy's X-Forwarded-* headers.
+ARG  APP_ORIGIN=
+RUN  APP_ORIGIN="$APP_ORIGIN" npx vite build && npm prune --omit=dev
 
-COPY inginious/frontend inginious/frontend/
-COPY inginious/client inginious/client/
-COPY inginious/scripts inginious/scripts
+FROM docker.io/library/node:24-bookworm-slim AS frontend
 
-# See https://github.com/pypa/setuptools_scm/#usage-from-docker
-RUN  --mount=source=.git,target=.git,type=bind \
-    pip"${PYTHON_VERSION}" install --no-cache-dir -e . &&\
-    pip"${PYTHON_VERSION}" install 'gunicorn==26.0.0'
+# git: marketplace course import and the git_repo plugin.
+RUN  apt-get update && apt-get install -y --no-install-recommends git ca-certificates && rm -rf /var/lib/apt/lists/*
 
-CMD ["sh", "-c", "python${PYTHON_VERSION} -m gunicorn.app.wsgiapp 'inginious.scripts.webapp:application' --bind 0.0.0.0"]
+WORKDIR /frontend
+ARG  APP_ORIGIN=
+ENV  NODE_ENV=production PORT=8000 INGINIOUS_CONFIG=/inginious/configuration.yaml APP_ORIGIN=$APP_ORIGIN
+COPY --from=frontend_build /frontend/build ./build
+COPY --from=frontend_build /frontend/node_modules ./node_modules
+COPY --from=frontend_build /frontend/package.json ./
+
+# Runs as root like the other INGInious services, so that it can manage the course
+# files of existing deployments (tasks directory written by the previous frontend).
+EXPOSE 8000
+CMD ["node", "build"]
 
 
 ###########
@@ -85,21 +99,3 @@ RUN --mount=source=.git,target=.git,type=bind \
     pip"${PYTHON_VERSION}" install --no-cache-dir -e .
 
 CMD ["sh", "-c", "python${PYTHON_VERSION} -m inginious.scripts.agent_docker ${BACKEND} --tmpdir=/tmp/agent_data/"]
-
-########
-# WEBDAV
-########
-FROM core AS webdav
-
-ENV  PYTHON_VERSION="${PYTHON_VERSION}"
-
-COPY inginious/frontend inginious/frontend/
-COPY inginious/client inginious/client/
-COPY inginious/scripts inginious/scripts
-
-# See https://github.com/pypa/setuptools_scm/#usage-from-docker
-RUN --mount=source=.git,target=.git,type=bind \
-    pip"${PYTHON_VERSION}" install --no-cache-dir -e . &&\
-    pip"${PYTHON_VERSION}" install 'gunicorn==26.0.0'
-
-CMD ["sh", "-c", "python${PYTHON_VERSION} -m gunicorn.app.wsgiapp 'inginious.scripts.webdav:application' --bind 0.0.0.0 --workers 1"]

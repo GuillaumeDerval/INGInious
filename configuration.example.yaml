@@ -1,51 +1,48 @@
-# Backend
-# Can be:
-# - "local" (run containers on the same machine)
-# - or an address to a distant manually-launched backend, in the form "tcp://host.be:3000", "udp://host.be:3000" or "ipc:///path/to/socket"
-backend: local
+# Example configuration of the INGInious web frontend (frontend/, read through the
+# INGINIOUS_CONFIG environment variable). See doc/admin_doc/install_doc/config_reference.rst.
 
-# Logging level
-log_level: INFO
-
-# Display errors? Possible values:
-# - false : do not display the error outside the log
-# - true : display the error directly in the browser. useful when debugging locally, but dangerous in production,
-#         as it may expose passwords and other sensitive data
-# - "your@email.com": send error report to the indicated email
-web_debug: false
-
-# Only for backend: local
-local-config:
-    # debug_host: localhost  # host that will be indicated to users when they want to use the task remote debug feature. Automatically guessed by
-                             # default
-    debug_ports: 64000-64100 #port range use for remote debug feature
-    debugger: true # for IDE debugging, uses port 5678
+# Address of the backend (client port), started separately (inginious-backend).
+backend: tcp://127.0.0.1:2000
 
 # MongoDB options
 mongo_opt:
     host: localhost
     database: INGInious
 
-# Location of the task directory
-tasks_directory: ./inginious/tasks
+# Location of the task directory (shared with the grading agents)
+tasks_directory: ./tasks
 
-# Use single minified javascript file (production) or multiple files (dev) ?
-use_minified_js: true
+# Folder of the course archives
+backup_directory: ./backups
 
-# URL of a node app INGInious-xterm, properly configured, that allows to run in-browser ssh debug
-# If you don't want to install/activate it, just set it to None or remove it from the file
+# Session cookie: secret_key is mandatory (e.g. `openssl rand -hex 32`)
+session_parameters:
+    secret_key: change-me-to-a-long-random-string
+    secure: true
+    timeout: 86400
+
+# Public URL of the platform (links sent by e-mail, OAuth/SAML callbacks)
+base_url: https://inginious.example.org
+
+# URL of an INGInious-xterm server for in-browser ssh debugging (remove if unused)
 webterm: "https://my-host.be:8080"
 
-# Plugins that will be loaded by the webapp
+# WebDAV access to course files, served by the frontend under /dav (remove to hide it)
+webdav_host: https://inginious.example.org/dav
+
+# Plugins loaded by the frontend (same plugin_module names as before)
 plugins:
-  - plugin_module: inginious.frontend.plugins.auth.demo_auth
-    users:
-        # register the user "test" with the password "test"
-        test: test
+  - plugin_module: inginious.frontend.plugins.scoreboard
+  - plugin_module: inginious.frontend.plugins.contests
+  - plugin_module: inginious.frontend.plugins.upcoming_tasks
 
 # Superadmins: list of user names that are administrators on all courses
 superadmins:
-  - test
+  - superadmin
+
+# Self-registration and account deletion
+allow_registration: true
+allow_deletion: true
 
 # Disable INGInious?
 maintenance: false
@@ -53,14 +50,14 @@ maintenance: false
 # Email info
 smtp:
     sendername: 'INGInious <no-reply@inginious.org>'
-    host: 'smtp.gmail.com'
+    host: 'smtp.example.org'
     port: 587
-    username: 'configme@gmail.com'
+    username: 'configme'
     password: 'secret'
-    starttls: True
+    starttls: true
 
-#reverse proxy fix
+# Behind a reverse proxy: trust its X-Forwarded-* headers (protocol, host, client address)
 reverse-proxy-config:
     enable: false
-    x_for: 1
-    x_host: 1
+    x-for: 1
+    x-host: 1
