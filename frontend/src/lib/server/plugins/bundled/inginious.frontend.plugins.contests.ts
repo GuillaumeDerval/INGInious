@@ -7,7 +7,8 @@
  * Differences with legacy: the settings have their own page (legacy: a block
  * of the task list form) and a rejected form never changes the running
  * contest (legacy mutated the cached settings); the scoreboard is restricted
- * to registered students and staff; the course
+ * to registered students and staff, and lists the tasks to students only once
+ * they are open (contest started; hidden tasks never); the course
  * menu shows links instead of the JavaScript countdown (the scoreboard page
  * shows the dates and refreshes itself every 30 seconds).
  */
@@ -21,7 +22,7 @@ import { courseTaskIds, saveCourse, type Course } from '../../courses/course.js'
 import type { ContestSettings } from '../../courses/dispenser.js';
 import { isCourseAdmin, registeredUsers } from '../../courses/members.js';
 import { attempt } from '../../attempt.js';
-import { realnames, type Cell, type Ranking } from './inginious.frontend.plugins.scoreboard.js';
+import { listedTasks, realnames, type Cell, type Ranking } from './inginious.frontend.plugins.scoreboard.js';
 
 /** Legacy module name of the plugin. */
 export const MODULE = 'inginious.frontend.plugins.contests';
@@ -98,16 +99,17 @@ const CLASSES: Record<Status['s'], string> = {
 
 /**
  * SITE-14: contest scoreboard (legacy algorithm: solved count, then minutes
- * since the start + penalty per wrong try; submissions of the blackout ignored).
+ * since the start + penalty per wrong try; submissions of the blackout ignored),
+ * over the tasks listed to the viewer (`listedTasks`).
  * @param timeZone time zone of the viewer for the activity times.
  */
-export async function contestScoreboard(course: Course, lang: string, timeZone: string) {
+export async function contestScoreboard(course: Course, username: string, lang: string, timeZone: string) {
 	const c = contestOf(course);
 	if (!c.enabled) error(404, t('Not found'));
 	const [start, end] = [parseDate(c.start), parseDate(c.end)];
 	const blackout = end - c.blackout * 3_600_000;
 	const users = await registeredUsers(course, true);
-	const tasks = courseTaskIds(course);
+	const tasks = listedTasks(course, courseTaskIds(course), username);
 	const names = await realnames(users);
 	const state = Object.fromEntries(
 		users.map((u) => [u, Object.fromEntries(tasks.map((id) => [id, { s: 'NA', tries: 0 } as Status]))])

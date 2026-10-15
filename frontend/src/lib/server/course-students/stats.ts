@@ -1,7 +1,7 @@
 /**
  * "Submissions" statistics of a course (CSTU-17), implementing the intended
  * legacy behaviour (the legacy tasks table, chart, global and tag statistics
- * were always empty): the most recent `limit` (default 500) submissions of the
+ * were always empty): the most recent `limit` (default 500, MAX_LIMIT; at most the CSV export cap) submissions of the
  * query (CSTU-11 filters) in the date range (default: the last 14 days from
  * midnight UTC to now) are counted per task, per user (group submissions count
  * for each member), per hour/day bucket, and per tag (normal or weighted ratio).
@@ -12,7 +12,7 @@ import { services } from '../app.js';
 import type { Course } from '../courses/course.js';
 import { toIsoString } from '../text/dates.js';
 import { taskName, userInfos } from './people.js';
-import { evaluationIds, parseIso, selection, type Query } from './query.js';
+import { CSV_FACTOR, evaluationIds, exportCap, MAX_LIMIT, parseIso, selection, type Query } from './query.js';
 
 const DAY = 86_400_000;
 const sum = (xs: number[]) => xs.reduce((a, b) => a + b, 0);
@@ -25,7 +25,7 @@ export async function submissionStats(course: Course, q: Query, lang: string, no
 	const after = parseIso(q.date_after) || new Date(Math.floor(before.getTime() / DAY) * DAY - 14 * DAY);
 	const query = { ...q, eval: false, date_after: q.date_after || toIsoString(after).slice(0, 16) };
 	const sel = await selection(course, query);
-	const limit = q.limit && q.limit > 0 ? q.limit : 500;
+	const limit = q.limit && q.limit > 0 ? Math.min(q.limit, exportCap(CSV_FACTOR)) : MAX_LIMIT;
 	const docs = await services()
 		.db.c.submissions.find(sel.filter, { projection: { username: 1, taskid: 1, result: 1, submitted_on: 1, tests: 1 } })
 		.sort({ submitted_on: -1 })

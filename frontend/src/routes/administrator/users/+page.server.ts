@@ -19,7 +19,13 @@ import type { Actions, PageServerLoad } from './$types';
 export const load: PageServerLoad = async (event) => {
 	const me = requireSuperadmin(event);
 	const q = event.url.searchParams.get('q') ?? '';
-	return { ...(await listUsers(Number(event.url.searchParams.get('page') ?? 1), q)), q, me: me.username };
+	const { passwordMinLength } = services().config;
+	return {
+		...(await listUsers(Number(event.url.searchParams.get('page') ?? 1), q)),
+		q,
+		me: me.username,
+		passwordMinLength
+	};
 };
 
 const target = z.object({ username: z.string().min(1), binding_id: z.string().default('') });

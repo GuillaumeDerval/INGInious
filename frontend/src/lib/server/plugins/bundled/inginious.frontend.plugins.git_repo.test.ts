@@ -69,5 +69,11 @@ describe('SITE-19 git_repo plugin', () => {
 		await vi.waitFor(() =>
 			expect(execFileSync('git', ['log', '--format=%s'], { cwd: repo, encoding: 'utf8' })).toContain('a-b - failed')
 		);
+		// An unreadable grader archive: the submission is committed without its output.
+		const broken = { ...submission, _id: new ObjectId(), username: ['c'] };
+		await git.saveSubmission(repo, { submission: broken, archive: Buffer.from('nope') } as unknown as DoneEvent);
+		expect(error).toHaveBeenCalledWith('Grader archive not fully extracted:', expect.any(Error));
+		expect(execFileSync('git', ['log', '--format=%s'], { cwd: repo, encoding: 'utf8' })).toContain(String(broken._id));
+		expect(existsSync(join(repo, 'c', 't', 'c', 'output'))).toBe(false);
 	});
 });

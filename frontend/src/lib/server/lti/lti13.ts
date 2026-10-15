@@ -21,6 +21,7 @@ import {
 	calculateJwkThumbprint,
 	createLocalJWKSet,
 	createRemoteJWKSet,
+	customFetch,
 	decodeJwt,
 	exportJWK,
 	jwtVerify,
@@ -34,6 +35,7 @@ import { requireCourse } from '../courses/access.js';
 import type { Course } from '../courses/course.js';
 import type { LtiLaunchDoc } from '../db/types.js';
 import { externalUrl, findClient, realname, startLtiSession, toolConfig, type Client } from './common.js';
+import { ltiFetch } from './outbound.js';
 
 /** Prefix of the LTI 1.3 core claim names. */
 export const CLAIM = 'https://purl.imsglobal.org/spec/lti/claim/';
@@ -44,11 +46,12 @@ type Claims = JWTPayload & Record<string, unknown>;
 /** Cached remote platform key sets (jose refetches them on an unknown `kid`). */
 const remoteSets = new Map<string, ReturnType<typeof createRemoteJWKSet>>();
 
-/** Key set of a platform: inline `key_set` or `key_set_url`. */
+/** Key set of a platform: inline `key_set` or `key_set_url` (fetched with `ltiFetch`: public https only). */
 function platformKeys(c: Client) {
 	if (c.key_set) return createLocalJWKSet(c.key_set);
 	const url = String(c.key_set_url);
-	return remoteSets.get(url) ?? remoteSets.set(url, createRemoteJWKSet(new URL(url))).get(url)!;
+	const remote = () => createRemoteJWKSet(new URL(url), { [customFetch]: ltiFetch });
+	return remoteSets.get(url) ?? remoteSets.set(url, remote()).get(url)!;
 }
 
 /** Expiry date `seconds` from now of an `lti_launch` entry (TTL index). */
@@ -84,7 +87,8 @@ export function launchClient(course: Course | null, claims: Claims): Client | un
 /**
  * Third-party cookies may be blocked in the LMS iframe: this page checks that a
  * cookie can be stored and continues the login, or offers to open it in a new tab
- * (legacy PyLTI1p3 `CookiesAllowedCheckPage`).
+ * (legacy PyLTI1p3 `CookiesAllowedCheckPage`). Its own CSP only allows its inline
+ * script (by hash); the request pipeline adds the frame ancestors.
  */
 function cookieCheckPage(url: URL, p: Record<string, string>, https: boolean): Response {
 	const next = new URL(url.pathname, url);
@@ -92,8 +96,13 @@ function cookieCheckPage(url: URL, p: Record<string, string>, https: boolean): R
 	const href = JSON.stringify(next.pathname + next.search).replace(/</g, '\\u003c');
 	const attrs = https ? '; SameSite=None; Secure; Partitioned' : '';
 	const link = `<a href="${escapeHtml(next.pathname + next.search)}" target="_blank">${escapeHtml(t('Click here to open content in the new tab.'))}</a>`;
-	const html = `<!doctype html><meta charset="utf-8"><title>INGInious</title><p id="m">${escapeHtml(t('Loading...'))}</p><script>document.cookie="lti1p3_test_cookie=1; path=/${attrs}";if(document.cookie.includes("lti1p3_test_cookie"))location.replace(${href});else document.getElementById("m").innerHTML=${JSON.stringify(`${escapeHtml(t('Your browser prohibits to save cookies in the iframes.'))} ${link}`).replace(/</g, '\\u003c')}</script>`;
-	return new Response(html, { headers: { 'Content-Type': 'text/html; charset=utf-8' } });
+	const script = `document.cookie="lti1p3_test_cookie=1; path=/${attrs}";if(document.cookie.includes("lti1p3_test_cookie"))location.replace(${href});else document.getElementById("m").innerHTML=${JSON.stringify(`${escapeHtml(t('Your browser prohibits to save cookies in the iframes.'))} ${link}`).replace(/</g, '\\u003c')}`;
+	const html = `<!doctype html><meta charset="utf-8"><title>INGInious</title><p id="m">${escapeHtml(t('Loading...'))}</p><script>${script}</script>`;
+	const hash = createHash('sha256').update(script).digest('base64');
+	const csp = `default-src 'none'; script-src 'sha256-${hash}'; base-uri 'none'; form-action 'none'`;
+	return new Response(html, {
+		headers: { 'Content-Type': 'text/html; charset=utf-8', 'Content-Security-Policy': csp }
+	});
 }
 
 /**

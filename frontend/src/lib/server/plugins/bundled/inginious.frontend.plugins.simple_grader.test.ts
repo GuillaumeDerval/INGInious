@@ -58,7 +58,7 @@ describe('SITE-18 simple_grader plugin', () => {
 	});
 	it('grades synchronously and asynchronously, filtering the fields', async () => {
 		env.backend.newJob.mockImplementation((_job, cb: { onDone: (r: unknown) => void }) => cb.onDone(RESULT));
-		expect(await grader.handleGrader(form({ taskid: 'hello', input: '{"q":"yes","c":["0"]}' }))).toEqual({
+		expect(await grader.handleGrader(form({ taskid: 'hello', input: '{"q":"yes","c":["0"],"@lang":"fr"}' }))).toEqual({
 			status: 'done',
 			result: 'success',
 			text: 'Well done',
@@ -68,7 +68,8 @@ describe('SITE-18 simple_grader plugin', () => {
 			courseId: 'external',
 			taskId: 'hello',
 			launcher: 'Plugin - Simple Grader',
-			input: { q: 'yes', c: '0' }
+			// The key holder provides the whole input, `@`-fields included.
+			input: { q: 'yes', c: '0', '@lang': 'fr' }
 		});
 		let finish: (r: unknown) => void = () => {};
 		env.backend.newJob.mockImplementation((_job, cb: { onDone: (r: unknown) => void }) => (finish = cb.onDone));

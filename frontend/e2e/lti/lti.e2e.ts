@@ -248,25 +248,15 @@ test('LTI-10 a bound course admin picks a task and the signed deep-linking respo
 			data: 'opaque'
 		}
 	};
-	// The auto-submission to the platform is recorded instead of performed: a navigation blocked by
-	// the CSP never finishes for Playwright (flaky waits), and the http mock could not receive it anyway.
-	await page.addInitScript(() => {
-		const submit = HTMLFormElement.prototype.submit;
-		HTMLFormElement.prototype.submit = function () {
-			if (this.action.endsWith('/dlreturn')) this.dataset.submitted = '1';
-			else submit.call(this);
-		};
-	});
 	await launch13(page, baseURL!, deep, 'plat-admin');
 	await expect(page).toHaveURL(/\/lti1\.3\/deeplink\?session_id=/);
 	await page.getByLabel('Course').selectOption(C);
 	await page.getByLabel('Task').selectOption('mcq2');
 	await page.getByRole('button', { name: 'Select' }).click();
-	// The page auto-submits the signed response to the platform. The CSP (`form-action 'self' https:`)
-	// only lets it go to https platforms (LTI 1.3 requires https): the http mock is checked on the form.
-	const returnForm = page.locator(`form[action="${mock.url}/dlreturn"]`);
-	await expect(returnForm).toHaveAttribute('data-submitted', '1');
-	const jwt = await returnForm.locator('input[name="JWT"]').inputValue();
+	// The page auto-submits the signed response to the platform (an LTI platform origin,
+	// allowed by the `form-action` of the LTI pages).
+	await expect(page.getByText('Deep link received')).toBeVisible();
+	const jwt = new URLSearchParams(mock.log.find((l) => l.path === '/dlreturn')!.body).get('JWT')!;
 	const claims = JSON.parse(Buffer.from(jwt.split('.')[1], 'base64url').toString());
 	expect(claims['https://purl.imsglobal.org/spec/lti-dl/claim/content_items'][0]).toMatchObject({
 		type: 'ltiResourceLink',

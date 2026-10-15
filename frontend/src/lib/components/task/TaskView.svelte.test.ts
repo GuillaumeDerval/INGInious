@@ -84,7 +84,9 @@ function server(answers: Record<string, unknown[]>) {
 		const body = init.body as FormData;
 		calls.push(body);
 		const list = answers[String(body.get('@action'))];
-		return new Response(JSON.stringify(list.length > 1 ? list.shift() : list[0]));
+		const answer = list.length > 1 ? list.shift() : list[0];
+		// Error answers come with an HTTP error status (403 refused submission, 404 unknown submission).
+		return Response.json(answer, { status: (answer as { status: string }).status === 'error' ? 403 : 200 });
 	});
 	return calls;
 }

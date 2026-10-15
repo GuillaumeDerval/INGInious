@@ -63,6 +63,17 @@ describe('lifecycle', () => {
 		expect(await t.database.c.sessions.countDocuments({ _id: s.doc._id })).toBe(0);
 	});
 
+	it('sets the Secure flag per request when it is not configured', async () => {
+		const perRequest = new SessionStore(t.database, { ...cfg, secure: null });
+		const dirty = async () => {
+			const s = await perRequest.load(undefined);
+			perRequest.markDirty(s);
+			return s;
+		};
+		expect(await perRequest.commit(await dirty(), true)).toContain('; Secure');
+		expect(await perRequest.commit(await dirty(), false)).not.toContain('Secure');
+	});
+
 	it('stores dirty sessions with a sliding expiration and a signed cookie', async () => {
 		const s = await store.load(undefined);
 		s.doc.language = 'fr';
@@ -151,5 +162,43 @@ describe('lifecycle', () => {
 		expect(await t.database.c.sessions.countDocuments({ _id: id })).toBe(0);
 		expect(s.stored).toBe(false);
 		expect(await store.commit(s)).toMatch(/^inginious_session_id=; Path=\/; Expires=Thu, 01 Jan 1970/);
+	});
+});
+
+describe('absolute lifetime', () => {
+	const capped = () => new SessionStore(t.database, { ...cfg, timeout: 3600, maxLifetime: 7200 });
+	/** Inserts a session whose id was created `age` seconds ago, expiring in an hour. */
+	async function sessionAged(age: number) {
+		const id = ObjectId.createFromTime(Math.floor(Date.now() / 1000) - age);
+		const expiration = new Date(Date.now() + 3600_000);
+		await t.database.c.sessions.insertOne({
+			_id: id,
+			permanent: true,
+			is_lti: false,
+			loggedin: true,
+			auth_storage: {},
+			expiration
+		});
+		return id;
+	}
+
+	it('ends a session max_lifetime after its creation, whatever the activity', async () => {
+		const store = capped();
+		const old = await sessionAged(7300);
+		expect((await store.load(store.sign(old))).stored).toBe(false);
+		expect(await t.database.c.sessions.countDocuments({ _id: old })).toBe(0);
+		// Near the end of its lifetime, the expiration (cookie and TTL) stops at the cap.
+		const recent = await sessionAged(6000);
+		const session = await store.load(store.sign(recent));
+		expect(session.stored).toBe(true);
+		store.markDirty(session);
+		await store.commit(session);
+		const cap = recent.getTimestamp().getTime() + 7200_000;
+		expect((await t.database.c.sessions.findOne({ _id: recent }))!.expiration!.getTime()).toBe(cap);
+		// Already at the cap: no rewrite on the next requests.
+		expect((await store.load(store.sign(recent))).dirty).toBe(false);
+		// 0 disables the cap.
+		const unlimited = new SessionStore(t.database, { ...cfg, maxLifetime: 0 });
+		expect((await unlimited.load(unlimited.sign(await sessionAged(7300)))).stored).toBe(true);
 	});
 });

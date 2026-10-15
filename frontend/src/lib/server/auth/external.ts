@@ -15,7 +15,7 @@ import { setFlash } from '../flash.js';
 import { forbidLti, safeRedirectTarget, type GuardEvent } from '../security/guards.js';
 import type { UserDoc } from '../db/types.js';
 import type { Session } from './session.js';
-import { connectUser, newUserDoc, sanitizeEmail } from './accounts.js';
+import { connectUser, insertUser, newUserDoc, sanitizeEmail } from './accounts.js';
 import { sessionAccount } from './profile.js';
 
 /** Identity returned by a provider (legacy tuple `(id, realname, email, additional)`). */
@@ -26,6 +26,12 @@ export interface ExternalUser {
 	email: string;
 	/** Extra attributes stored in `users.bindings.<method>[1]` (SAML). */
 	additional?: Record<string, unknown>;
+	/**
+	 * False when the provider does not confirm that the user owns `email`: such an
+	 * identity can sign in to the account bound to it, or be bound to the logged-in
+	 * account, but never creates an account with that address. Default true.
+	 */
+	emailVerified?: boolean;
 }
 
 /** Per-method state stored in the session during a flow (`sessions.auth_storage.<id>`). */
@@ -71,13 +77,20 @@ const fetchError = () =>
 		"Couldn't fetch the required information from the service. Please check the provided permissions (name, email) and contact your INGInious administrator if the error persists."
 	);
 
+/** Error shown when the e-mail address of a new identity belongs to an account not bound with the method. */
+const bindError = () =>
+	t(
+		'An account using this email already exists and is not bound with this service. For security reasons, please log in via another method and bind your account in your profile.'
+	);
+
 /**
  * Signs in, binds or creates the account of an external identity (legacy `bind_user`).
  * New accounts are built by `newUserDoc` (same policy as the other account
  * creations), without username: the profile page asks for one (AUTH-11).
- * @returns null on success, else the error message: unusable identity, or
+ * @returns null on success, else the error message: unusable identity,
  *          e-mail already used by a non-bound account while nobody is logged
- *          in (the legacy "binderror" case).
+ *          in (the legacy "binderror" case), or unverified e-mail address of a
+ *          new identity while nobody is logged in.
  */
 export async function bindUser(session: Session, authId: string, user: ExternalUser): Promise<string | null> {
 	const c = services().db.c;
@@ -93,10 +106,11 @@ export async function bindUser(session: Session, authId: string, user: ExternalU
 	else if (profile) console.warn('Tried to bind an already bound account !');
 	else if (account) await c.users.updateOne({ _id: account._id }, { $set: binding });
 	else if (doc.loggedin) return t('Incorrect email.');
-	else if (await c.users.findOne({ email: sanitizeEmail(user.email)! }))
+	else if (user.emailVerified === false)
 		return t(
-			'An account using this email already exists and is not bound with this service. For security reasons, please log in via another method and bind your account in your profile.'
+			'This service does not confirm that your e-mail address is verified. Please sign up with another method, then bind this service in your profile.'
 		);
+	else if (await c.users.findOne({ email: sanitizeEmail(user.email)! })) return bindError();
 	else {
 		const created = await newUserDoc({
 			...user,
@@ -106,7 +120,8 @@ export async function bindUser(session: Session, authId: string, user: ExternalU
 			timezone: doc.timezone
 		});
 		if (typeof created === 'string') return fetchError();
-		await c.users.insertOne(created);
+		// Same answer when the address was taken concurrently (unique index).
+		if (!(await insertUser(created))) return bindError();
 		await connectUser(session, created);
 	}
 	return null;

@@ -9,7 +9,7 @@ import { ObjectId } from 'mongodb';
 import { test, expect, withDb } from '../fixtures.js';
 import { E2E_ID } from '../setup-data.js';
 import { createUser, sessionCookie, uid, useApp } from './helpers.js';
-import { idpCert, samlResponse } from './saml-idp.js';
+import { idpCert, requestId, samlResponse } from './saml-idp.js';
 
 /** Copy of the static pages fixture (modified by a test). */
 const STATIC = `e2e/.generated/auth-static-${E2E_ID}`;
@@ -134,8 +134,8 @@ test('AUTH-09 users must accept the terms of service, on GET and POST', async ({
 	await form.getByLabel(/Username/).fill('auth_tos_user');
 	await form.getByLabel(/Complete name/).fill('T');
 	await form.getByLabel(/Email address/).fill('auth_tos_user@inginious.local');
-	await form.getByLabel(/^Password/).fill('secret123');
-	await form.getByLabel(/Confirm password/).fill('secret123');
+	await form.getByLabel(/^Password/).fill('secret1234');
+	await form.getByLabel(/Confirm password/).fill('secret1234');
 	await form.getByRole('button', { name: 'Sign up' }).click();
 	await expect(page.getByText('Please accept the Terms of Service and Data Privacy')).toBeVisible();
 });
@@ -263,22 +263,20 @@ test('AUTH-12 a configured method can be bound from the sign-in methods tab', as
 	expect(await wrong.text()).toContain('Incorrect authentication binding.');
 });
 
-/** Signs in through the test SAML IdP; returns once the browser posted the response. */
-async function samlLogin(
-	page: import('@playwright/test').Page,
-	baseURL: string,
-	attributes: Record<string, string>,
-	redirect = '/preferences/bindings'
-) {
+/** Starts a SAML sign-in in the browser session; returns the RelayState and the AuthnRequest id. */
+async function samlStart(page: import('@playwright/test').Page, baseURL: string, redirect = '/preferences/bindings') {
 	await page.goto('/pages/auth_terms');
 	const start = await page.request.post('/auth/signin/saml', {
 		form: { redirect },
 		maxRedirects: 0,
 		headers: { origin: baseURL }
 	});
-	const relay = new URL(start.headers().location).searchParams.get('RelayState')!;
-	const response = samlResponse(`${baseURL}/auth/callback/saml`, 'inginious-e2e', attributes);
-	// The IdP posts the response: the page re-posts it with the session cookie.
+	const location = start.headers().location;
+	return { relay: new URL(location).searchParams.get('RelayState')!, request: requestId(location) };
+}
+
+/** Posts a SAML response as the IdP does (the page re-posts it with the session cookie). */
+async function samlPost(page: import('@playwright/test').Page, response: string, relay: string) {
 	await page.evaluate(
 		([SAMLResponse, RelayState]) => {
 			const form = Object.assign(document.createElement('form'), { method: 'POST', action: '/auth/callback/saml' });
@@ -289,6 +287,19 @@ async function samlLogin(
 		},
 		[response, relay]
 	);
+}
+
+/** Signs in through the test SAML IdP; returns once the browser posted the response (returned). */
+async function samlLogin(
+	page: import('@playwright/test').Page,
+	baseURL: string,
+	attributes: Record<string, string>,
+	redirect = '/preferences/bindings'
+) {
+	const { relay, request } = await samlStart(page, baseURL, redirect);
+	const response = samlResponse(`${baseURL}/auth/callback/saml`, 'inginious-e2e', attributes, request);
+	await samlPost(page, response, relay);
+	return response;
 }
 
 test('AUTH-17 a signed SAML assertion creates, then signs in, the bound account', async ({
@@ -318,6 +329,37 @@ test('AUTH-17 a signed SAML assertion creates, then signs in, the bound account'
 	expect(await withDb((db) => db.collection('users').countDocuments({ email: attributes.mail }))).toBe(1);
 	await page.goto('/signin');
 	await expect(page).toHaveURL(/\/preferences\/profile$/);
+});
+
+test('AUTH-17 a SAML response is only accepted for the pending request of the same browser session', async ({
+	page,
+	browser,
+	baseURL
+}) => {
+	const acs = `${baseURL}/auth/callback/saml`;
+	const id = `saml_${uid()}`;
+	const attributes = { uid: id, cn: 'Once', mail: `${id}@inginious.local` };
+	const refused = async (target: import('@playwright/test').Page) => {
+		await expect(target).toHaveURL(/\/signin$/);
+		await expect(target.getByText("Couldn't fetch the required information from the service.")).toBeVisible();
+	};
+	// An unsolicited response (no InResponseTo) is refused.
+	const first = await samlStart(page, baseURL!);
+	await samlPost(page, samlResponse(acs, 'inginious-e2e', attributes), first.relay);
+	await refused(page);
+	// A response to an earlier (already answered) request is refused.
+	const second = await samlStart(page, baseURL!);
+	await samlPost(page, samlResponse(acs, 'inginious-e2e', attributes, first.request), second.relay);
+	await refused(page);
+	// The right answer signs in once; replayed in another browser session, it is refused.
+	const response = await samlLogin(page, baseURL!, attributes);
+	await expect(page).toHaveURL(/\/preferences\/bindings$/);
+	const other = await browser.newContext({ baseURL, extraHTTPHeaders: { 'x-forwarded-proto': 'http' } });
+	const replay = await other.newPage();
+	await samlPost(replay, response, (await samlStart(replay, baseURL!)).relay);
+	await refused(replay);
+	await other.close();
+	expect(await withDb((db) => db.collection('users').countDocuments({ email: attributes.mail }))).toBe(1);
 });
 
 test('AUTH-14 an identity whose e-mail belongs to a local account is not bound automatically', async ({

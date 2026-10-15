@@ -903,5 +903,16 @@
 	"Show all ({})": "Hiện tất cả ({})",
 	"Unregister the {} matching students": "Hủy đăng ký {} sinh viên phù hợp",
 	"{} results": "{} kết quả",
-	"{} students": "{} sinh viên"
+	"{} students": "{} sinh viên",
+	"Log out of this account on every other browser and device. This one stays logged in.": "Đăng xuất tài khoản này khỏi mọi trình duyệt và thiết bị khác. Phiên này vẫn được đăng nhập.",
+	"Log out other sessions": "Đăng xuất các phiên khác",
+	"New password (min. {} characters) :": "Mật khẩu mới (tối thiểu {} ký tự) :",
+	"Other sessions": "Các phiên khác",
+	"Password (min. {} characters) :": "Mật khẩu (tối thiểu {} kí tự) :",
+	"Password too long.": "Mật khẩu quá dài.",
+	"Security": "Bảo mật",
+	"This service does not confirm that your e-mail address is verified. Please sign up with another method, then bind this service in your profile.": "Dịch vụ này không xác nhận rằng địa chỉ email của bạn đã được xác minh. Vui lòng đăng ký bằng phương thức khác, sau đó liên kết dịch vụ này trong hồ sơ của bạn.",
+	"This username is not available. Please choose another one.": "Tên người dùng này không khả dụng. Vui lòng chọn tên khác.",
+	"Your other sessions have been logged out.": "Các phiên khác của bạn đã được đăng xuất.",
+	"The selection contains {} submissions, more than the {} allowed: narrow it with the filters.": "Lựa chọn chứa {} bài nộp, nhiều hơn {} bài được phép: hãy thu hẹp bằng các bộ lọc."
 }

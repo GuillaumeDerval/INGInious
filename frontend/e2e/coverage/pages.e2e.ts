@@ -156,8 +156,8 @@ test('AUTH-07 activation links are never built from a foreign Host header', asyn
 			username: name,
 			realname: 'Cov',
 			email: `${name}@inginious.local`,
-			passwd: 'secret123',
-			passwd2: 'secret123'
+			passwd: 'secret1234',
+			passwd2: 'secret1234'
 		}
 	});
 	expect(await response.text()).toContain('Something went wrong while sending you activation email.');

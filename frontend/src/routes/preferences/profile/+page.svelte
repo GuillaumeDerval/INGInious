@@ -90,7 +90,7 @@ of service not accepted).
 								/>{/snippet}
 						</FormField>
 					{/if}
-					<PasswordFields required={false} newPassword />
+					<PasswordFields required={false} newPassword minLength={data.passwordMinLength} />
 				</div>
 			</Card>
 		{/if}

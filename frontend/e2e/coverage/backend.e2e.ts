@@ -188,8 +188,8 @@ test('TASK-09 SITE-11 queue positions, job results without optional fields and b
 		problems: {},
 		tests: {},
 		custom: {},
-		state: '',
-		stdout: 'x'.repeat(17_000_000)
+		// Outputs are truncated when stored, the state is not: the document is too large.
+		state: 'x'.repeat(17_000_000)
 	});
 	await expect
 		.poll(async () => (await check(page.request, 'code1', bigId)).text, { timeout: 30_000 })

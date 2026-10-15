@@ -32,10 +32,11 @@ describe('cleanRelativePath', () => {
 });
 
 describe('safeJoin', () => {
+	let root: string;
 	let base: string;
 	let outside: string;
 	beforeAll(() => {
-		const root = mkdtempSync(join(tmpdir(), 'paths-'));
+		root = mkdtempSync(join(tmpdir(), 'paths-'));
 		base = join(root, 'base');
 		outside = join(root, 'outside');
 		mkdirSync(join(base, 'course', 'task'), { recursive: true });
@@ -43,16 +44,24 @@ describe('safeJoin', () => {
 		writeFileSync(join(outside, 'secret'), 'x');
 		symlinkSync(outside, join(base, 'evil'));
 		symlinkSync(join(base, 'course'), join(base, 'alias'));
+		symlinkSync(join(outside, 'not-yet'), join(base, 'course', 'dangling'));
+		symlinkSync(base, join(root, 'base-link'));
 	});
 
 	it('joins paths inside the base directory', () => {
 		expect(safeJoin(base, 'course', 'task/run')).toBe(join(base, 'course', 'task', 'run'));
 		expect(safeJoin(base, 'course/new/deep/file')).toBe(join(base, 'course', 'new', 'deep', 'file'));
+		// Below a file (the caller's write fails later).
+		expect(safeJoin(outside, 'secret/x')).toBe(join(outside, 'secret', 'x'));
 		expect(safeJoin(base)).toBe(base);
-		expect(safeJoin(base, 'alias/task')).toBe(join(base, 'alias', 'task'));
+		// The trusted base may itself be a link.
+		expect(safeJoin(join(root, 'base-link'), 'course')).toBe(join(root, 'base-link', 'course'));
 	});
 
-	it('rejects traversal and symlink escapes', () => {
+	it('rejects traversal and every symbolic link below the base', () => {
+		expect(() => safeJoin(base, 'alias/task')).toThrow(UnsafePathError);
+		expect(() => safeJoin(base, 'course', 'dangling')).toThrow(UnsafePathError);
+		expect(() => safeJoin(base, 'course/dangling/new-file')).toThrow(UnsafePathError);
 		expect(() => safeJoin(base, '../outside/secret')).toThrow(UnsafePathError);
 		expect(() => safeJoin(base, 'course', '../../outside')).toThrow(UnsafePathError);
 		expect(() => safeJoin(base, 'evil/secret')).toThrow(UnsafePathError);

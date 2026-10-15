@@ -47,7 +47,9 @@ the export / download / replay of the whole selection in a secondary menu.
 	<Card title={t('{} submissions selected', data.count)} description={t('Submissions matching the filters.')}>
 		{#snippet actions()}
 			<MoreMenu label={t('Whole selection')} class="w-72 space-y-1 p-1.5">
-				<a class="menu-item" href={`${base}/submissions/submissions.csv?${search}`} download
+				<!-- A plain navigation (no `download` attribute): the file is an attachment, and an
+				     oversized selection shows its error page instead of a broken download. -->
+				<a class="menu-item" href={`${base}/submissions/submissions.csv?${search}`} data-sveltekit-reload
 					><DownloadIcon aria-hidden="true" />{t('Download CSV')}</a
 				>
 				<form

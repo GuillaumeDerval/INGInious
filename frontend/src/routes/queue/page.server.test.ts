@@ -21,26 +21,33 @@ beforeAll(async () => (env = await setupNav({ backend } as never)));
 afterAll(() => env.cleanup());
 
 describe('/queue', () => {
-	it('NAV-17 shows the snapshot with kill rights', async () => {
-		const student = load(navEvent('nav_alice')) as {
-			running: Record<string, unknown>[];
-			waiting: Record<string, unknown>[];
-		};
+	it('NAV-17 shows the snapshot with kill rights; job details only to the course staff', async () => {
+		type Rows = { running: Record<string, unknown>[]; waiting: Record<string, unknown>[] };
+		const student = load(navEvent('nav_alice')) as Rows;
+		// Jobs of courses the user is not staff of keep their timing, without name or launcher.
 		expect(student.running[0]).toEqual({
 			id: 'job1',
 			agent: 'agent-1',
-			info: 'nav_open/t1',
-			launcher: 'core',
+			info: null,
+			launcher: null,
 			start: 1_000_000,
 			end: 1_030_000,
 			kill: false
 		});
-		// Course-less jobs carry their environment as info (backend contract).
-		expect(student.running[1]).toMatchObject({ info: 'default', end: null });
+		expect(student.running[1]).toMatchObject({ info: null, launcher: null, end: null });
 		expect(student.waiting.map((j) => j.max)).toEqual([null, 20]);
-		const admin = load(navEvent('nav_admin')) as typeof student;
+		const tutor = load(navEvent('nav_tutor')) as Rows;
+		expect(tutor.running.map((j) => [j.info, j.launcher, j.kill])).toEqual([
+			['nav_open/t1', 'core', false],
+			[null, null, false]
+		]);
+		const admin = load(navEvent('nav_admin')) as Rows;
 		expect(admin.running.map((j) => j.kill)).toEqual([true, false]);
-		expect((load(navEvent('superadmin')) as typeof student).waiting.every((j) => j.kill)).toBe(true);
+		expect(admin.waiting.map((j) => j.info)).toEqual([null, 'nav_open/t2']);
+		// Superadmins see every job, course-less ones included (their info is the environment).
+		const root = load(navEvent('superadmin')) as Rows;
+		expect(root.waiting.every((j) => j.kill)).toBe(true);
+		expect(root.running[1]).toMatchObject({ info: 'default', launcher: 'core', end: null });
 		expect(await outcome(() => load(navEvent(null)))).toMatchObject({ status: 302 });
 		backend.queue = null;
 		expect(load(navEvent('nav_alice'))).toEqual({ running: [], waiting: [] });

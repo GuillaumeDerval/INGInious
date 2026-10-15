@@ -7,8 +7,13 @@
  *    (`<64 hex>.<expiry in ms>` stored in the unchanged `activate`/`reset`
  *    fields); tokens without expiry are refused;
  *  - registration and lost password answer the same way whether or not the
- *    account exists;
- *  - sign-in failures and outgoing mails are rate limited;
+ *    e-mail address is used; a taken username gets one generic answer, given
+ *    only after the rate limits;
+ *  - new passwords have a configurable minimum length (`password_min_length`)
+ *    and every password a maximum length (checked before any hashing);
+ *  - sign-in failures and outgoing mails (per client and per address) are rate limited;
+ *  - usernames and e-mail addresses are unique (database indexes, see db/index.ts):
+ *    a concurrent duplicate gets the normal error message;
  *  - older SHA-512 hashes are upgraded to argon2id at login;
  *  - links in mails are built with `publicUrl` (never from the Host header).
  * Functions used by form actions directly return the action result:
@@ -16,6 +21,7 @@
  */
 import { randomBytes } from 'node:crypto';
 import { fail } from '@sveltejs/kit';
+import { MongoServerError } from 'mongodb';
 import { t } from '#lib/i18n/index.js';
 import { services } from '../app.js';
 import type { UserDoc } from '../db/types.js';
@@ -36,6 +42,10 @@ const EMAIL_RE =
 export const TOKEN_RE = /^[0-9a-f]{64}\.\d+$/;
 /** Registration / reset mails allowed per client every 15 minutes. */
 export const mailLimiter = new RateLimiter(10, 15 * 60_000);
+/** Registration / reset mails allowed per recipient address every 15 minutes (on top of `mailLimiter`). */
+export const addressLimiter = new RateLimiter(3, 15 * 60_000);
+/** Maximum length of any password (longer ones are refused before hashing). */
+export const PASSWORD_MAX_LENGTH = 1024;
 
 /** Shorthand for the typed collections. */
 const db = () => services().db.c;
@@ -49,9 +59,31 @@ export function sanitizeEmail(email: string): string | null {
 	return EMAIL_RE.test(email) ? email.slice(0, at) + '@' + email.slice(at + 1).toLowerCase() : null;
 }
 
-/** Legacy password rules: the error message for a new password and its confirmation, or null. */
+/** Length rules of a new password (`password_min_length`, `PASSWORD_MAX_LENGTH`): the error message, or null. */
+function passwordLengthError(passwd: string): string | null {
+	if (passwd.length < services().config.passwordMinLength) return t('Password too short.');
+	return passwd.length > PASSWORD_MAX_LENGTH ? t('Password too long.') : null;
+}
+
+/** Password rules: the error message for a new password and its confirmation, or null. */
 export function passwordError(passwd: string, passwd2: string): string | null {
-	return passwd.length < 6 ? t('Password too short.') : passwd === passwd2 ? null : t("Passwords don't match !");
+	return passwordLengthError(passwd) ?? (passwd === passwd2 ? null : t("Passwords don't match !"));
+}
+
+/** True for the duplicate-key error of a unique index (concurrent creation of the same username/e-mail). */
+export const isDuplicate = (e: unknown) => e instanceof MongoServerError && e.code === 11000;
+
+/**
+ * Inserts a new account (`newUserDoc`).
+ * @returns false when the username or the e-mail address was taken meanwhile (unique indexes).
+ */
+export async function insertUser(doc: UserDoc): Promise<boolean> {
+	return db()
+		.users.insertOne(doc)
+		.then(
+			() => true,
+			(e) => (isDuplicate(e) ? false : Promise.reject(e))
+		);
 }
 
 /** Fields of a new account; `password` is in clear text, `tos` the state of the terms of service checkbox. */
@@ -63,7 +95,7 @@ export type NewUser = Pick<UserDoc, 'username' | 'realname' | 'email'> &
  * (AUTH-07), external sign-up (AUTH-14) and user administration (SITE-02):
  * legacy username rule (the username may only be empty for an external
  * account, which chooses it later, AUTH-11), real name required, valid e-mail
- * and, when given, a password of 6+ characters.
+ * and, when given, a password of the configured length (`passwordError`).
  * @returns the error message, or null.
  */
 export function newUserError(f: NewUser): string | null {
@@ -71,7 +103,7 @@ export function newUserError(f: NewUser): string | null {
 	if (!external && !USERNAME_RE.test(f.username)) return t('Invalid username format.');
 	if (!f.realname.trim()) return t('Name is too short.');
 	if (!sanitizeEmail(f.email)) return t('Invalid email format.');
-	return f.password !== undefined && f.password.length < 6 ? t('Password too short.') : null;
+	return f.password === undefined ? null : passwordLengthError(f.password);
 }
 
 /**
@@ -118,6 +150,8 @@ export async function authenticate(login: string, password: string, client = '')
 	const account = `local:${username}`;
 	// Checked before hashing: a throttled guess costs no argon2 computation.
 	if (authThrottle.blocked(client, account)) return null;
+	// Over-long passwords are refused without hashing them (they can never be valid).
+	if (password.length > PASSWORD_MAX_LENGTH) return (authThrottle.failed(client, account), null);
 	const user = await db().users.findOne({ username, activate: { $exists: false } });
 	const stored = user?.password;
 	// Unknown users also cost a hash computation, so that timing does not reveal accounts.
@@ -161,6 +195,13 @@ const canLink = (url: URL) =>
 		() => false
 	);
 
+/**
+ * Counts a mail to `email` for the per-client and per-address limits.
+ * @returns false when one of them is exceeded.
+ */
+const mailAllowed = (client: string, email: string) =>
+	mailLimiter.hit(client) && addressLimiter.hit(email.toLowerCase());
+
 /** Sends a mail in the background (no timing or delivery oracle); failures are logged. */
 function mailLater(to: string, name: string, subject: string, text: string): void {
 	sendMail({ to, name, subject, text }).catch((e) => console.error(`Couldn't send email : ${e}`));
@@ -173,7 +214,8 @@ export type Registration = Record<'username' | 'realname' | 'email' | 'passwd' |
  * Creates a local account and mails its activation link (AUTH-07). The account
  * is removed again when the mail cannot be sent. When the e-mail address is
  * already used, the same success message is shown and the owner of the address
- * is notified instead (no enumeration).
+ * is notified instead (no enumeration). A taken username is only reported
+ * after the rate limits, with a generic message.
  * @param url URL of the request (fallback base of the links, see `publicUrl`).
  * @param client client identifier for rate limiting.
  */
@@ -183,10 +225,11 @@ export async function register(f: Registration, lang: string, url: URL, client: 
 		services().config.isTosDefined && !f.tos ? t('Please accept the Terms of Service and Data Privacy') : null;
 	const invalid = newUserError(fields) ?? passwordError(f.passwd, f.passwd2) ?? tos;
 	if (invalid) return failure(invalid);
-	if (await db().users.findOne({ username: f.username })) return failure(t('This username is already taken !'));
-	if (!mailLimiter.hit(client)) return failure(t('Too many requests, please retry later.'));
+	if (!mailAllowed(client, f.email)) return failure(t('Too many requests, please retry later.'));
 	if (!canLink(url))
 		return failure(t('Something went wrong while sending you activation email. Please contact the administrator.'));
+	const taken = () => failure(t('This username is not available. Please choose another one.'));
+	if (await db().users.findOne({ username: f.username })) return taken();
 	const doc = (await newUserDoc(fields)) as UserDoc;
 	const done = { message: t('You are succesfully registered. An email has been sent to you for activation.') };
 	if (await db().users.findOne({ email: doc.email })) {
@@ -196,7 +239,8 @@ export async function register(f: Registration, lang: string, url: URL, client: 
 			done
 		);
 	}
-	await db().users.insertOne(doc);
+	// Same answer when the username (or the address) was taken by a concurrent registration.
+	if (!(await insertUser(doc))) return taken();
 	try {
 		const text = t('Welcome on INGInious !\n\nTo activate your account, please click on the following link :\n');
 		await sendMail({
@@ -223,11 +267,12 @@ export async function activate(token: string) {
 /**
  * Lost password (AUTH-08): stores a reset token valid one hour and mails the
  * link when an account uses this exact address. The answer is the same whether
- * or not the address is known (no enumeration).
+ * or not the address is known (no enumeration). Mails are limited per client and
+ * per address.
  */
 export async function requestReset(email: string, url: URL, client: string) {
 	if (!sanitizeEmail(email)) return failure(t('Invalid email format.'));
-	if (!mailLimiter.hit(client)) return failure(t('Too many requests, please retry later.'));
+	if (!mailAllowed(client, email)) return failure(t('Too many requests, please retry later.'));
 	if (!canLink(url))
 		return failure(t('Something went wrong while sending you reset email. Please contact the administrator.'));
 	const reset = newToken(3600_000);

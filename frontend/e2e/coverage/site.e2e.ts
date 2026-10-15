@@ -19,7 +19,7 @@ import type { APIRequestContext, Page } from '@playwright/test';
 import { createSessionCookie, expect, installCourse, removeCourse, test, withDb } from '../fixtures.js';
 import { E2E, E2E_ID } from '../setup-data.js';
 import { appUrl, createUser, sessionCookie, startApp, uid, type App } from '../auth/helpers.js';
-import { idpCert, samlResponse } from '../auth/saml-idp.js';
+import { idpCert, requestId, samlResponse } from '../auth/saml-idp.js';
 import { launch11, startMockLms, type MockLms } from '../lti/mock/platform.js';
 
 /** Basic authorization header. */
@@ -121,9 +121,9 @@ test.describe('main server', () => {
 				}
 			}
 		}
-		// The snapshot of the queue is refreshed every 10 seconds.
+		// The snapshot of the queue is refreshed every 10 seconds (seen by an administrator of the course).
 		await page.context().clearCookies();
-		await loginAs('e2e_student1');
+		await loginAs('e2e_admin');
 		await expect
 			.poll(
 				async () => {
@@ -136,13 +136,18 @@ test.describe('main server', () => {
 				{ timeout: 40_000, intervals: [2_000] }
 			)
 			.toBeGreaterThan(3);
-		await expect(page.getByRole('heading', { name: /Running jobs/ })).toBeVisible();
-		await expect(page.getByRole('button', { name: 'Kill' })).toHaveCount(0);
 		const jobid = (await page
 			.locator('tr[title]')
 			.filter({ hasText: `${course}/slow` })
 			.first()
 			.getAttribute('title'))!;
+		// Students (not staff of the course) see the jobs without their name and launcher.
+		await page.context().clearCookies();
+		await loginAs('e2e_student1');
+		await page.goto('/queue');
+		await expect(page.getByRole('heading', { name: /Running jobs/ })).toBeVisible();
+		await expect(page.getByRole('button', { name: 'Kill' })).toHaveCount(0);
+		await expect(page.getByText(`${course}/slow`)).toHaveCount(0);
 		// Students may not kill jobs, even with a forged form; unknown jobs are refused too.
 		expect((await actionResult(await action(page.request, '/queue?/kill', { jobid }, baseURL!))).status).toBe(403);
 		const refused = await page.request.post('/queue?/kill', {
@@ -903,7 +908,6 @@ test.describe('extra server: marketplace, OAuth, LDAP, SAML, reverse proxy', () 
 			['github', `gh-noname-${run}`],
 			['google', `g-ok-${run}`],
 			['google2', `g2-wronghd-${run}`],
-			['facebook', `fb-${run}`],
 			['linkedin', `li-${run}`]
 		]) {
 			await page.context().clearCookies();
@@ -916,8 +920,11 @@ test.describe('extra server: marketplace, OAuth, LDAP, SAML, reverse proxy', () 
 				bindings: { [id]: expect.any(Array) }
 			});
 		}
-		// Refused identities: unverified e-mails, other Google domain, provider errors, bad codes, forged states.
+		// Refused identities: unverified e-mails (Facebook never reports verification), other Google domain,
+		// provider errors, bad codes, forged states.
 		for (const [id, code, forged] of [
+			['facebook', `fb-${run}`, false],
+			['linkedin', `li-unverified-${run}`, false],
 			['github', `gh-unverified-${run}`, false],
 			['github', `gh-fail-${run}`, false],
 			['google', `g-unverified-${run}`, false],
@@ -952,8 +959,14 @@ test.describe('extra server: marketplace, OAuth, LDAP, SAML, reverse proxy', () 
 		await page.context().clearCookies();
 		await cookie('e2e_student2');
 		expect((await oauthFlow(page, 'linkedin', `li-bind-${run}`)).headers().location).toBe('/preferences/bindings');
+		// A Facebook identity (unverified address) can still be bound to the logged-in account.
+		await page.context().clearCookies();
+		await cookie('e2e_student1');
+		expect((await oauthFlow(page, 'facebook', `fb-bind-${run}`)).headers().location).toBe('/preferences/bindings');
 		await withDb((db) =>
-			db.collection('users').updateOne({ username: 'e2e_student1' }, { $unset: { 'bindings.linkedin': '' } })
+			db
+				.collection('users')
+				.updateOne({ username: 'e2e_student1' }, { $unset: { 'bindings.linkedin': '', 'bindings.facebook': '' } })
 		);
 		// A logged-in session whose account disappeared.
 		const ghost = await createUser();
@@ -997,8 +1010,8 @@ test.describe('extra server: marketplace, OAuth, LDAP, SAML, reverse proxy', () 
 			['ldap', 'alice', 'wrong', 'Cannot contact host'],
 			['ldap', 'nomail', 'nomailpw', "Can't get field mail from your LDAP server"],
 			['ldap', 'alice', ' ', 'Empty password'],
-			['ldapsvc', 'ghost', 'svcpass', 'Unknown user'],
-			['ldapsvc', 'alice', 'svcpass', 'Incorrect password'],
+			['ldapsvc', 'ghost', 'svcpass', 'Invalid login/password'],
+			['ldapsvc', 'alice', 'svcpass', 'Invalid login/password'],
 			['ldapanon', 'alice', 'alicepw', 'Cannot contact host'],
 			['ldapcn', 'alice', 'alicepw', "Can't get field displayname from your LDAP server"],
 			['ldaptls', 'alice', 'alicepw', 'Cannot contact host'],
@@ -1025,11 +1038,12 @@ test.describe('extra server: marketplace, OAuth, LDAP, SAML, reverse proxy', () 
 			headers: { origin: appUrl(5) }
 		});
 		const relay = new URL(start.headers().location).searchParams.get('RelayState')!;
-		const response = samlResponse(`${appUrl(5)}/auth/callback/saml`, 'inginious-cov', {
-			uid: [id, 'second'],
-			cn: 'Multi Valued',
-			mail: `${id}@saml.local`
-		});
+		const response = samlResponse(
+			`${appUrl(5)}/auth/callback/saml`,
+			'inginious-cov',
+			{ uid: [id, 'second'], cn: 'Multi Valued', mail: `${id}@saml.local` },
+			requestId(start.headers().location)
+		);
 		await page.request.post('/auth/callback/saml', {
 			form: { SAMLResponse: response, RelayState: relay, alreadyRedirected: '1' },
 			maxRedirects: 0
@@ -1093,7 +1107,13 @@ test.describe('extra server: marketplace, OAuth, LDAP, SAML, reverse proxy', () 
 		const result = await registerAction(
 			page,
 			'register',
-			{ username: name, realname: 'Reg', email: `${name}@inginious.local`, passwd: 'abcdefgh', passwd2: 'abcdefgh' },
+			{
+				username: name,
+				realname: 'Reg',
+				email: `${name}@inginious.local`,
+				passwd: 'abcdefgh12',
+				passwd2: 'abcdefgh12'
+			},
 			'10.8.0.1'
 		);
 		expect(result.status).toBe(200);
@@ -1107,7 +1127,7 @@ test.describe('extra server: marketplace, OAuth, LDAP, SAML, reverse proxy', () 
 				await registerAction(
 					page,
 					'register',
-					{ username: u, realname: 'M', email: `${u}@inginious.local`, passwd: 'abcdefgh', passwd2: 'abcdefgh' },
+					{ username: u, realname: 'M', email: `${u}@inginious.local`, passwd: 'abcdefgh12', passwd2: 'abcdefgh12' },
 					'10.11.0.1'
 				)
 			).message!;
@@ -1918,8 +1938,8 @@ test.describe('configurations', () => {
 				username: name,
 				realname: 'S',
 				email: `${name}@inginious.local`,
-				passwd: 'abcdefgh',
-				passwd2: 'abcdefgh'
+				passwd: 'abcdefgh12',
+				passwd2: 'abcdefgh12'
 			});
 			await fetch(`${appUrl(0)}/register?/register`, {
 				method: 'POST',

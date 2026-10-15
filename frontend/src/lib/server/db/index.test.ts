@@ -33,6 +33,25 @@ describe('Database', () => {
 		await t.database.c.dbVersion.updateOne({}, { $set: { db_version: DB_VERSION } });
 	});
 
+	it('makes usernames and e-mail addresses unique, or only warns on a database with duplicates', async () => {
+		const users = t.database.c.users;
+		const unique = (await users.indexes()).filter((i) => i.unique).map((i) => i.name);
+		expect(unique.sort()).toEqual(['email_unique', 'username_unique']);
+		// Accounts without username yet are not concerned.
+		await users.insertMany([{ username: '', email: 'a@x.org' } as never, { username: '', email: 'b@x.org' } as never]);
+		await expect(users.insertOne({ username: '', email: 'a@x.org' } as never)).rejects.toMatchObject({ code: 11000 });
+		const other = await createTestDatabase();
+		const dropped = other.database.c.users;
+		await dropped.dropIndexes();
+		await dropped.insertMany([{ username: 'twin' } as never, { username: 'twin' } as never]);
+		const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+		await other.database.init();
+		expect(warn).toHaveBeenCalledWith(expect.stringContaining('Cannot create the unique index username_unique'));
+		warn.mockRestore();
+		expect((await dropped.indexes()).map((i) => i.name)).toContain('email_unique');
+		await other.drop();
+	});
+
 	it('stores files in GridFS exactly like pymongo', async () => {
 		const big = new Uint8Array(300 * 1024).map((_, i) => i % 251);
 		const id = await t.database.putFile(big);

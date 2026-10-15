@@ -1144,5 +1144,16 @@
 	"Show all ({})": "הצג הכול ({})",
 	"Unregister the {} matching students": "ביטול הרישום של {} הסטודנטים התואמים",
 	"{} results": "{} תוצאות",
-	"{} students": "{} סטודנטים"
+	"{} students": "{} סטודנטים",
+	"Log out of this account on every other browser and device. This one stays logged in.": "התנתקות מחשבון זה בכל דפדפן ומכשיר אחר. החיבור הנוכחי יישאר פעיל.",
+	"Log out other sessions": "התנתקות משאר ההפעלות",
+	"New password (min. {} characters) :": "סיסמה חדשה (לפחות {} תווים):",
+	"Other sessions": "הפעלות אחרות",
+	"Password (min. {} characters) :": "סיסמה ({} תווים לפחות):",
+	"Password too long.": "הסיסמה ארוכה מדי.",
+	"Security": "אבטחה",
+	"This service does not confirm that your e-mail address is verified. Please sign up with another method, then bind this service in your profile.": "שירות זה אינו מאשר שכתובת הדוא\"ל שלך מאומתת. נא להירשם בשיטה אחרת, ולאחר מכן לקשר שירות זה בפרופיל שלך.",
+	"This username is not available. Please choose another one.": "שם משתמש זה אינו זמין. נא לבחור שם אחר.",
+	"Your other sessions have been logged out.": "ההפעלות האחרות שלך נותקו.",
+	"The selection contains {} submissions, more than the {} allowed: narrow it with the filters.": "הבחירה מכילה {} הגשות, יותר מ-{} המותרות: יש לצמצם אותה בעזרת המסננים."
 }

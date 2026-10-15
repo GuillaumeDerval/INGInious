@@ -2,6 +2,7 @@ import { rmSync, readFileSync, symlinkSync, writeFileSync, existsSync } from 'no
 import { join } from 'node:path';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { siteEnv, event, type SiteEnv } from '../../../../tests/site/env.js';
+import { services, setServices } from '../app.js';
 import { handleDav } from './index.js';
 
 let env: SiteEnv;
@@ -10,6 +11,8 @@ const auth = (u: string, k = KEY) => ({ authorization: `Basic ${Buffer.from(`${u
 
 beforeAll(async () => {
 	env = await siteEnv();
+	// The shared site fixture has no raw configuration document.
+	setServices({ ...services(), config: { ...services().config, raw: services().config.raw ?? {} } });
 	await env.db.c.users.insertMany(
 		['admin1', 'tutor1', 'root', 'nokey'].map((username) => ({
 			username,
@@ -65,6 +68,25 @@ describe('SITE-22 authentication', () => {
 		for (let i = 0; i < 20; i++) expect((await dav('GET', 'dav/', { headers: auth('root', 'bad') })).status).toBe(401);
 		expect((await dav('GET', 'dav/', { headers: auth('root') })).status).toBe(401);
 		expect((await dav('GET', 'dav/')).status).toBe(200);
+	});
+	it('refuses Basic credentials over plain http, except on localhost or when allowed', async () => {
+		const status = async (url: string, headers: Record<string, string> = {}) =>
+			(await handleDav(event(url, { headers: { ...auth('admin1'), ...headers } }), 'dav/')).status;
+		const refused = await handleDav(event('http://inginious.example/dav/dav/', { headers: auth('admin1') }), 'dav/');
+		expect([refused.status, await refused.text()]).toEqual([
+			403,
+			'WebDAV requires HTTPS: Basic credentials are not accepted over plain HTTP.'
+		]);
+		expect(await status('https://inginious.example/dav/dav/')).toBe(200);
+		expect(await status('http://127.0.0.1/dav/dav/')).toBe(200);
+		const config = services().config;
+		// Behind a configured reverse proxy, the scheme seen by the client counts.
+		const proxied = { ...config, raw: { ...config.raw, 'reverse-proxy-config': { enable: true } } };
+		setServices({ ...services(), config: proxied });
+		expect(await status('http://inginious.example/dav/dav/', { 'x-forwarded-proto': 'https' })).toBe(200);
+		setServices({ ...services(), config: { ...config, webdavAllowHttp: true } });
+		expect(await status('http://inginious.example/dav/dav/')).toBe(200);
+		setServices({ ...services(), config });
 	});
 	it('normalises the path before choosing the course (no prefix traversal)', async () => {
 		expect((await dav('GET', 'dav/../dav2/secret.txt')).status).toBe(401);

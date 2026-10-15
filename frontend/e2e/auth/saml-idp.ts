@@ -6,6 +6,7 @@
 import { execFileSync } from 'node:child_process';
 import { mkdirSync, readFileSync } from 'node:fs';
 import { randomBytes } from 'node:crypto';
+import { inflateRawSync } from 'node:zlib';
 import { SignedXml } from 'xml-crypto';
 import { E2E_ID } from '../setup-data.js';
 
@@ -41,11 +42,18 @@ const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replac
  * A base64 SAML response with a signed assertion for the attributes given.
  * @param acs assertion consumer service URL; @param audience SP entity id;
  * @param attributes attribute values (an array for a multi-valued attribute).
+ * @param inResponseTo id of the AuthnRequest answered (none: unsolicited response).
  */
-export function samlResponse(acs: string, audience: string, attributes: Record<string, string | string[]>): string {
+export function samlResponse(
+	acs: string,
+	audience: string,
+	attributes: Record<string, string | string[]>,
+	inResponseTo?: string
+): string {
 	const now = new Date();
 	const at = (minutes: number) => new Date(now.getTime() + minutes * 60_000).toISOString();
 	const id = () => `_${randomBytes(8).toString('hex')}`;
+	const answers = inResponseTo ? ` InResponseTo="${esc(inResponseTo)}"` : '';
 	const attrs = Object.entries(attributes)
 		.map(
 			([name, value]) =>
@@ -56,10 +64,10 @@ export function samlResponse(acs: string, audience: string, attributes: Record<s
 		)
 		.join('');
 	const xml =
-		`<samlp:Response xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol" xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion" ID="${id()}" Version="2.0" IssueInstant="${at(0)}" Destination="${acs}">` +
+		`<samlp:Response xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol" xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion" ID="${id()}" Version="2.0" IssueInstant="${at(0)}" Destination="${acs}"${answers}>` +
 		`<saml:Issuer>https://idp.example</saml:Issuer><samlp:Status><samlp:StatusCode Value="urn:oasis:names:tc:SAML:2.0:status:Success"/></samlp:Status>` +
 		`<saml:Assertion ID="${id()}" Version="2.0" IssueInstant="${at(0)}"><saml:Issuer>https://idp.example</saml:Issuer>` +
-		`<saml:Subject><saml:NameID>${esc([attributes.uid ?? 'x'].flat()[0])}</saml:NameID><saml:SubjectConfirmation Method="urn:oasis:names:tc:SAML:2.0:cm:bearer"><saml:SubjectConfirmationData NotOnOrAfter="${at(5)}" Recipient="${acs}"/></saml:SubjectConfirmation></saml:Subject>` +
+		`<saml:Subject><saml:NameID>${esc([attributes.uid ?? 'x'].flat()[0])}</saml:NameID><saml:SubjectConfirmation Method="urn:oasis:names:tc:SAML:2.0:cm:bearer"><saml:SubjectConfirmationData NotOnOrAfter="${at(5)}" Recipient="${acs}"${answers}/></saml:SubjectConfirmation></saml:Subject>` +
 		`<saml:Conditions NotBefore="${at(-5)}" NotOnOrAfter="${at(5)}"><saml:AudienceRestriction><saml:Audience>${audience}</saml:Audience></saml:AudienceRestriction></saml:Conditions>` +
 		`<saml:AuthnStatement AuthnInstant="${at(0)}" SessionIndex="s"><saml:AuthnContext><saml:AuthnContextClassRef>urn:oasis:names:tc:SAML:2.0:ac:classes:Password</saml:AuthnContextClassRef></saml:AuthnContext></saml:AuthnStatement>` +
 		`<saml:AttributeStatement>${attrs}</saml:AttributeStatement></saml:Assertion></samlp:Response>`;
@@ -75,4 +83,10 @@ export function samlResponse(acs: string, audience: string, attributes: Record<s
 		location: { reference: "//*[local-name(.)='Assertion']/*[local-name(.)='Issuer']", action: 'after' }
 	});
 	return Buffer.from(signature.getSignedXml()).toString('base64');
+}
+
+/** Id of the AuthnRequest carried by an IdP redirect URL (HTTP-Redirect binding: deflated, base64). */
+export function requestId(location: string): string {
+	const xml = inflateRawSync(Buffer.from(new URL(location).searchParams.get('SAMLRequest')!, 'base64')).toString();
+	return /\bID="([^"]+)"/.exec(xml)![1];
 }

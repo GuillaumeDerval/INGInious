@@ -46,16 +46,18 @@ describe('auth components', () => {
 
 	it('PasswordFields hints the strength and the mismatch', async () => {
 		render(PasswordFields, {});
-		await userEvent.fill(page.getByLabelText(/^Password/), 'abc');
+		await expect.element(page.getByText('Password (min. 10 characters) :')).toBeVisible();
+		await userEvent.fill(page.getByLabelText(/^Password/), 'abcdefghi');
 		await expect.element(page.getByText('Too short')).toBeVisible();
-		await userEvent.fill(page.getByLabelText(/^Password/), 'abcdefgh');
+		await userEvent.fill(page.getByLabelText(/^Password/), 'abcdefghij');
 		await expect.element(page.getByText('Weak')).toBeVisible();
 		await userEvent.fill(page.getByLabelText(/^Password/), 'Abcdefgh1!xyzwvut');
 		await expect.element(page.getByText('Strong')).toBeVisible();
 		await userEvent.fill(page.getByLabelText(/Confirm password/), 'x');
 		await expect.element(page.getByText("Passwords don't match !")).toBeVisible();
 		document.body.innerHTML = '';
-		render(PasswordFields, { newPassword: true, required: false });
+		render(PasswordFields, { newPassword: true, required: false, minLength: 12 });
+		await expect.element(page.getByText('New password (min. 12 characters) :')).toBeVisible();
 		await expect.element(page.getByLabelText(/New password/)).not.toBeRequired();
 		await expect.element(page.getByLabelText(/Confirm new password/)).toBeVisible();
 	});

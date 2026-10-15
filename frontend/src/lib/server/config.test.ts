@@ -21,6 +21,8 @@ describe('buildConfig', () => {
 			maxFileSize: 1048576,
 			allowDeletion: true,
 			allowRegistration: true,
+			passwordMinLength: 10,
+			webdavAllowHttp: false,
 			maintenance: false,
 			plugins: [],
 			smtp: null,
@@ -29,15 +31,29 @@ describe('buildConfig', () => {
 			session: {
 				secretKey: 's3cret',
 				timeout: 86400,
+				maxLifetime: 7 * 86400,
 				cookieName: 'inginious_session_id',
 				cookiePath: '/',
 				sameSite: 'lax',
 				httpOnly: true,
-				secure: false
+				secure: null
 			}
 		});
 		expect(c.session.cookieDomain).toBeUndefined();
 		expect(c.welcomePage).toBeUndefined();
+	});
+
+	it('makes the session cookie Secure by default on https deployments only', () => {
+		const secure = (raw: Record<string, unknown>, sp: Record<string, unknown> = {}) =>
+			buildConfig({ ...minimal, ...raw, session_parameters: { secret_key: 'k', ...sp } }).session.secure;
+		expect(secure({ base_url: 'https://inginious.example' })).toBe(true);
+		// Not configured and no https public URL: decided per request.
+		expect(secure({ base_url: 'http://inginious.example' })).toBeNull();
+		expect(secure({ base_url: 'https://inginious.example' }, { secure: false })).toBe(false);
+		expect(secure({}, { secure: true })).toBe(true);
+		process.env.APP_ORIGIN = 'https://app.example';
+		expect(secure({})).toBe(true);
+		delete process.env.APP_ORIGIN;
 	});
 
 	it('reads every supported key', () => {
@@ -50,6 +66,7 @@ describe('buildConfig', () => {
 			session_parameters: {
 				secret_key: 'k',
 				timeout: 10,
+				max_lifetime: 3600,
 				cookie_name: 'sid',
 				cookie_domain: 'example.org',
 				cookie_path: '/app',
@@ -61,6 +78,8 @@ describe('buildConfig', () => {
 			max_file_size: 10,
 			allow_deletion: false,
 			allow_registration: false,
+			password_min_length: 12,
+			webdav_allow_http: true,
 			maintenance: true,
 			plugins: [{ plugin_module: 'inginious.frontend.plugins.scoreboard' }],
 			smtp: { host: 'mail', port: '25', username: 'u', password: 'p', starttls: true, usessl: true, sendername: 'me' },
@@ -80,6 +99,7 @@ describe('buildConfig', () => {
 			session: {
 				secretKey: 'k',
 				timeout: 10,
+				maxLifetime: 3600,
 				cookieName: 'sid',
 				cookieDomain: 'example.org',
 				cookiePath: '/app',
@@ -91,6 +111,8 @@ describe('buildConfig', () => {
 			maxFileSize: 10,
 			allowDeletion: false,
 			allowRegistration: false,
+			passwordMinLength: 12,
+			webdavAllowHttp: true,
 			maintenance: true,
 			smtp: { host: 'mail', port: 25, username: 'u', password: 'p', starttls: true, usessl: true, sendername: 'me' },
 			ltiConfig: { a: 1 },

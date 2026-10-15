@@ -234,21 +234,36 @@ export function problemView(p: Problem, ctx: ViewContext): ProblemView {
 }
 
 /**
+ * Posted `@`-fields kept in the job input: only the `@random_<i>` values the task page
+ * posts back. Every other `@`-key is reserved for values set by the server (`@username`,
+ * `@email`, `@lang`, `@time`, `@random`, `@state`, ...) or is a page control field
+ * (`@action`, `@debug-mode`), so a posted one never reaches the grader.
+ */
+const POSTED_META_KEY = /^@random_\d+$/;
+
+/**
  * Builds the submission input from a posted form (TASK-08): every posted text
- * field (first value) except `@action` and `@debug-mode`, then each problem
- * replaced by its typed value.
+ * field (first value) except the `@`-fields (see `POSTED_META_KEY`), then each
+ * problem replaced by its typed value.
+ * @param allMeta keep every posted `@`-field: only for callers that set no `@`-key
+ *        themselves and are trusted to provide them (the key-checked simple grader).
  * @returns the input, or null when an answer is missing or invalid (legacy
  *          "Please answer to all the questions..." error).
  */
 export async function buildInput(
 	problems: Problem[],
 	form: FormData,
-	defaults: UploadDefaults
+	defaults: UploadDefaults,
+	allMeta = false
 ): Promise<Record<string, unknown> | null> {
 	const input: Record<string, unknown> = {};
-	for (const [key, value] of form) if (typeof value === 'string' && !Object.hasOwn(input, key)) input[key] = value;
-	delete input['@action'];
-	delete input['@debug-mode'];
+	for (const [key, value] of form)
+		if (
+			typeof value === 'string' &&
+			!Object.hasOwn(input, key) &&
+			(allMeta || !key.startsWith('@') || POSTED_META_KEY.test(key))
+		)
+			input[key] = value;
 	for (const p of problems) {
 		const type = problemTypes[p.type];
 		const kind = type.inputKind(p.content);

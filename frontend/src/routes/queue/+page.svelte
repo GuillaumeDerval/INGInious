@@ -2,6 +2,7 @@
 @component
 /queue (NAV-17): running and waiting grading jobs, with a kill button
 (confirmation dialog) on the jobs the user may kill; the result of a kill is shown above the tables.
+Jobs of other courses have no name/launcher (null, shown as a dash).
 -->
 <script lang="ts">
 	import { t } from '#lib/i18n/index.js';
@@ -42,13 +43,15 @@
 			{#snippet row(job)}
 				<tr title={job.id}>
 					{#if 'agent' in job}
-						<td class="font-medium">{job.agent}</td><td>{job.info}</td><td>{job.launcher}</td><td
+						<td class="font-medium">{job.agent}</td><td>{job.info ?? '—'}</td><td>{job.launcher ?? '—'}</td><td
 							><DateTime value={job.start} /></td
 						><td
 							>{#if job.end}<DateTime value={job.end} />{:else}{t('No timeout set')}{/if}</td
 						>
 					{:else}
-						<td>{job.info}</td><td>{job.launcher}</td><td class="tabular-nums">{job.max ?? t('No timeout set')}</td>
+						<td>{job.info ?? '—'}</td><td>{job.launcher ?? '—'}</td><td class="tabular-nums"
+							>{job.max ?? t('No timeout set')}</td
+						>
 					{/if}
 					<td class="text-end"
 						>{#if job.kill}<ConfirmDialog

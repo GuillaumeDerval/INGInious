@@ -85,7 +85,8 @@ export async function handleGrader(form: FormData): Promise<Record<string, unkno
 	const answers = new FormData();
 	for (const [k, v] of Object.entries(posted ?? {})) for (const item of [v].flat()) answers.append(k, String(item));
 	const { config, backend } = services();
-	const input = await buildInput(task.problems, answers, config);
+	// The key holder sets the whole input, `@`-fields included (no server-set field here).
+	const input = await buildInput(task.problems, answers, config, true);
 	if (!input) return error('Input is not consistent with the task');
 	const job = new Promise<JobResult>((onDone) =>
 		backend.newJob(

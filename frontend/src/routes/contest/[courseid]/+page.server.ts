@@ -4,6 +4,6 @@ import { requireCourseMember } from '#lib/server/plugins/bundled/inginious.front
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async (event) => {
-	const { course, page } = await requireCourseMember(event, MODULE);
-	return { ...page, ...(await contestScoreboard(course, event.locals.lang, event.locals.user!.timezone)) };
+	const { course, username, page } = await requireCourseMember(event, MODULE);
+	return { ...page, ...(await contestScoreboard(course, username, event.locals.lang, event.locals.user!.timezone)) };
 };

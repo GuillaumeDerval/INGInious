@@ -9,12 +9,22 @@ import { rstToHtml, SevereRstError } from './rst.js';
 
 process.env.TZ = 'UTC';
 
-/** Renders with a fixed clock and removes insignificant whitespace. */
-function html(source: string, options: RenderOptions = {}): string {
-	return renderText(source, { now: new Date('2026-01-01T00:00:00Z'), ...options })
+/** Removes insignificant whitespace. */
+function normalize(html: string): string {
+	return html
 		.replace(/\s*(<[^>]+>)\s*/g, '$1')
 		.replace(/\s+/g, ' ')
 		.trim();
+}
+
+/** Renders (and sanitizes) with a fixed clock. */
+function html(source: string, options: RenderOptions = {}): string {
+	return normalize(renderText(source, { now: new Date('2026-01-01T00:00:00Z'), ...options }));
+}
+
+/** Writer output before sanitizing (author classes and ids as written). */
+function written(source: string): string {
+	return normalize(rstToHtml(source, { showEverything: false, headerLevel: 3, now: new Date(0) }));
 }
 
 describe('hidden-until (TASK feedback)', () => {
@@ -53,16 +63,18 @@ describe('hidden-until (TASK feedback)', () => {
 
 describe('directives', () => {
 	it('renders code blocks with classes, and errors on empty `code`', () => {
-		expect(html('.. class:: foo\n\n.. code-block:: python\n\n    x = 1')).toBe(
+		expect(written('.. class:: foo\n\n.. code-block:: python\n\n    x = 1')).toBe(
 			'<pre class="code python foo literal-block">x = 1</pre>'
 		);
-		expect(html('.. code-block:: c\n   :class: extra\n\n   y')).toBe('<pre class="code c extra literal-block">y</pre>');
+		expect(written('.. code-block:: c\n   :class: extra\n\n   y')).toBe(
+			'<pre class="code c extra literal-block">y</pre>'
+		);
 		expect(html('.. code:: c')).toContain('Content block expected for the "code" directive');
 	});
 
 	it('renders images, targets, alignment and figures with legends', () => {
-		expect(html('.. image:: a.png\n   :height: 10px\n   :align: center\n   :class: big')).toBe(
-			'<img alt="a.png" class="big align-center" src="a.png" style="height:10px" />'
+		expect(written('.. image:: a.png\n   :height: 10px\n   :align: center\n   :class: big')).toBe(
+			'<img alt="a.png" class="big align-center" src="a.png" style="height: 10px;" />'
 		);
 		const figure = html('.. figure:: a.png\n   :align: right\n\n   Caption.\n\n   Legend.');
 		expect(figure).toBe(
@@ -151,7 +163,7 @@ describe('roles', () => {
 	it('renders custom roles based on raw, code, other roles or nothing', () => {
 		const src =
 			'.. role:: html(raw)\n   :format: html\n\n.. role:: tex(raw)\n   :format: latex\n\n.. role:: py(code)\n\n.. role:: big(strong)\n\n.. role:: plain\n\n.. role:: odd(unknownbase)\n\n.. role:: noformat(raw)\n\n';
-		const out = html(src + ':html:`<b>x</b>` :tex:`y` :py:`z` :big:`w` :plain:`v` :odd:`u` :noformat:`t`');
+		const out = written(src + ':html:`<b>x</b>` :tex:`y` :py:`z` :big:`w` :plain:`v` :odd:`u` :noformat:`t`');
 		expect(out).toBe(
 			'<p><span class="html"><b>x</b></span><code class="py">z</code><span class="big"><strong>w</strong></span><span class="plain">v</span><span class="odd">u</span></p>'
 		);
@@ -198,7 +210,7 @@ describe('lists and blocks', () => {
 		expect(html('para\n\n    quote\n\n    -- Author')).toContain('<p class="attribution">—Author</p>');
 		expect(html('See [CIT]_.\n\n.. [CIT] Ref.')).toContain('Ref.');
 		expect(html('a\n\n.. _t:\n\nb `x`_\n\n.. _x: https://x.org\n\nc _`inline` d')).toContain(
-			'<span class="target" id="inline">inline</span>'
+			'<span class="target" id="rt-inline">inline</span>'
 		);
 	});
 

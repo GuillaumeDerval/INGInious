@@ -68,7 +68,9 @@ type UserInfo = { sub: string; name: string; email: string; email_verified?: boo
  * Differences with legacy: GitHub uses the primary *verified* address; Google
  * enforces `domain` and refuses unverified addresses; LinkedIn uses "Sign In
  * with LinkedIn using OpenID Connect" (the legacy `r_liteprofile` API no
- * longer exists).
+ * longer exists) and its address counts as verified only when `email_verified`
+ * is true; the Facebook Graph API reports no verification at all, so its
+ * address is never trusted to create an account (`ExternalUser.emailVerified`).
  */
 export const OAUTH_PROVIDERS = {
 	github: {
@@ -113,7 +115,7 @@ export const OAUTH_PROVIDERS = {
 				'https://graph.facebook.com/me?fields=id,name,email',
 				token
 			);
-			return { id: me.id, realname: me.name, email: me.email };
+			return { id: me.id, realname: me.name, email: me.email, emailVerified: false };
 		}
 	},
 	linkedin: {
@@ -121,7 +123,7 @@ export const OAUTH_PROVIDERS = {
 		client: plain(LinkedIn, ['openid', 'profile', 'email']),
 		async profile(token) {
 			const info = await getJson<UserInfo>('https://api.linkedin.com/v2/userinfo', token);
-			return { id: info.sub, realname: info.name, email: info.email };
+			return { id: info.sub, realname: info.name, email: info.email, emailVerified: info.email_verified === true };
 		}
 	}
 } satisfies Record<string, OAuthProvider>;

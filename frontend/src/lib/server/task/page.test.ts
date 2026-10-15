@@ -76,6 +76,9 @@ beforeEach(async () => {
 describe('loadTaskPage', () => {
 	it('TASK-01 loads the page of a registered student and records the visit', async () => {
 		plugins().addHook('task_menu', () => ({ label: 'Scoreboard', href: '/scoreboard', extra: 1 }));
+		// TASK-01: plugin entries keep http(s) and relative links only.
+		for (const href of ['javascript:alert(1)', ' JavaScript:x', 'data:text/html,x', 'http://[', 'https://x.org/a'])
+			plugins().addHook('task_menu', () => ({ label: href, href }));
 		const data = await p.loadTaskPage(ev('alice'), C, 'code_python');
 		expect(data).toMatchObject({
 			name: 'Python code - count to n',
@@ -91,7 +94,10 @@ describe('loadTaskPage', () => {
 			group: null,
 			prev: 'legacy_env',
 			next: 'single_line',
-			menu: [{ label: 'Scoreboard', href: '/scoreboard' }],
+			menu: [
+				{ label: 'Scoreboard', href: '/scoreboard' },
+				{ label: 'https://x.org/a', href: 'https://x.org/a' }
+			],
 			webterm: null,
 			info: {
 				author: 'INGInious test-suite',
@@ -332,9 +338,10 @@ describe('taskAction', () => {
 				})
 			).text
 		).toMatch(/^Please answer to all the questions/);
-		expect((await act('alice', 'closed_task', { '@action': 'submit', q: '0' })).text).toBe(
-			'You are not allowed to submit for this task.'
-		);
+		// TASK-08: a refused submission answers HTTP 403 with the JSON error.
+		const refused = await p.taskAction(ev('alice', { '@action': 'submit', q: '0' }), C, 'closed_task');
+		expect(refused.status).toBe(403);
+		expect(await refused.json()).toEqual({ status: 'error', text: 'You are not allowed to submit for this task.' });
 		expect(await status(() => p.taskAction(ev(null), C, 'mcq_single'))).toMatch(/^\/signin/);
 		expect(await status(() => p.taskAction(ev('alice', { '@action': 'nope' }), C, 'mcq_single'))).toBe(400);
 		expect((await act('alice', 'mcq_single', { '@action': 'check', submissionid: 'bad' })).status).toBe('error');
@@ -369,6 +376,14 @@ describe('taskAction', () => {
 	it('TASK-11/12 kills and starts SSH debug sessions for admins', async () => {
 		const res = await act('superadmin', 'outcomes', { '@action': 'submit', mode: 'sleep', '@debug-mode': 'ssh' });
 		expect(env.backend.last.job.debug).toBe('ssh');
+		// TASK-12: the SSH access is shown to the admin who launched the session only.
+		env.backend.last.cb.onSsh!({ host: 'ssh.host', port: 2222, user: 'worker', password: 'pw' });
+		const ssh = { host: 'ssh.host', port: 2222, user: 'worker', password: 'pw' };
+		const check = (user: string) => act(user, 'outcomes', { '@action': 'check', submissionid: res.submissionid });
+		await expect.poll(async () => (await check('superadmin')).submission.ssh).toEqual(ssh);
+		const tutor = (await check('task_tutor')).submission;
+		expect(tutor.ssh).toBeUndefined();
+		expect(JSON.stringify(tutor)).not.toContain('pw');
 		expect(await act('bob', 'outcomes', { '@action': 'kill', submissionid: res.submissionid })).toEqual({
 			status: 'done',
 			killed: false

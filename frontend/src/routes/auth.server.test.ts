@@ -8,6 +8,7 @@ import { mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { randomBytes } from 'node:crypto';
+import { ObjectId } from 'mongodb';
 import { setupAuth, fakeEvent, run, type AuthEnv, type EventOptions } from '#lib/server/testing/auth.js';
 import { hashPassword } from '#lib/server/auth/passwords.js';
 import { authMethods, type AuthMethod } from '#lib/server/auth/external.js';
@@ -21,6 +22,7 @@ import * as prefs from './preferences/+page.server.js';
 import * as profile from './preferences/profile/+page.server.js';
 import * as bindings from './preferences/bindings/+page.server.js';
 import * as deletion from './preferences/delete/+page.server.js';
+import * as security from './preferences/security/+page.server.js';
 import * as start from './auth/signin/[authid]/+server.js';
 import * as callback from './auth/callback/[authid]/+page.server.js';
 import * as formPage from './auth/page/[authid]/+page.server.js';
@@ -144,6 +146,7 @@ describe('/register', () => {
 
 	it('shows the activation button, the reset form or the forms', async () => {
 		expect(await call(registerPage.load, { url: 'http://x/register?activate=t' })).toMatchObject({
+			passwordMinLength: 10,
 			activate: 't',
 			reset: null,
 			invalidReset: false,
@@ -166,8 +169,8 @@ describe('/register', () => {
 			username: name,
 			realname: 'R',
 			email: `${name}@x.org`,
-			passwd: 'secret123',
-			passwd2: 'secret123',
+			passwd: 'secret1234',
+			passwd2: 'secret1234',
 			term_policy_check: 'on'
 		};
 		expect(await call(reg.register, { form })).toMatchObject({ message: expect.stringContaining('registered') });
@@ -190,7 +193,7 @@ describe('/register', () => {
 			data: { reset: { token } }
 		});
 		expect(
-			await call(reg.resetpasswd, { form: { reset: token, passwd: 'newpass1', passwd2: 'newpass1' } })
+			await call(reg.resetpasswd, { form: { reset: token, passwd: 'newpass123', passwd2: 'newpass123' } })
 		).toMatchObject({ status: 303, location: '/signin' });
 	});
 });
@@ -200,6 +203,7 @@ describe('/preferences', () => {
 		expect(await call(prefsLayout.load, { url: 'http://x/preferences/profile' })).toMatchObject({ status: 302 });
 		const u = await user();
 		expect(await call(prefsLayout.load, { session: u.session })).toEqual({ allowDeletion: true });
+		expect(await call(prefsLayout.load, { session: env.sessions.create(true) })).toMatchObject({ status: 302 });
 		expect(await call(prefs.load)).toMatchObject({ location: '/preferences/profile' });
 	});
 
@@ -208,6 +212,7 @@ describe('/preferences', () => {
 		expect(await call(profile.load, { session: u.session })).toMatchObject({
 			profile: { username: u.username, timezone: 'Europe/Brussels', codeIndentation: 'tabs', hasPassword: true },
 			passwords: true,
+			passwordMinLength: 10,
 			tos: null,
 			tosSigned: false
 		});
@@ -294,6 +299,74 @@ describe('/preferences', () => {
 		env.configure({ allow_deletion: false });
 		expect(await call(deletion.load, { session: (await user()).session })).toMatchObject({ status: 403 });
 		env.configure();
+	});
+});
+
+describe('/preferences/security', () => {
+	it('AUTH-04 logs out the other sessions of the account', async () => {
+		const u = await user();
+		const sessions = env.database.c.sessions;
+		const other = new ObjectId();
+		await sessions.insertOne({ _id: other, username: u.username } as never);
+		expect(await call(security.load, { session: u.session })).toBeUndefined();
+		expect(await call(security.actions.default, { session: u.session, form: {} })).toEqual({
+			message: 'Your other sessions have been logged out.'
+		});
+		expect(await sessions.findOne({ _id: other })).toBeNull();
+	});
+});
+
+describe('preferences: anonymous visitors and other users', () => {
+	/** Every action of the preference pages with a plausible form. */
+	const actions: [unknown, Record<string, string>][] = [
+		[profile.actions.default, { realname: 'N', language: 'en', timezone: 'UTC', code_indentation: '4' }],
+		[bindings.actions.add, { auth_binding: 'bindable' }],
+		[bindings.actions.revoke, { revoke_auth_binding: 'gone' }],
+		[deletion.actions.default, { delete_email: 'a@x.org' }],
+		[security.actions.default, {}]
+	];
+
+	it('AUTH-11 sends anonymous visitors and LTI sessions to the sign-in page', async () => {
+		const victim = await user();
+		const others = new ObjectId();
+		await env.database.c.sessions.insertOne({ _id: others, username: victim.username } as never);
+		for (const [action, form] of actions) {
+			expect(await call(action, { form, url: 'http://x/preferences/profile' })).toMatchObject({
+				status: 302,
+				location: expect.stringContaining('/signin')
+			});
+			const lti = env.sessions.create(true);
+			Object.assign(lti.doc, { loggedin: true, username: victim.username, email: victim.email });
+			expect(await call(action, { session: lti, form })).toMatchObject({ status: 302 });
+		}
+		for (const load of [profile.load, bindings.load, deletion.load, security.load])
+			expect(await call(load)).toMatchObject({ status: 302 });
+		expect(await env.database.c.users.findOne({ username: victim.username })).toMatchObject({ realname: 'Real' });
+		expect(await env.database.c.sessions.findOne({ _id: others })).not.toBeNull();
+	});
+
+	it('AUTH-12/13 only ever change the account of the session', async () => {
+		const [a, b] = [await user(), await user({ bindings: { gone: ['2', {}] } })];
+		const bSession = new ObjectId();
+		await env.database.c.sessions.insertOne({ _id: bSession, username: b.username } as never);
+		// a cannot revoke b's binding, delete b's account nor close b's sessions.
+		expect(
+			await call(bindings.actions.revoke, { session: a.session, form: { revoke_auth_binding: 'gone' } })
+		).toMatchObject({ status: 400 });
+		expect(await call(deletion.actions.default, { session: a.session, form: { delete_email: b.email } })).toMatchObject(
+			{
+				status: 400
+			}
+		);
+		await call(security.actions.default, { session: a.session, form: {} });
+		await call(profile.actions.default, {
+			session: a.session,
+			form: { username: 'hijack', realname: 'N', language: 'en', timezone: 'UTC', code_indentation: '4' }
+		});
+		const bDoc = await env.database.c.users.findOne({ username: b.username });
+		expect(bDoc).toMatchObject({ realname: 'Real', bindings: { gone: ['2', {}] } });
+		expect(await env.database.c.users.findOne({ username: a.username })).toMatchObject({ realname: 'N' });
+		expect(await env.database.c.sessions.findOne({ _id: bSession })).not.toBeNull();
 	});
 });
 

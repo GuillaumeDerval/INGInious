@@ -97,6 +97,18 @@ export function normalize(fields: FieldSpec[], values: Values, base: Values = {}
 }
 
 /**
+ * CADM-11: the grading environment must be one the backend announces, or the task's
+ * current one (a task whose environment is temporarily unavailable stays editable).
+ * @throws Error with a translated message otherwise.
+ */
+function checkEnvironment(data: Values, raw: Values): void {
+	const [type, id] = [String(data.environment_type), String(data.environment_id)];
+	if (environments()[type]?.includes(id)) return;
+	if (type === String(raw.environment_type) && id === String(raw.environment_id)) return;
+	throw new Error(t('Invalid data: {}', `${t('Grading environment')} "${type}/${id}"`));
+}
+
+/**
  * Saves the editor state into task.yaml (merged with the existing descriptor).
  * @returns null when saved, or the error message.
  */
@@ -111,6 +123,7 @@ export async function saveEditor(
 		const tabs = await editorTabs(course, taskid, raw);
 		const fields = [...BASIC_SPEC, ...envSpec({}, ''), ...tabs.flatMap((tab) => tab.fields)];
 		data = normalize(fields, post.values, raw);
+		checkEnvironment(data, raw);
 		if (data.environment_type === 'mcq') data.environment_parameters = {};
 		const old = (raw.problems ?? {}) as Record<string, Values>;
 		data.problems = {};

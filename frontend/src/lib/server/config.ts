@@ -31,14 +31,23 @@ export interface SmtpConfig {
 /** Session cookie settings (`session_parameters:` section). */
 export interface SessionConfig {
 	secretKey: string;
-	/** Session lifetime in seconds. */
+	/** Session lifetime in seconds (sliding: renewed by every request). */
 	timeout: number;
+	/**
+	 * Absolute lifetime of a session in seconds, counted from its creation (i.e. the
+	 * login, which gives the session a new id), whatever the activity; 0 or absent = no limit.
+	 */
+	maxLifetime?: number;
 	cookieName: string;
 	cookieDomain?: string;
 	cookiePath: string;
 	sameSite: 'lax' | 'strict' | 'none';
 	httpOnly: boolean;
-	secure: boolean;
+	/**
+	 * `Secure` cookie flag: the configured value, else true when the public URL of the deployment
+	 * is https, else null (decided per request: set on https requests).
+	 */
+	secure: boolean | null;
 }
 
 /** Typed view of configuration.yaml. */
@@ -55,6 +64,10 @@ export interface AppConfig {
 	maxFileSize: number;
 	allowDeletion: boolean;
 	allowRegistration: boolean;
+	/** Minimum length of new passwords (`password_min_length`). */
+	passwordMinLength: number;
+	/** True when WebDAV accepts Basic credentials over plain http (`webdav_allow_http`). */
+	webdavAllowHttp: boolean;
 	maintenance: boolean;
 	plugins: PluginConfig[];
 	smtp: SmtpConfig | null;
@@ -92,6 +105,8 @@ export function buildConfig(raw: Record<string, unknown>): AppConfig {
 	const smtp = raw.smtp as Record<string, unknown> | undefined;
 	const mongo = get<Record<string, unknown>>(raw, 'mongo_opt', {});
 	const optional = (key: string) => (raw[key] === undefined ? undefined : String(raw[key]));
+	// Public URL of the deployment (same sources as the links in e-mails, see mail.ts `publicUrl`).
+	const publicOrigin = String(raw.base_url ?? (process.env.ORIGIN || process.env.APP_ORIGIN || ''));
 	const privacyPage = optional('privacy_page');
 	const termsPage = optional('terms_page');
 	return {
@@ -103,12 +118,15 @@ export function buildConfig(raw: Record<string, unknown>): AppConfig {
 		session: {
 			secretKey: String(sp.secret_key),
 			timeout: Number(get(sp, 'timeout', 86400)),
+			// Rewrite addition: a session ends 7 days after the login at the latest.
+			maxLifetime: Number(get(sp, 'max_lifetime', 7 * 86400)),
 			cookieName: String(get(sp, 'cookie_name', 'inginious_session_id')),
 			cookieDomain: sp.cookie_domain ? String(sp.cookie_domain) : undefined,
 			cookiePath: String(get(sp, 'cookie_path', '/')),
 			sameSite: String(get(sp, 'samesite', 'Lax')).toLowerCase() as SessionConfig['sameSite'],
 			httpOnly: Boolean(get(sp, 'httponly', true)),
-			secure: Boolean(get(sp, 'secure', false))
+			// Rewrite change: without an explicit value, the cookie is `Secure` on https deployments and requests.
+			secure: 'secure' in sp ? Boolean(sp.secure) : publicOrigin.startsWith('https:') || null
 		},
 		allowedFileExtensions: get(raw, 'allowed_file_extensions', [
 			'.c',
@@ -123,6 +141,8 @@ export function buildConfig(raw: Record<string, unknown>): AppConfig {
 		maxFileSize: Number(get(raw, 'max_file_size', 1024 * 1024)),
 		allowDeletion: Boolean(get(raw, 'allow_deletion', true)),
 		allowRegistration: Boolean(get(raw, 'allow_registration', true)),
+		passwordMinLength: Number(get(raw, 'password_min_length', 10)),
+		webdavAllowHttp: Boolean(get(raw, 'webdav_allow_http', false)),
 		maintenance: Boolean(get(raw, 'maintenance', false)),
 		plugins: get<PluginConfig[]>(raw, 'plugins', []),
 		smtp: smtp

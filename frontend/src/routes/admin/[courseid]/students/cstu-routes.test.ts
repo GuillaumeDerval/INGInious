@@ -6,6 +6,7 @@ import { gunzipSync } from 'node:zlib';
 import { ObjectId } from 'mongodb';
 import { addSub, setupCstu, type CstuEnv } from '../../../../../tests/fixtures/cstu/setup.js';
 import { outcome } from '../../../../../tests/fixtures/nav/setup.js';
+import { services } from '#lib/server/app.js';
 import * as students from './+page.server.js';
 import { GET as studentFiles } from './[file]/+server.js';
 import * as audience from '../edit/audience/[audienceid]/+page.server.js';
@@ -274,9 +275,22 @@ describe('student page', () => {
 			'answer',
 			['answer']
 		]);
-		expect(
-			(await outcome(() => student.load(ev('cstu_tutor', { courseid: 'cstu', username: 'ghost' })))).realname
-		).toBe('ghost');
+		// Only users related to the course: unknown and foreign users are 404, former students with submissions are kept.
+		const other = (username: string) => ({ courseid: 'cstu', username });
+		expect(await outcome(() => student.load(ev('cstu_tutor', other('ghost'))))).toMatchObject({ status: 404 });
+		await env.db.c.users.insertOne({ username: 'cstu_far', realname: 'Far Away', email: 'f@x', bindings: {} } as never);
+		expect(await outcome(() => student.load(ev('cstu_tutor', other('cstu_far'))))).toMatchObject({ status: 404 });
+		const csv = (username: string) =>
+			outcome(() =>
+				studentFiles(ev('cstu_tutor', { courseid: 'cstu', file: 'student.csv' }, { url: `?username=${username}` }))
+			);
+		expect(await csv('cstu_far')).toMatchObject({ status: 404 });
+		await addSub(env.db, { username: ['cstu_far'] });
+		expect((await outcome(() => student.load(ev('cstu_tutor', other('cstu_far'))))).realname).toBe('Far Away');
+		expect((await csv('cstu_far')).status).toBe(200);
+		await env.db.c.users.deleteOne({ username: 'cstu_far' });
+		// A deleted account keeps its submissions: shown under its username.
+		expect((await outcome(() => student.load(ev('cstu_tutor', other('cstu_far'))))).realname).toBe('cstu_far');
 		expect(await outcome(() => student.actions.reset(ev('cstu_tutor', p, { form: [['taskid', 'answer']] })))).toEqual({
 			message: 'Task state reset.'
 		});
@@ -364,6 +378,46 @@ describe('submissions', () => {
 		for (const bad of [waiting, foreign, 'zz'])
 			expect(await get('submissions.tgz', `?submission=${bad}`)).toMatchObject({ status: 404 });
 		expect(await get('other.txt')).toMatchObject({ status: 404 });
+	});
+	it('CSTU-12/13/14 refuses exports and replays larger than the export limit', async () => {
+		const [a, b] = [await addSub(env.db, { username: ['cstu_bob'] }), await addSub(env.db, { username: ['cstu_eve'] })];
+		const raw = services().config.raw;
+		raw.submissions_export_limit = 1;
+		try {
+			const get = (file: string, url = '') =>
+				outcome(() => submissionFiles(ev('cstu_tutor', { courseid: 'cstu', file }, { url })));
+			const tooMany = {
+				status: 400,
+				message: 'The selection contains 2 submissions, more than the 1 allowed: narrow it with the filters.'
+			};
+			// The CSV export allows CSV_FACTOR (20) times more submissions.
+			expect((await text(await get('submissions.csv'))).split('\r\n')).toHaveLength(4);
+			expect(await get('submissions.tgz')).toEqual(tooMany);
+			expect(await get('submissions.tgz', `?selected=${a}&selected=${b}`)).toEqual(tooMany);
+			// Narrowed selections are exported.
+			expect((await text(await get('submissions.csv', '?users=cstu_bob'))).split('\r\n')).toHaveLength(3);
+			expect(await text(await get('submissions.tgz', `?selected=${a}`))).toMatch(/^submission\.test/);
+			const replay = (form: [string, string][]) =>
+				outcome(() => submissions.actions.replay(ev('cstu_admin', C, { form })));
+			const refused = { status: 400, data: { message: tooMany.message } };
+			expect(await replay([['query', '']])).toMatchObject(refused);
+			expect(
+				await replay([
+					['selected', String(a)],
+					['selected', String(b)]
+				])
+			).toMatchObject(refused);
+			expect(await replay([['query', 'users=cstu_eve']])).toEqual({
+				message: '1 selected submissions were set for replay.'
+			});
+			for (let i = 0; i < 19; i++) await addSub(env.db, { username: ['cstu_bob'] });
+			expect(await get('submissions.csv')).toEqual({
+				status: 400,
+				message: 'The selection contains 21 submissions, more than the 20 allowed: narrow it with the filters.'
+			});
+		} finally {
+			delete raw.submissions_export_limit;
+		}
 	});
 	it('CSTU-15/14 shows one submission to the staff of its course and replays it', async () => {
 		const id = await addSub(env.db, {

@@ -3,8 +3,9 @@
  *
  * Opens one shared `MongoClient`, exposes typed collections (same names and
  * document shapes as the legacy mongoengine models) and creates the same indexes
- * as mongoengine does, so a database initialised by either frontend is
- * identical. GridFS (bucket "fs", like mongoengine's FileField) stores submission
+ * as mongoengine does (plus a few rewrite additions: unique usernames and
+ * e-mail addresses, TTL of the SAML assertion ids), so a database initialised
+ * by either frontend has the same documents. GridFS (bucket "fs", like mongoengine's FileField) stores submission
  * inputs (BSON-encoded dicts) and archives.
  */
 import { MongoClient, GridFSBucket, ObjectId, type Db, type Collection, type IndexDescription } from 'mongodb';
@@ -91,8 +92,25 @@ const INDEXES: Record<string, IndexDescription[]> = {
 	// the replay-protection index (lib/server/lti/lti11.ts).
 	nonce: [{ key: { expiration: 1 }, expireAfterSeconds: 0 }],
 	// OIDC nonces and launches expire (anonymous oidc_login calls cannot grow the collection forever).
-	lti_launch: [{ key: { expires: 1 }, expireAfterSeconds: 0 }]
+	lti_launch: [{ key: { expires: 1 }, expireAfterSeconds: 0 }],
+	// Rewrite addition: ids of the SAML assertions already used (single use), forgotten after `expires`.
+	saml_assertions: [{ key: { expires: 1 }, expireAfterSeconds: 0 }]
 };
+
+/** Only the documents whose `field` is a non-empty string (accounts without username yet are excluded). */
+const nonEmpty = (field: string) => ({ [field]: { $type: 'string', $gt: '' } });
+
+/**
+ * Rewrite addition: usernames and e-mail addresses are unique. These indexes are
+ * named so that they live next to the legacy (non-unique) ones; they cannot be
+ * created on a database that already holds duplicates, which is then logged.
+ */
+const UNIQUE_USERS: IndexDescription[] = ['username', 'email'].map((field) => ({
+	key: { [field]: 1 },
+	name: `${field}_unique`,
+	unique: true,
+	partialFilterExpression: nonEmpty(field)
+}));
 
 /** A connected database with its collections and GridFS bucket. */
 export class Database {
@@ -115,6 +133,15 @@ export class Database {
 		for (const [name, indexes] of Object.entries(INDEXES)) {
 			await this.db.collection(name).createIndexes(indexes);
 		}
+		for (const index of UNIQUE_USERS)
+			await this.c.users
+				.createIndexes([index])
+				.catch((e) =>
+					console.warn(
+						`Cannot create the unique index ${index.name} on users (duplicate values?); ` +
+							`concurrent registrations may create duplicates until they are removed: ${e}`
+					)
+				);
 		const version = await this.c.dbVersion.findOne({ db_version: { $exists: true } });
 		if (!version) await this.c.dbVersion.insertOne({ db_version: DB_VERSION });
 		else if (version.db_version !== DB_VERSION) {

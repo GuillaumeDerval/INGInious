@@ -30,5 +30,10 @@ describe('/admin/<courseid>/submissions/options/<list>', () => {
 		rmSync(join(env.dir, 'cstu', 'zz_broken'), { recursive: true });
 		expect(await get('cstu_tutor', 'nope', 'x')).toMatchObject({ status: 404 });
 		expect(await get('cstu_bob', 'users', 'bob')).toMatchObject({ status: 403 });
+		// Without `q`: the first choices.
+		const all = await GET(
+			navEvent('cstu_tutor', { params: { courseid: 'cstu', list: 'tasks' }, url: 'http://localhost/x' })
+		);
+		expect((await all.json()).length).toBeGreaterThan(0);
 	});
 });

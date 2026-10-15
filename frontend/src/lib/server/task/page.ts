@@ -8,8 +8,10 @@
  *    archives (`/course/<courseid>/<taskid>/<path>`).
  *
  * Access rules: tasks hidden to the viewer give 403; a submission is only
- * readable through the course AND task it belongs to (staff included); unregistered users cannot submit; anonymous
- * previews do not write `user_tasks`; only problem inputs are downloadable.
+ * readable through the course AND task it belongs to (staff included), its SSH debug access
+ * only by its submitter; users who may not submit get HTTP 403 (JSON error body); anonymous
+ * previews do not write `user_tasks`; only problem inputs are downloadable; plugin menu
+ * entries keep http(s) and relative links only.
  */
 import { error, type RequestEvent } from '@sveltejs/kit';
 import { Double, type Filter } from 'mongodb';
@@ -36,6 +38,7 @@ import { PyRandom } from '../courses/pyrandom.js';
 import type { Task } from '../courses/task.js';
 import { plugins } from '../plugins/index.js';
 import { safeJoin } from '../security/paths.js';
+import { safeLinks } from '../nav/courses.js';
 import { submissionToJson, summarize } from '../submissions/feedback.js';
 import {
 	addSubmission,
@@ -226,9 +229,9 @@ export async function loadTaskPage(
 		next: pos >= 0 && pos < order.length - 1 ? order[pos + 1] : null,
 		courseHidden: staff && !isOpen(course.accessible),
 		taskHidden: staff && !afterStart(acc),
-		menu: (await plugins().callHook<object, { label: string; href: string }>('task_menu', { course, task })).map(
-			({ label, href }) => ({ label, href })
-		),
+		menu: safeLinks(
+			await plugins().callHook<object, { label: string; href: string }>('task_menu', { course, task })
+		).map(({ label, href }) => ({ label, href })),
 		webterm: admin ? (config.webterm ?? null) : null
 	};
 }
@@ -263,7 +266,7 @@ async function historyPage(course: Course, filter: Filter<SubmissionDoc>, admin:
 	};
 }
 
-/** JSON error answer of the actions (legacy `{status: "error", text}`). */
+/** JSON error answer of the actions (legacy `{status: "error", text}`; refusals with their HTTP status). */
 const fail = (text: string, status = 200) => Response.json({ status: 'error', text }, { status });
 
 /**
@@ -286,7 +289,7 @@ export async function taskAction(
 	const { db, config } = services();
 	if (action === 'submit') {
 		if (!(await taskCanUserSubmit(course, task.id, username, { lti })))
-			return fail(t('You are not allowed to submit for this task.'));
+			return fail(t('You are not allowed to submit for this task.'), 403);
 		await userSawTask(username, course.id, task.id);
 		// TASK-17: the posted random values must be the current ones.
 		const ut = await db.c.userTasks.findOne({ courseid: course.id, taskid: task.id, username });
@@ -323,7 +326,8 @@ export async function taskAction(
 		return Response.json({ status: 'ok', ...(await historyPage(course, mine, admin, after)) });
 	}
 	const id = form.get('submissionid');
-	if (action === 'kill') return Response.json({ status: 'done', killed: await killSubmission(id, username) });
+	if (action === 'kill')
+		return Response.json({ status: 'done', killed: await killSubmission(id, username, course.id, task.id) });
 	if (action !== 'check' && action !== 'load') error(400, t('Invalid action'));
 	const sub = await findSubmission(id, { courseid: course.id, taskid: task.id, ...(!staff && { username }) });
 	if (!sub) return fail(t('Internal error'), 404);
@@ -332,7 +336,7 @@ export async function taskAction(
 	const json: SubmissionJson = await submissionToJson(
 		sub,
 		course,
-		{ staff, admin },
+		{ staff, admin, username },
 		{ replace, reloading: action === 'load' }
 	);
 	return Response.json({ status: 'ok', submission: json });

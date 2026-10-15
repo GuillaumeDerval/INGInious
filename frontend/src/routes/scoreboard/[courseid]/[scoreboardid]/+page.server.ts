@@ -3,6 +3,6 @@ import { requireCourseMember, scoreboard } from '#lib/server/plugins/bundled/ing
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async (event) => {
-	const { course, page } = await requireCourseMember(event);
-	return { ...page, ...(await scoreboard(course, event.params.scoreboardid, event.locals.lang)) };
+	const { course, username, page } = await requireCourseMember(event);
+	return { ...page, ...(await scoreboard(course, event.params.scoreboardid, event.locals.lang, username)) };
 };

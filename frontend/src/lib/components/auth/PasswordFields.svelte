@@ -7,6 +7,7 @@ strength hint and a mismatch warning (the server still validates).
 Props:
 - `required` (boolean, default true): both fields are mandatory.
 - `newPassword` (boolean, default false): uses the "New password" labels (profile).
+- `minLength` (number, default 10): minimum length shown in the label (`password_min_length`).
 -->
 <script lang="ts">
 	import { t } from '#lib/i18n/index.js';
@@ -16,14 +17,15 @@ Props:
 	export interface Props {
 		required?: boolean;
 		newPassword?: boolean;
+		minLength?: number;
 	}
 
-	let { required = true, newPassword = false }: Props = $props();
+	let { required = true, newPassword = false, minLength = 10 }: Props = $props();
 	let passwd = $state('');
 	let passwd2 = $state('');
 	/** Rough strength: length plus the variety of character classes (0 to 4). */
 	const score = $derived(
-		passwd.length < 6
+		passwd.length < minLength
 			? 0
 			: Math.min(
 					4,
@@ -34,7 +36,9 @@ Props:
 </script>
 
 <FormField
-	label={newPassword ? t('New password (min. 6 characters) :') : t('Password (min. 6 characters) :')}
+	label={newPassword
+		? t('New password (min. {} characters) :', minLength)
+		: t('Password (min. {} characters) :', minLength)}
 	hint={passwd ? levels[score] : undefined}
 	{required}
 >
@@ -44,6 +48,7 @@ Props:
 			type="password"
 			name="passwd"
 			autocomplete="new-password"
+			maxlength={1024}
 			bind:value={passwd}
 			{required}
 		/>{/snippet}

@@ -234,16 +234,19 @@ describe('NAV pages', () => {
 		show(Queue, {
 			running: [
 				{ id: 'j1', agent: 'ag', info: 'c/t', launcher: 'core', start: 0, end: null, kill: true },
-				{ id: 'j2', agent: 'ag', info: 'c/u', launcher: 'core', start: 0, end: 1000, kill: false }
+				// Jobs of other courses have no name nor launcher.
+				{ id: 'j2', agent: 'ag', info: null, launcher: null, start: 0, end: 1000, kill: false }
 			],
 			waiting: [
-				{ id: 'j3', info: 'x', launcher: 'core', max: null, kill: false },
+				{ id: 'j3', info: null, launcher: null, max: null, kill: false },
 				{ id: 'j4', info: 'y', launcher: 'core', max: 20, kill: false }
 			]
 		});
 		await expect.element(page.getByText('No timeout set').first()).toBeVisible();
 		await expect.element(page.getByRole('button', { name: 'Kill' })).toBeVisible();
 		await expect.element(page.getByText('20')).toBeVisible();
+		expect(document.querySelector('tr[title=j2]')!.textContent).toContain('—');
+		expect(document.querySelector('tr[title=j3]')!.textContent).toMatch(/^——/);
 		document.body.innerHTML = '';
 		show(Queue, { running: [], waiting: [] });
 		await expect.element(page.getByText('There are no jobs running')).toBeVisible();

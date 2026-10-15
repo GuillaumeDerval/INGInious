@@ -33,7 +33,7 @@ current user's row has no activate/delete action.
 		['username', 'Username (min. 4 alphanumerical characters) :', 'text'],
 		['realname', 'Complete name :', 'text'],
 		['email', 'Email address :', 'email'],
-		['password', 'Password (min. 6 characters) :', 'password']
+		['password', 'Password (min. {} characters) :', 'password']
 	];
 	const labels = { realname: t('member'), email: t('email address'), bindings: t('Available bindings'), actions: '' };
 	const columns = Object.entries(labels).map(([key, label]) => ({ key, label, class: 'first-letter:uppercase' }));
@@ -72,7 +72,7 @@ current user's row has no activate/delete action.
 			<MoreMenu label={t('Add user')} icon={PlusIcon} class="w-80 max-w-[calc(100vw-2rem)] p-4">
 				<form method="POST" action="?/add" use:enhance={toastEnhance()} class="space-y-3">
 					{#each fields as [name, label, type] (name)}
-						<FormField label={t(label)}>
+						<FormField label={t(label, data.passwordMinLength)}>
 							{#snippet children(a)}<input {...a} class="input" {name} {type} required autocomplete="off" />{/snippet}
 						</FormField>
 					{/each}

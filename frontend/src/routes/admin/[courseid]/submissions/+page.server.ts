@@ -1,7 +1,8 @@
 /**
  * Course submissions page (CSTU-11) and in-place replay (CSTU-14).
  * The query is read from the URL (GET, bookmarkable); replays are POST
- * actions restricted to course admins and to submissions of this course.
+ * actions restricted to course admins and to submissions of this course,
+ * refused beyond the export limit (`exportLimitError`).
  */
 import { fail } from '@sveltejs/kit';
 import { t } from '#lib/i18n/index.js';
@@ -9,6 +10,7 @@ import { requireCourseAdmin, requireCourseStaff } from '#lib/server/courses/acce
 import { getTask } from '#lib/server/courses/task.js';
 import { LAYOUTS } from '#lib/server/course-students/archive.js';
 import {
+	exportLimitError,
 	GRADED,
 	listSubmissions,
 	parseQuery,
@@ -32,6 +34,9 @@ export const load: PageServerLoad = async (event) => {
 	};
 };
 
+/** Fields of the submissions needed to replay them (never their outputs or feedback). */
+const REPLAY_FIELDS = { courseid: 1, taskid: 1, username: 1, status: 1, input: 1, archive: 1 } as const;
+
 export const actions: Actions = {
 	/**
 	 * Replays the submission `submissionid`, the `selected` ones, or the whole selection of the URL
@@ -40,11 +45,15 @@ export const actions: Actions = {
 	replay: async (event) => {
 		const { course } = await requireCourseAdmin(event, event.params.courseid);
 		const form = await event.request.formData();
-		const docs = form.has('query')
-			? (await selectedSubmissions(course, parseQuery(new URLSearchParams(formText(form, 'query'))))).docs.filter((s) =>
-					GRADED.includes(s.status)
-				)
-			: await pickSubmissions(course, [...form.getAll('submissionid'), ...form.getAll('selected')]);
+		const ids = [...form.getAll('submissionid'), ...form.getAll('selected')];
+		const selected = form.has('query')
+			? await selectedSubmissions(course, parseQuery(new URLSearchParams(formText(form, 'query'))), REPLAY_FIELDS)
+			: null;
+		const tooMany = selected ? selected.tooMany : exportLimitError(ids.length);
+		if (tooMany) return fail(400, { message: tooMany });
+		const docs = selected
+			? (await selected.docs.toArray()).filter((s) => GRADED.includes(s.status))
+			: await pickSubmissions(course, ids);
 		if (!docs.length) return fail(404, { message: t('No submission selected.') });
 		let n = 0;
 		for (const sub of docs)

@@ -45,7 +45,8 @@ export async function setupLti(): Promise<LtiEnv> {
 	Object.assign(services().config, {
 		session,
 		ltiConfig: {},
-		raw: {},
+		// The mock LMS listens on http://localhost.
+		raw: { lti_allow_private_urls: true },
 		allowedFileExtensions: ['.txt'],
 		maxFileSize: 1024,
 		superadmins: ['superadmin']

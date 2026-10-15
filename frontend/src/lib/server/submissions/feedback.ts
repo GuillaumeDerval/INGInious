@@ -6,8 +6,9 @@
  *
  * Differences with legacy `submission_to_json`: titles are plain text (the
  * submission id/date are separate fields), grades are numbers, there is no
- * `feedback_script` field (server strings are never executed) and the debug dump
- * is only built for course admins.
+ * `feedback_script` field (server strings are never executed), the debug dump
+ * is only built for course admins and never contains the SSH password, and the SSH
+ * access of a debug job is only sent to the user who launched it.
  */
 import { t } from '#lib/i18n/index.js';
 import { roundGrade } from '#lib/utils/grade.js';
@@ -35,6 +36,8 @@ export interface Viewer {
 	staff: boolean;
 	/** Course admin: hidden tags, auto-tags and the debug dump. */
 	admin: boolean;
+	/** Viewer's username: the submitter alone receives the SSH access of a debug job (TASK-12). */
+	username: string;
 }
 
 /**
@@ -128,10 +131,19 @@ export function summarize(sub: Submission, course: Course, admin: boolean): Subm
 	};
 }
 
-/** TASK-21: JSON copy of a document with strings longer than 1000 characters truncated. */
+/**
+ * TASK-21: JSON copy of a document with strings longer than 1000 characters truncated
+ * and without `ssh_password` (TASK-12: the SSH access belongs to the submitter only).
+ */
 export function debugDump(doc: unknown): unknown {
 	return JSON.parse(
-		JSON.stringify(doc, (_key, v) => (typeof v === 'string' && v.length > 1000 ? `${v.slice(0, 1000)} <truncated>` : v))
+		JSON.stringify(doc, (key, v) =>
+			key === 'ssh_password'
+				? undefined
+				: typeof v === 'string' && v.length > 1000
+					? `${v.slice(0, 1000)} <truncated>`
+					: v
+		)
 	);
 }
 
@@ -172,7 +184,8 @@ export async function submissionToJson(
 		tests,
 		replace: opts.replace
 	};
-	if (waiting && sub.ssh_host) {
+	// TASK-12: debug jobs are staff submissions (never group ones): their single user launched it.
+	if (waiting && sub.ssh_host && sub.username.includes(viewer.username)) {
 		json.text = sanitize(t('<b>SSH server active</b>'));
 		json.ssh = { host: sub.ssh_host, port: sub.ssh_port!, user: sub.ssh_user!, password: sub.ssh_password! };
 	}

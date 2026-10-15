@@ -31,7 +31,8 @@ const contestCourse = (id: string, s: object) =>
 				toc_data: { toc: [{ title: 'P', tasks_list: ['p1', 'p2'] }], config: { p1: {}, p2: {} } }
 			}
 		},
-		{ p1: MCQ_TASK, p2: MCQ_TASK }
+		// p3 is outside the contest (hidden).
+		{ p1: MCQ_TASK, p2: MCQ_TASK, p3: MCQ_TASK }
 	);
 
 const status = async (fn: () => unknown) => {
@@ -104,7 +105,7 @@ describe('SITE-14 contests plugin', () => {
 		expect(await status(() => contests.contestOf(getCourse('toc')))).toBe(404);
 	});
 	it('computes the ranking with penalties, first accepted and activity', async () => {
-		const r = await contests.contestScoreboard(getCourse('ct'), 'en', 'UTC');
+		const r = await contests.contestScoreboard(getCourse('ct'), 'alice', 'en', 'UTC');
 		expect(r.header).toEqual(['Rank', 'Contestant', 'Solved', 'Score', 'p1', 'p2']);
 		expect(r.rows.map((row) => row.map((c) => c.v))).toEqual([
 			[1, 'BOB', 1, 60, '1/60', '1'],
@@ -125,11 +126,19 @@ describe('SITE-14 contests plugin', () => {
 		expect([r.started, r.finished]).toEqual([true, false]);
 	});
 	it('ignores the blackout and refuses disabled contests', async () => {
-		const r = await contests.contestScoreboard(getCourse('ended'), 'en', 'UTC');
+		const r = await contests.contestScoreboard(getCourse('ended'), 'alice', 'en', 'UTC');
 		expect(r.rows[0][2].v).toBe(0);
 		expect(r.finished).toBe(true);
-		expect((await contests.contestScoreboard(getCourse('future'), 'en', 'UTC')).started).toBe(false);
-		expect(await status(() => contests.contestScoreboard(getCourse('off'), 'en', 'UTC'))).toBe(404);
+		const future = await contests.contestScoreboard(getCourse('future'), 'alice', 'en', 'UTC');
+		expect(future.started).toBe(false);
+		// Before the start, students see no task; the staff sees every task.
+		expect(future.header).toEqual(['Rank', 'Contestant', 'Solved', 'Score']);
+		expect((await contests.contestScoreboard(getCourse('future'), 'admin1', 'en', 'UTC')).header.slice(4)).toEqual([
+			'p1',
+			'p2',
+			'p3'
+		]);
+		expect(await status(() => contests.contestScoreboard(getCourse('off'), 'alice', 'en', 'UTC'))).toBe(404);
 	});
 	it('validates and saves the settings', () => {
 		const course = getCourse('off');

@@ -16,7 +16,15 @@ import { requireUser, type GuardEvent } from '../security/guards.js';
 import { afterStart, isOpen } from './accessible.js';
 import { findCourse, type Course } from './course.js';
 import { accessibility, groupSubmission, taskConfig } from './dispenser.js';
-import { addStudent, checkTokens, isCourseAdmin, isCourseStaff, isRegistered, userGroup } from './members.js';
+import {
+	addStudent,
+	checkTokens,
+	isCourseAdmin,
+	isCourseStaff,
+	isRegistered,
+	isSuperadmin,
+	userGroup
+} from './members.js';
 import { findTask, type Task } from './task.js';
 
 /** Why a course is not open to a user (legacy `course_is_open_to_user` reasons). */
@@ -196,14 +204,18 @@ export async function requireCourseAccess(event: GuardEvent, courseid: string): 
 	};
 }
 
-/** Requires a tutor, an admin of the course or a superadmin. */
+/**
+ * Requires a tutor, an admin of the course or a superadmin. CADM-02: for other users an
+ * unknown course answers the same 403 as a course they have no rights on (which course
+ * ids exist is not revealed); superadmins get the 404 "Course not found.".
+ */
 export async function requireCourseStaff(
 	event: GuardEvent,
 	courseid: string
 ): Promise<CourseAccess & { user: CurrentUser }> {
-	const course = requireCourse(courseid);
 	const user = requireUser(event);
-	if (!isCourseStaff(course, user.username)) error(403, t('You are not allowed to access this page.'));
+	const course = isSuperadmin(user.username) ? requireCourse(courseid) : findCourse(courseid);
+	if (!course || !isCourseStaff(course, user.username)) error(403, t('You are not allowed to access this page.'));
 	return {
 		course,
 		user,

@@ -6,8 +6,8 @@
  *  - SITE-01: a search box (username, real name or e-mail) is added; the page
  *    number is a GET parameter clamped to the valid range (legacy: 500).
  *  - SITE-02: the hints of the form are enforced server side (username rule,
- *    real name, valid e-mail, password of 6+ characters, see `newUserDoc`)
- *    and the e-mail is normalised.
+ *    real name, valid e-mail, password of `password_min_length`+ characters,
+ *    see `newUserDoc`) and the e-mail is normalised.
  *  - SITE-03/05: deletion and binding revocation reuse the account logic of
  *    the AUTH area (`deleteUser`, `revokeBinding`), which also removes GridFS
  *    files and sessions and keeps the group submissions of teammates.
@@ -15,7 +15,7 @@
  */
 import { t } from '#lib/i18n/index.js';
 import { services } from '../app.js';
-import { newUserDoc, type NewUser } from '../auth/accounts.js';
+import { insertUser, newUserDoc, type NewUser } from '../auth/accounts.js';
 import type { UserDoc } from '../db/types.js';
 import { pageSlice } from '../pagination.js';
 
@@ -70,9 +70,9 @@ export async function createUser(
 	const doc = await newUserDoc(f);
 	if (typeof doc === 'string') return doc;
 	const users = services().db.c.users;
-	if (await users.findOne({ $or: [{ username: doc.username }, { email: doc.email }] }))
+	// The unique indexes also refuse an account created concurrently with the same username or e-mail.
+	if ((await users.findOne({ $or: [{ username: doc.username }, { email: doc.email }] })) || !(await insertUser(doc)))
 		return t('User could not be created.');
-	await users.insertOne(doc);
 	return null;
 }
 

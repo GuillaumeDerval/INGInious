@@ -47,7 +47,7 @@
 	{
 		"name": "links",
 		"markdown": "[INGInious](https://inginious.org), [anchor](#top), <https://example.com> and [js](javascript:alert(1))",
-		"html": "<p><a href=\"https://inginious.org\" target=\"_blank\" rel=\"noopener noreferrer\">INGInious</a>, <a href=\"#top\">anchor</a>, <a href=\"https://example.com\" target=\"_blank\" rel=\"noopener noreferrer\">https://example.com</a> and [js](javascript:alert(1))</p>\n"
+		"html": "<p><a href=\"https://inginious.org\" target=\"_blank\" rel=\"noopener noreferrer\">INGInious</a>, <a href=\"#rt-top\">anchor</a>, <a href=\"https://example.com\" target=\"_blank\" rel=\"noopener noreferrer\">https://example.com</a> and [js](javascript:alert(1))</p>\n"
 	},
 	{
 		"name": "image",

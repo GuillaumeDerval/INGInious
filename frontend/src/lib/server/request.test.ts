@@ -14,7 +14,8 @@ import {
 	resolveLanguage,
 	withLanguage,
 	maintenanceResponse,
-	isCrossSiteForbidden
+	isCrossSiteForbidden,
+	completeCsp
 } from './request.js';
 import { t } from '#lib/i18n/index.js';
 
@@ -117,6 +118,46 @@ describe('handleRequest', () => {
 		}
 	});
 
+	it('CORE-03 completes the page CSP with the configured hosts and the allowed frame ancestors', async () => {
+		const base = "default-src 'self'; connect-src 'self'; frame-src 'self'; form-action 'self'; frame-ancestors 'self'";
+		const page = async (path: string, session?: string) => {
+			const e = event(path);
+			if (session) e.url.searchParams.set('session_id', session);
+			const resolve = async () => new Response('<html>', { headers: { 'Content-Security-Policy': base } });
+			return (await handleRequest(e, resolve)).headers.get('content-security-policy');
+		};
+		expect(await page('/courselist')).toBe(base);
+		Object.assign(services.config, {
+			sentryIoUrl: 'https://key@o1.ingest.sentry.io/42',
+			webterm: 'https://term.example:8080/xterm',
+			ltiConfig: { 'https://lms.example': [{ auth_login_url: 'https://auth.lms.example/login' }] }
+		});
+		try {
+			expect(await page('/courselist')).toBe(
+				"default-src 'self'; connect-src 'self' https://o1.ingest.sentry.io; frame-src 'self' https://term.example:8080; form-action 'self'; frame-ancestors 'self'"
+			);
+			// Sign-in forms are redirected to the identity providers.
+			expect(await page('/signin')).toContain("form-action 'self' https:;");
+			expect(await page('/preferences/bindings')).toContain("form-action 'self' https:;");
+			// LTI pages: framed by (and posting to) the LMS, except the bind page.
+			const lms = 'https://lms.example https://auth.lms.example';
+			expect(await page('/lti1.3/deeplink')).toContain(`form-action 'self' ${lms}; frame-ancestors 'self' ${lms}`);
+			expect(await page('/lti/bind')).toContain("form-action 'self'; frame-ancestors 'self'");
+			const s = services.sessions.create(true);
+			s.doc.lti = { version: '1.1', tool_url: 'https://moodle.example/' } as never;
+			await services.sessions.commit(s);
+			expect(await page('/lti/task', services.sessions.sign(s.doc._id))).toMatch(
+				new RegExp(`frame-ancestors 'self' ${lms} https://moodle.example$`)
+			);
+			// Responses without a CSP are left alone.
+			expect(
+				(await handleRequest(event('/x'), async () => new Response('x'))).headers.has('content-security-policy')
+			).toBe(false);
+		} finally {
+			Object.assign(services.config, { sentryIoUrl: undefined, webterm: undefined, ltiConfig: {} });
+		}
+	});
+
 	it('serves the maintenance page for every URL', async () => {
 		services.config.maintenance = true;
 		try {
@@ -125,6 +166,9 @@ describe('handleRequest', () => {
 			expect(response.status).toBe(503);
 			expect(response.headers.get('retry-after')).toBe('300');
 			expect(await response.text()).toContain('under maintenance');
+			expect(response.headers.get('content-security-policy')).toBe(
+				"default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'; frame-ancestors 'self'"
+			);
 			expect(resolve).not.toHaveBeenCalled();
 		} finally {
 			services.config.maintenance = false;
@@ -176,6 +220,20 @@ describe('helpers', () => {
 		const html = await withLanguage('fr', async () => (await maintenanceResponse('fr').text()) + t('Sign in'));
 		expect(html).toContain('lang="fr"');
 		expect(html).not.toMatch(/Sign in$/);
+	});
+});
+
+describe('completeCsp', () => {
+	it('CORE-03 adds sources to existing directives only and replaces the frame ancestors', () => {
+		expect(
+			completeCsp(
+				"default-src 'none'; img-src 'self';frame-ancestors *; form-action 'none'; sandbox",
+				{ 'img-src': ['https://a.example', null], 'connect-src': ['https://b.example'], 'form-action': ['https:'] },
+				["'self'", 'https://lms.example']
+			)
+		).toBe(
+			"default-src 'none'; img-src 'self' https://a.example; form-action 'none'; sandbox; frame-ancestors 'self' https://lms.example"
+		);
 	});
 });
 

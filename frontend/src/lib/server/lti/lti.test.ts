@@ -1,4 +1,4 @@
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createHash, createPublicKey } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -17,6 +17,7 @@ import {
 	bindTarget,
 	externalUrl,
 	findClient,
+	ltiOrigins,
 	realname,
 	registrationConflict,
 	toolConfig
@@ -97,7 +98,8 @@ beforeEach(async () => {
 			bindings: {}
 		}))
 	);
-	Object.assign(services().config, { ltiConfig: registration(env.mock), raw: {} });
+	// The mock LMS listens on http://localhost.
+	Object.assign(services().config, { ltiConfig: registration(env.mock), raw: { lti_allow_private_urls: true } });
 	env.mock.log.length = 0;
 	resetPlugins();
 });
@@ -188,7 +190,7 @@ describe('LTI 1.1 launch (LTI-02, LTI-03)', () => {
 			headers: { 'x-forwarded-proto': 'https', 'x-forwarded-host': 'inginious.example, proxy' }
 		});
 		expect(externalUrl(ev).href).toBe(URL1);
-		services().config.raw = { 'reverse-proxy-config': { enable: true } };
+		services().config.raw = { 'reverse-proxy-config': { enable: true }, lti_allow_private_urls: true };
 		expect(externalUrl(ev).href).toBe('https://inginious.example/lti/lti_test/mcq1');
 		expect(externalUrl(ltiEvent(URL1)).href).toBe(URL1);
 		// The forwarded host replaces the port of the internal URL.
@@ -227,6 +229,12 @@ describe('LTI 1.3 (LTI-08, LTI-09, LTI-11)', () => {
 		expect(html).toContain('lti1p3_new_window=1');
 		expect(html).toContain('Your browser prohibits to save cookies in the iframes.');
 		expect(html).not.toContain('Partitioned');
+		// The page only runs its own inline script (CSP hash).
+		const script = /<script>(.*)<\/script>/.exec(html)![1];
+		const hash = createHash('sha256').update(script).digest('base64');
+		expect((first.r.value as Response).headers.get('content-security-policy')).toBe(
+			`default-src 'none'; script-src 'sha256-${hash}'; base-uri 'none'; form-action 'none'`
+		);
 		const { loc, state, nonce, ev } = await oidc();
 		expect([...loc.searchParams.keys()]).toEqual([
 			'scope',
@@ -253,7 +261,7 @@ describe('LTI 1.3 (LTI-08, LTI-09, LTI-11)', () => {
 			value: state,
 			expires: expect.any(Date)
 		});
-		services().config.raw = { 'reverse-proxy-config': { enable: true } };
+		services().config.raw = { 'reverse-proxy-config': { enable: true }, lti_allow_private_urls: true };
 		const https = ltiEvent(`${T}/lti1.3/oidc_login?${query()}`, {
 			method: 'POST',
 			form: Object.fromEntries(new URLSearchParams(query('&lti1p3_new_window=1'))),
@@ -353,6 +361,12 @@ describe('LTI 1.3 (LTI-08, LTI-09, LTI-11)', () => {
 		// Inline key set and a token signed by another key.
 		services().config.ltiConfig = registration(env.mock, { key_set: { keys: [] } });
 		expect(await msg(launch(claims))).toBe('Invalid LTI launch (signature).');
+		// Without lti_allow_private_urls, the key set of the (http, local) mock is not fetched.
+		services().config.ltiConfig = registration(env.mock, { key_set_url: `${env.mock.url}/jwks?private` });
+		services().config.raw = {};
+		env.mock.log.length = 0;
+		expect(await msg(launch(claims))).toBe('Invalid LTI launch (signature).');
+		expect(env.mock.log).toEqual([]);
 	});
 
 	it('LTI-09 a course cannot redeclare a platform of another source with its own keys', async () => {
@@ -600,6 +614,12 @@ describe('LTI task page and grade passback (LTI-05, LTI-06, LTI-07, LTI-12)', ()
 		expect(fails).toHaveLength(MAX_ATTEMPTS);
 		expect(fails[0].body).toContain('<textString>0.75</textString>');
 		expect(env.mock.log.filter((l) => l.path === '/outcome')).toHaveLength(0);
+		// Without lti_allow_private_urls, the (http, local) outcome service is never contacted.
+		services().config.raw = {};
+		await env.db.c.lisOutcomes.insertOne({ ...doc, outcome_service_url: `${env.mock.url}/outcome` });
+		await drain();
+		await queuesEmpty();
+		expect(env.mock.log.filter((l) => l.path === '/outcome')).toHaveLength(0);
 	});
 
 	it('LTI-12 a graded 1.3 submission posts a score to the AGS line item with a client-assertion token', async () => {
@@ -811,6 +831,52 @@ describe('helpers', () => {
 		expect(realname('', '', 'F', '', 'id')).toBe('F');
 		expect(realname('', 'G', '', '', 'id')).toBe('G');
 		expect(realname()).toBe('');
+	});
+
+	it('LTI-01 LTI-03 LMS origins allowed to frame the LTI pages', () => {
+		const course = getCourse('lti_test');
+		services().config.ltiConfig = { ...registration(env.mock), 'not a url': { auth_login_url: 'ftp://x' } };
+		services().config.raw = { lti_frame_ancestors: ['https://*.lms.example'] };
+		saveCourse('lti_test', {
+			...course.content,
+			lti_config: { 'https://course.example': [{ auth_login_url: 'https://auth.course.example:8443/login' }] }
+		});
+		try {
+			const configured = [
+				'https://*.lms.example',
+				'https://platform.example',
+				env.mock.url,
+				'https://course.example',
+				'https://auth.course.example:8443'
+			];
+			const lti11 = (extra: Partial<LtiData>) => ({ version: '1.1', ...extra }) as LtiData;
+			// LTI 1.3 and pages without a session: the configured platforms only.
+			expect(ltiOrigins({ version: '1.3' } as LtiData, '/lti1.3/task')).toEqual(configured);
+			expect(ltiOrigins(null, '/lti1.3/oidc_login')).toEqual(configured);
+			// LTI 1.1: the consumer named by the launch, any https origin when unknown.
+			const known = lti11({ tool_url: 'http://lms.example/x', outcome_service_url: 'https://lms.example:444/o' });
+			expect(ltiOrigins(known, '/lti/task')).toEqual([...configured, 'http://lms.example', 'https://lms.example:444']);
+			expect(ltiOrigins(lti11({ tool_url: 'N/A' }), '/lti/task')).toEqual([...configured, 'https:']);
+			expect(ltiOrigins(undefined, '/lti/lti_test/mcq1')).toEqual([...configured, 'https:']);
+			services().config.raw = { lti_frame_ancestors: 'https://one.example' };
+			expect(ltiOrigins(null, '/lti1.3/task')[0]).toBe('https://one.example');
+		} finally {
+			saveCourse('lti_test', course.content);
+		}
+	});
+
+	it('LTI-07 database errors of the passback are logged, never thrown', async () => {
+		const find = vi.spyOn(env.db.c.lisOutcomes, 'find').mockImplementation(() => {
+			throw new Error('database down');
+		});
+		const log = vi.spyOn(console, 'error').mockImplementation(() => {});
+		try {
+			await drain();
+			expect(log).toHaveBeenCalledWith('LTI grade passback: Error: database down');
+		} finally {
+			find.mockRestore();
+			log.mockRestore();
+		}
 	});
 
 	it('LTI-07 LTI-12 submissions without their LMS identifiers are not queued', async () => {

@@ -917,5 +917,16 @@
 	"Show all ({})": "Alle anzeigen ({})",
 	"Unregister the {} matching students": "Die {} passenden Studierenden abmelden",
 	"{} results": "{} Ergebnisse",
-	"{} students": "{} Studierende"
+	"{} students": "{} Studierende",
+	"Log out of this account on every other browser and device. This one stays logged in.": "Meldet dieses Konto auf allen anderen Browsern und Geräten ab. Dieser bleibt angemeldet.",
+	"Log out other sessions": "Andere Sitzungen abmelden",
+	"New password (min. {} characters) :": "Neues Passwort (mind. {} Zeichen):",
+	"Other sessions": "Andere Sitzungen",
+	"Password (min. {} characters) :": "Passwort (mind. {} Zeichen):",
+	"Password too long.": "Passwort zu lang.",
+	"Security": "Sicherheit",
+	"This service does not confirm that your e-mail address is verified. Please sign up with another method, then bind this service in your profile.": "Dieser Dienst bestätigt nicht, dass Ihre E-Mail-Adresse verifiziert ist. Bitte registrieren Sie sich mit einer anderen Methode und verknüpfen Sie diesen Dienst dann in Ihrem Profil.",
+	"This username is not available. Please choose another one.": "Dieser Benutzername ist nicht verfügbar. Bitte wählen Sie einen anderen.",
+	"Your other sessions have been logged out.": "Ihre anderen Sitzungen wurden abgemeldet.",
+	"The selection contains {} submissions, more than the {} allowed: narrow it with the filters.": "Die Auswahl enthält {} Einreichungen, mehr als die erlaubten {}: Schränken Sie sie mit den Filtern ein."
 }

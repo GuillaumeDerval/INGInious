@@ -3,9 +3,14 @@ import { siteEnv, type SiteEnv } from '../../../../tests/site/env.js';
 import { verifyPassword } from '../auth/passwords.js';
 import { activateUser, createUser, listUsers, PAGE_SIZE } from './users.js';
 import { attempt } from '../attempt.js';
+import { services, setServices } from '../app.js';
 
 let env: SiteEnv;
-beforeAll(async () => (env = await siteEnv()));
+beforeAll(async () => {
+	env = await siteEnv();
+	// The shared site fixture has a partial configuration: add the password policy default.
+	setServices({ ...services(), config: { ...services().config, passwordMinLength: 10 } });
+});
 afterAll(() => env.cleanup());
 beforeEach(() => env.db.c.users.deleteMany({}));
 
@@ -50,7 +55,7 @@ describe('SITE-01 listUsers', () => {
 });
 
 describe('SITE-02 createUser', () => {
-	const f = { username: 'newbie', realname: 'New', email: 'New@EXAMPLE.org', password: 'secret1' };
+	const f = { username: 'newbie', realname: 'New', email: 'New@EXAMPLE.org', password: 'secret1234' };
 	it('creates an activated account with an argon2id hash', async () => {
 		expect(await createUser(f)).toBeNull();
 		const u = await env.db.c.users.findOne({ username: 'newbie' });
@@ -61,7 +66,7 @@ describe('SITE-02 createUser', () => {
 			tos_accepted: false,
 			pinned_courses: []
 		});
-		expect(await verifyPassword(u!.password, 'secret1')).toBe(true);
+		expect(await verifyPassword(u!.password, 'secret1234')).toBe(true);
 		expect(await createUser({ ...f, username: 'other' })).toBe('User could not be created.');
 		expect(await createUser({ ...f, email: 'bad' })).toBe('Invalid email format.');
 		expect(await createUser({ ...f, username: 'x' })).toBe('Invalid username format.');

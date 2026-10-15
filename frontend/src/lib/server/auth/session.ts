@@ -8,7 +8,12 @@
  *    are therefore useless without the server secret;
  *  - the LTI cookieless `session_id` parameter must carry the same signature and
  *    is only accepted for sessions flagged `is_lti`;
- *  - the session id is rotated when a user logs in;
+ *  - the session id is rotated when a user logs in (and when the password changes);
+ *  - besides the sliding `timeout`, a session ends `max_lifetime` seconds after its
+ *    creation at the latest: the creation time is the timestamp of its ObjectId
+ *    (a new id is created at login), so no field is added to the documents;
+ *  - without an explicit `secure` setting, the cookie is `Secure` when the public URL
+ *    of the deployment is https (see config.ts);
  *  - anonymous sessions are only written to MongoDB once they hold data, and the
  *    sliding expiration is refreshed at most once a minute (no write per request).
  */
@@ -95,12 +100,25 @@ export class SessionStore {
 		if (!id) return this.create();
 		const doc = await this.database.c.sessions.findOne({ _id: id });
 		if (!doc || (ltiId && !doc.is_lti)) return this.create();
-		if (doc.expiration && doc.expiration.getTime() <= Date.now()) {
+		// Expired sessions (sliding timeout, or absolute lifetime of documents saved with a
+		// longer expiration, e.g. by another frontend) are deleted.
+		const expiry = this.expiry(id);
+		if ((doc.expiration && doc.expiration.getTime() <= Date.now()) || expiry <= Date.now()) {
 			await this.database.c.sessions.deleteOne({ _id: id });
 			return this.create();
 		}
-		const stale = !doc.expiration || doc.expiration.getTime() - this.cfg.timeout * 1000 + REFRESH_INTERVAL < Date.now();
+		const stale = !doc.expiration || expiry - doc.expiration.getTime() > REFRESH_INTERVAL;
 		return { doc, stored: true, dirty: stale };
+	}
+
+	/**
+	 * Expiration date (ms) of a session saved now: now + `timeout`, capped by the
+	 * creation time of its id + `max_lifetime` (when not 0).
+	 */
+	private expiry(id: ObjectId): number {
+		const sliding = Date.now() + this.cfg.timeout * 1000;
+		const { maxLifetime = 0 } = this.cfg;
+		return maxLifetime > 0 ? Math.min(sliding, id.getTimestamp().getTime() + maxLifetime * 1000) : sliding;
 	}
 
 	/** Flags the session as modified so that `save` persists it. */
@@ -110,16 +128,17 @@ export class SessionStore {
 
 	/**
 	 * Writes the session back when needed (the expiration slides to now + timeout,
-	 * like the legacy `save_session`) and returns the `Set-Cookie` header value to
+	 * like the legacy `save_session`, within the absolute lifetime) and returns the `Set-Cookie` header value to
 	 * send, or null when the cookie does not change. LTI sessions never get a cookie.
 	 * Called by hooks.server.ts once the response is built.
+	 * @param https the request came over https (`Secure` flag when not configured).
 	 */
-	async commit(session: Session): Promise<string | null> {
+	async commit(session: Session, https = false): Promise<string | null> {
 		const opts = {
 			path: this.cfg.cookiePath,
 			domain: this.cfg.cookieDomain,
 			httpOnly: this.cfg.httpOnly,
-			secure: this.cfg.secure,
+			secure: this.cfg.secure ?? https,
 			sameSite: this.cfg.sameSite
 		};
 		if (!session.dirty) {
@@ -127,7 +146,7 @@ export class SessionStore {
 				? stringifySetCookie({ name: this.cfg.cookieName, value: '', ...opts, expires: new Date(0) })
 				: null;
 		}
-		const expiration = new Date(Date.now() + this.cfg.timeout * 1000);
+		const expiration = new Date(this.expiry(session.doc._id));
 		session.doc.expiration = expiration;
 		await this.database.c.sessions.replaceOne({ _id: session.doc._id }, session.doc, { upsert: true });
 		session.stored = true;

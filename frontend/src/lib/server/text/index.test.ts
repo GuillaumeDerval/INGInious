@@ -171,7 +171,7 @@ describe('TASK-19 sanitization', () => {
 			{ ltiAssetRewrite: rewrite }
 		);
 		expect(html).toContain('href="asset/rel.txt?session_id=s" target="_blank" rel="noopener noreferrer"');
-		expect(html).toContain('<a class="reference external" href="#anchor">b</a>');
+		expect(html).toContain('<a class="reference external" href="#rt-anchor">b</a>');
 		expect(html).toContain('href="https://x.org" target="_blank"');
 		expect(html).toContain('href="//cdn.org/x" target="_blank"');
 		expect(html).toContain('src="asset/i.png?session_id=s"');

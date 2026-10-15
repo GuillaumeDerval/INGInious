@@ -12,6 +12,7 @@ import PrefsLayout from './preferences/+layout.svelte';
 import Profile from './preferences/profile/+page.svelte';
 import Bindings from './preferences/bindings/+page.svelte';
 import Delete from './preferences/delete/+page.svelte';
+import Security from './preferences/security/+page.svelte';
 import Callback from './auth/callback/[authid]/+page.svelte';
 import FormPage from './auth/page/[authid]/+page.svelte';
 
@@ -70,7 +71,8 @@ describe('auth pages', () => {
 		await expect.element(page.getByRole('checkbox')).toBeVisible();
 		await expect.element(page.getByRole('button', { name: 'Reset my password' })).toBeVisible();
 		reset();
-		show(Register, data);
+		show(Register, { ...data, passwordMinLength: 12 });
+		await expect.element(page.getByText('Password (min. 12 characters) :')).toBeVisible();
 		await expect.element(page.getByRole('button', { name: 'Sign up' })).toBeVisible();
 		await expect.element(page.getByRole('checkbox')).not.toBeInTheDocument();
 	});
@@ -98,7 +100,8 @@ describe('auth pages', () => {
 		await expect.element(page.getByRole('checkbox')).toBeChecked();
 		await expect.element(page.getByText('Please set a new username')).not.toBeInTheDocument();
 		reset();
-		show(Profile, { profile, passwords: true, tos, tosSigned: false });
+		show(Profile, { profile, passwords: true, passwordMinLength: 10, tos, tosSigned: false });
+		await expect.element(page.getByText('New password (min. 10 characters) :')).toBeVisible();
 		await expect.element(page.getByLabelText('Username :')).toBeEnabled();
 		await expect.element(page.getByLabelText('Old password :')).not.toBeInTheDocument();
 		await expect.element(page.getByText('Please set a new username')).toBeVisible();
@@ -129,6 +132,12 @@ describe('auth pages', () => {
 		show(Delete, { email: 'j@x.org' });
 		await page.getByRole('button', { name: 'Delete my account' }).click();
 		await expect.element(page.getByRole('alertdialog')).toBeVisible();
+	});
+
+	it('AUTH-04 security page: log out the other sessions', async () => {
+		show(Security, {});
+		await expect.element(page.getByRole('heading', { name: 'Other sessions' })).toBeVisible();
+		await expect.element(page.getByRole('button', { name: 'Log out other sessions' })).toBeVisible();
 	});
 
 	it('AUTH-16/17 LDAP form and SAML re-post', async () => {

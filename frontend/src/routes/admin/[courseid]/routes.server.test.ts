@@ -69,7 +69,9 @@ describe('CADM-02 layout, redirect and rights', () => {
 		resetPlugins();
 		expect(await call(layoutLoad as never, 'student')).toMatchObject({ status: 403 });
 		expect(await call(layoutLoad as never, null)).toMatchObject({ status: 302 });
-		expect(await call(layoutLoad as never, 'admin1', { courseid: 'nope' })).toMatchObject({ status: 404 });
+		// Unknown courses: same answer as a course without rights, except for superadmins.
+		expect(await call(layoutLoad as never, 'admin1', { courseid: 'nope' })).toMatchObject({ status: 403 });
+		expect(await call(layoutLoad as never, 'root', { courseid: 'nope' })).toMatchObject({ status: 404 });
 	});
 	it('redirects tutors to the tasks and admins to the settings', async () => {
 		expect(await call(redirectLoad as never, 'tutor1')).toMatchObject({ status: 302, location: '/admin/fx/tasks' });
@@ -161,6 +163,20 @@ describe('CADM-06 tasks', () => {
 			webdav: { url: 'https://dav.example/fx', username: 'admin1' }
 		});
 		expect(Object.keys(data.errors as object)).toEqual(['broken']);
+		// The API key is only created by the POST action, then shown.
+		expect((data.webdav as { password: unknown }).password).toBeNull();
+		expect((await env.db.c.users.findOne({ username: 'admin1' }))?.apikey).toBeUndefined();
+		expect(await call(tasks.actions.webdav as never, 'tutor1', P(), { form: {} })).toMatchObject({ status: 403 });
+		expect((await call(tasks.actions.webdav as never, 'admin1', P(), { form: {} })).value).toEqual({
+			message: 'Changes saved.'
+		});
+		const key = (await env.db.c.users.findOne({ username: 'admin1' }))?.apikey;
+		expect(key).toMatch(/^[0-9a-f]{80}$/);
+		Object.assign(services().config, { webdavHost: 'https://dav.example' });
+		const again = (await call(tasks.load as never, 'admin1')).value as { webdav: { password: string } };
+		Object.assign(services().config, { webdavHost: undefined });
+		expect(again.webdav.password).toBe(key);
+		expect(((await call(tasks.load as never, 'admin1')).value as { webdav: unknown }).webdav).toBeNull();
 		expect(((await call(tasks.load as never, 'tutor1')).value as { webdav: unknown }).webdav).toBeNull();
 		// Tutors are not shown an API key that WebDAV would refuse anyway.
 		Object.assign(services().config, { webdavHost: 'https://dav.example' });

@@ -6,6 +6,7 @@
  * prefixed with a quote. Also a small RFC 4180 parser (audience upload) and
  * the CSV download response.
  */
+import { Readable } from 'node:stream';
 import { download } from '../forms.js';
 
 /** Python `str()` of a value (`True`, `['a', 'b']`), dates in ISO format. */
@@ -29,21 +30,53 @@ export function toCsv(rows: unknown[][]): string {
 	return rows.map((r) => r.map(cell).join(',') + '\r\n').join('');
 }
 
+/** A `dictCsv` row with its plain-object values flattened as `key[sub]` (the column `key` removed). */
+function flatten(row: Record<string, unknown>): Record<string, unknown> {
+	const out: Record<string, unknown> = {};
+	for (const [k, v] of Object.entries(row))
+		if (v && typeof v === 'object' && !Array.isArray(v) && !(v instanceof Date))
+			for (const [sub, x] of Object.entries(v)) out[`${k}[${sub}]`] = x;
+		else out[k] = v;
+	return out;
+}
+
 /**
  * Legacy `make_csv(dict)`: one row per entry, first column `id` (the key), then
  * every key sorted, plain-object values flattened as `key[sub]` (the column `key` removed).
  */
 export function dictCsv(data: Record<string, Record<string, unknown>>): string {
-	const flat = Object.entries(data).map(([id, row]) => {
-		const out: Record<string, unknown> = {};
-		for (const [k, v] of Object.entries(row))
-			if (v && typeof v === 'object' && !Array.isArray(v) && !(v instanceof Date))
-				for (const [sub, x] of Object.entries(v)) out[`${k}[${sub}]`] = x;
-			else out[k] = v;
-		return [id, out] as const;
-	});
+	const flat = Object.entries(data).map(([id, row]) => [id, flatten(row)] as const);
 	const keys = [...new Set(flat.flatMap(([, r]) => Object.keys(r)))].sort();
 	return toCsv([['id', ...keys], ...flat.map(([id, r]) => [id, ...keys.map((k) => r[k])])]);
+}
+
+/** Rows per chunk of `dictCsvStream`. */
+const CHUNK_ROWS = 1000;
+
+/**
+ * `dictCsv` written while the rows are read (e.g. from a database cursor), for large exports.
+ * @param keys every flattened key of the rows (`key[sub]` for plain-object values): the sorted header.
+ * @param rows [id, row] pairs.
+ */
+export function dictCsvStream(keys: string[], rows: AsyncIterable<[string, Record<string, unknown>]>): ReadableStream {
+	const header = [...keys].sort();
+	return Readable.toWeb(
+		Readable.from(
+			(async function* () {
+				let lines: unknown[][] = [['id', ...header]];
+				for await (const [id, row] of rows) {
+					const flat = flatten(row);
+					lines.push([id, ...header.map((k) => flat[k])]);
+					// Written in chunks of CHUNK_ROWS rows (fewer, larger stream chunks).
+					if (lines.length >= CHUNK_ROWS) {
+						yield Buffer.from(toCsv(lines));
+						lines = [];
+					}
+				}
+				yield Buffer.from(toCsv(lines));
+			})()
+		)
+	) as ReadableStream;
 }
 
 /** Parses CSV text (quoted fields, `""` escapes, CRLF/LF); blank lines are skipped. */
@@ -76,5 +109,5 @@ export function parseCsv(text: string): string[][] {
 }
 
 /** CSV attachment response (legacy file name `export.csv` by default). */
-export const csvDownload = (text: string, name = 'export.csv'): Response =>
+export const csvDownload = (text: string | ReadableStream, name = 'export.csv'): Response =>
 	download(text, name, 'text/csv; charset=utf-8');

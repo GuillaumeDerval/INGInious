@@ -8,21 +8,21 @@
  * commit ever), the input is read from GridFS and `result`/`text` are the
  * stored fields; git runs through `execFile` (no shell) with its own
  * identity; archive members are extracted through `safeJoin` and only files
- * and folders are written (nothing outside the target folder, no symlinks). Saves are
+ * and folders are written (nothing outside the target folder, no symlinks). The
+ * archive is read with the size limits of security/tgz.ts: when one is exceeded,
+ * the members read so far are kept and the submission is committed anyway. Saves are
  * serialised in a promise queue (legacy thread).
  */
 import { execFile } from 'node:child_process';
 import { existsSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
-import { Readable } from 'node:stream';
 import { promisify } from 'node:util';
-import { gunzipSync } from 'node:zlib';
-import { extract } from 'tar-stream';
 import type { PluginConfig } from '../../config.js';
 import type { PluginRegistry } from '../index.js';
 import { services } from '../../app.js';
 import { dumpYaml } from '../../courses/files.js';
 import { safeJoin } from '../../security/paths.js';
+import { tgzMembers } from '../../security/tgz.js';
 import { attempt } from '../../attempt.js';
 import { pyIsoformat } from '../../db/index.js';
 import type { DoneEvent } from '../../submissions/manager.js';
@@ -46,21 +46,22 @@ export async function init(registry: PluginRegistry, opts: PluginConfig): Promis
 
 /** Extracts a grader tgz archive under `dir`; members escaping it are skipped. */
 async function extractArchive(archive: Uint8Array, dir: string): Promise<void> {
-	const members = extract();
-	Readable.from([gunzipSync(archive)]).pipe(members);
-	for await (const m of members) {
-		const chunks: Buffer[] = [];
-		for await (const c of m) chunks.push(c as Buffer);
-		// Members resolving outside `dir` are ignored.
-		const target = attempt(
-			() => safeJoin(dir, m.header.name),
-			() => null
-		);
-		if (target && m.header.type === 'directory') mkdirSync(target, { recursive: true });
-		else if (target && m.header.type === 'file') {
-			mkdirSync(dirname(target), { recursive: true });
-			writeFileSync(target, Buffer.concat(chunks));
+	try {
+		for await (const { header, data } of tgzMembers(archive)) {
+			// Members resolving outside `dir` are ignored.
+			const target = attempt(
+				() => safeJoin(dir, header.name),
+				() => null
+			);
+			if (target && header.type === 'directory') mkdirSync(target, { recursive: true });
+			else if (target && header.type === 'file') {
+				mkdirSync(dirname(target), { recursive: true });
+				writeFileSync(target, data);
+			}
 		}
+	} catch (e) {
+		// Corrupted or oversized archive: the input, result and members already written are still committed.
+		console.error('Grader archive not fully extracted:', e);
 	}
 }
 

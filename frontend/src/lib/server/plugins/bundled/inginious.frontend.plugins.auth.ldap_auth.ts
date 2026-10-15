@@ -5,7 +5,8 @@
  * (none | ssl | tls), `base_dn`, `request` (filter, `{}` = login), `bind_dn`
  * (optional initial bind as the user, `{}` = login), `cn`, `mail`.
  * The login is escaped in the filter (RFC 4515) and in the bind DN
- * (RFC 4514), and `encryption: tls` really performs StartTLS.
+ * (RFC 4514), and `encryption: tls` really performs StartTLS. Unknown logins
+ * and wrong passwords get the same message (logins cannot be probed).
  */
 import { Client, Filter } from 'ldapts';
 import { t } from '#lib/i18n/index.js';
@@ -57,11 +58,11 @@ export function init(_registry: PluginRegistry, o: PluginConfig): void {
 				} catch {
 					return t('Cannot contact host');
 				}
-				if (!entries.length) return t('Unknown user');
+				if (!entries.length) return t('Invalid login/password');
 				try {
 					await client.bind(entries[0].dn, password);
 				} catch {
-					return t('Incorrect password');
+					return t('Invalid login/password');
 				}
 				const [email, realname] = [first(entries[0][mail]), first(entries[0][cn])];
 				if (!email || !realname) return t("Can't get field {} from your LDAP server", email ? cn : mail);

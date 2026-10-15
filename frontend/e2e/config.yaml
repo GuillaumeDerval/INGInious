@@ -32,3 +32,5 @@ plugins:
     repo_directory: e2e/.generated/git-repo
   - plugin_module: inginious.frontend.plugins.upcoming_tasks
   - plugin_module: inginious.frontend.plugins.ltibestsubmission
+# The LTI tests use local mock platforms over http (outcome service, key set, token, scores).
+lti_allow_private_urls: true

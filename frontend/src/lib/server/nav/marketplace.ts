@@ -8,9 +8,12 @@
  * text), only `https://` repositories are cloned, `git` runs through `execFile`
  * (no shell, `--` before the URL, no credential prompt) and the cloned `.git`
  * folder is removed so that it is never exposed by the file editors/WebDAV.
+ * Symbolic links of the repository are deleted too (course files are always
+ * regular files and directories, see security/paths.ts).
  */
 import { execFile } from 'node:child_process';
-import { existsSync, readFileSync, rmSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, rmSync, unlinkSync } from 'node:fs';
+import { join } from 'node:path';
 import { promisify } from 'node:util';
 import { fail, redirect, type RequestEvent } from '@sveltejs/kit';
 import { z } from 'zod';
@@ -61,6 +64,18 @@ export async function marketCourses(): Promise<MarketCourse[]> {
 }
 
 /**
+ * Deletes every symbolic link of a directory tree. Links are never followed: only real
+ * directories are visited (`readdirSync`'s `recursive` option descends into linked ones).
+ */
+function removeSymlinks(dir: string): void {
+	for (const entry of readdirSync(dir, { withFileTypes: true })) {
+		const path = join(dir, entry.name);
+		if (entry.isSymbolicLink()) unlinkSync(path);
+		else if (entry.isDirectory()) removeSymlinks(path);
+	}
+}
+
+/**
  * Imports a marketplace course as `courseid`, the importer becoming its admin
  * (legacy `import_course`). The new course is hidden and keeps only the
  * description, tags, name and table of contents of the original one.
@@ -82,6 +97,7 @@ export async function importCourse(course: MarketCourse, courseid: string, usern
 		return "Couldn't clone course into your instance";
 	}
 	rmSync(coursePath(courseid, '.git'), { recursive: true, force: true });
+	removeSymlinks(dir);
 	// No (valid) course.yaml in the repository: legacy starts from {}.
 	const old = attempt(
 		() => (parseYaml(readFileSync(coursePath(courseid, 'course.yaml'), 'utf8')) as Record<string, unknown>) ?? {},

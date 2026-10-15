@@ -24,6 +24,8 @@
  *  - TASK-25: at start-up only the waiting submissions whose job is unknown to the
  *    (shared) backend are marked as errors, so that a legacy frontend running on the
  *    same database keeps its jobs.
+ *  - TASK-09: the feedback texts and outputs of a job result are truncated to RESULT_LIMITS
+ *    when stored, so that they always fit in a submission document and stay renderable.
  */
 import type { ObjectId, Filter } from 'mongodb';
 import { t } from '#lib/i18n/index.js';
@@ -36,6 +38,7 @@ import type { Task } from '../courses/task.js';
 import { dbl, parseId, pyIsoformat } from '../db/index.js';
 import type { SubmissionDoc } from '../db/types.js';
 import { plugins } from '../plugins/index.js';
+import { MAX_SOURCE_LENGTH } from '../text/index.js';
 
 /** A stored submission (always has an id). */
 export type Submission = SubmissionDoc & { _id: ObjectId };
@@ -333,29 +336,62 @@ async function updateUserStats(username: string, sub: Submission, newsub: boolea
 }
 
 /**
+ * TASK-09: stored sizes of a job result, in characters (UTF-16 code units, at most 3 bytes each
+ * in BSON). `text` (feedback and each problem feedback) keeps feedback renderable (texts longer
+ * than MAX_SOURCE_LENGTH are not parsed), `problems` bounds all problem feedbacks together and
+ * `output` each of stdout/stderr: at most ≈10 MB in all, within MongoDB's 16 MB document limit.
+ * `tests`, `custom` and `state` are stored as they are (a too large document still becomes the
+ * "Maximum submission size exceeded" error).
+ */
+export const RESULT_LIMITS = { text: MAX_SOURCE_LENGTH, problems: 1_000_000, output: 1_000_000 };
+
+/** Appended to a truncated text or output. */
+export const TRUNCATED = '\n\n[…]';
+
+/** `text` cut to at most `max` characters, marker included. */
+function truncate(text: string, max: number): string {
+	return text.length > max ? text.slice(0, Math.max(0, max - TRUNCATED.length)) + TRUNCATED : text;
+}
+
+/** Problem feedbacks truncated to RESULT_LIMITS (each, and all together in their order). */
+function truncateProblems(problems: JobResult['problems']): JobResult['problems'] {
+	let room = RESULT_LIMITS.problems;
+	return Object.fromEntries(
+		Object.entries(problems).map(([pid, value]) => {
+			// Values other than [result, feedback] pairs (never sent by the backend) are kept as they are.
+			if (!Array.isArray(value)) return [pid, value];
+			const kept = truncate(String(value[1]), Math.min(RESULT_LIMITS.text, room));
+			room -= kept.length;
+			return [pid, [value[0], kept]];
+		})
+	);
+}
+
+/**
  * Stores the result of a job (TASK-09): archive in GridFS, result fields
  * (status done for success/failed, error otherwise), `user_tasks` of every
- * member, then the `submission_done` hook and the listeners. A result too
- * large for MongoDB (16 MB) turns the submission into an error.
+ * member, then the `submission_done` hook and the listeners. Texts are truncated
+ * to RESULT_LIMITS; a result still too large for MongoDB (16 MB) turns the submission into an error.
  * @param newsub false for in-place replays.
  */
 export async function completeJob(id: ObjectId, r: JobResult, newsub: boolean, course: Course): Promise<void> {
 	const archive = r.archive ? await db().putFile(r.archive) : null;
-	const [result, text] = r.result;
+	const [result, feedback] = r.result;
 	const status = result === 'success' || result === 'failed' ? ('done' as const) : ('error' as const);
-	const { tests, problems, custom, state } = r;
-	// stdout/stderr are null for mcq jobs, like legacy (stored as BSON null).
+	const { tests, custom, state } = r;
+	/** stdout/stderr are null for mcq jobs, like legacy (stored as BSON null). */
+	const output = (s: string | null) => (s === null ? s : truncate(s, RESULT_LIMITS.output)) as string;
 	const fields = {
 		status,
 		result,
 		grade: dbl(r.grade),
-		text,
+		text: truncate(String(feedback), RESULT_LIMITS.text),
 		tests,
-		problems,
+		problems: truncateProblems(r.problems),
 		custom,
 		state,
-		stdout: r.stdout as string,
-		stderr: r.stderr as string,
+		stdout: output(r.stdout),
+		stderr: output(r.stderr),
 		...(archive && { archive })
 	};
 	const $unset = { jobid: '' as const, ...SSH_FIELDS };
@@ -379,11 +415,17 @@ export async function completeJob(id: ObjectId, r: JobResult, newsub: boolean, c
 }
 
 /**
- * TASK-11: kills the job of a waiting submission of `username` (ownership is
- * always checked, even for staff). @returns false when there is nothing to kill.
+ * TASK-11: kills the job of a waiting submission of `username` for the task `taskid` of the
+ * course `courseid` (ownership is always checked, even for staff).
+ * @returns false when there is nothing to kill.
  */
-export async function killSubmission(id: unknown, username: string): Promise<boolean> {
-	const sub = await findSubmission(id, { username, status: 'waiting' });
+export async function killSubmission(
+	id: unknown,
+	username: string,
+	courseid: string,
+	taskid: string
+): Promise<boolean> {
+	const sub = await findSubmission(id, { username, status: 'waiting', courseid, taskid });
 	if (!sub?.jobid) return false;
 	services().backend.killJob(sub.jobid);
 	return true;

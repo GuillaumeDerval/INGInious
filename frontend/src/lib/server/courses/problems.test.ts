@@ -169,6 +169,26 @@ describe('buildInput (TASK-08)', () => {
 			any: { filename: 'm.c', value: new TextEncoder().encode('int main') }
 		});
 	});
+	it('keeps only the @random_<i> fields among the posted @-fields', async () => {
+		const input = await p.buildInput(
+			[],
+			form([
+				['@random_0', '0.5'],
+				['@random_12', '0.25'],
+				['@random_x', 'no'],
+				['@username', 'someone_else'],
+				['@email', 'x@example.com'],
+				['@state', '{}'],
+				['@lang', 'fr'],
+				['plain', 'kept']
+			]),
+			defaults
+		);
+		expect(input).toEqual({ '@random_0': '0.5', '@random_12': '0.25', plain: 'kept' });
+	});
+	it('keeps every posted field for trusted callers', async () => {
+		expect(await p.buildInput([], form([['@lang', 'fr']]), defaults, true)).toEqual({ '@lang': 'fr' });
+	});
 	it('rejects missing or invalid files', async () => {
 		const base: [string, string | File][] = [
 			['answer', 'x'],

@@ -14,8 +14,8 @@ test('AUTH-07 a registration whose mail cannot be sent is rolled back', async ({
 	await form.getByLabel(/Username/).fill(name);
 	await form.getByLabel(/Complete name/).fill('S');
 	await form.getByLabel(/Email address/).fill(`${name}@inginious.local`);
-	await form.getByLabel(/^Password/).fill('secret123');
-	await form.getByLabel(/Confirm password/).fill('secret123');
+	await form.getByLabel(/^Password/).fill('secret1234');
+	await form.getByLabel(/Confirm password/).fill('secret1234');
 	await form.getByRole('button', { name: 'Sign up' }).click();
 	await expect(
 		page.getByText('Something went wrong while sending you activation email.', { exact: false })

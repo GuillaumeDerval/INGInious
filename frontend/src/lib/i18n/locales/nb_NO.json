@@ -1182,5 +1182,16 @@
 	"Show all ({})": "Vis alle ({})",
 	"Unregister the {} matching students": "Meld av de {} samsvarende studentene",
 	"{} results": "{} resultater",
-	"{} students": "{} studenter"
+	"{} students": "{} studenter",
+	"Log out of this account on every other browser and device. This one stays logged in.": "Logger denne kontoen ut av alle andre nettlesere og enheter. Denne forblir innlogget.",
+	"Log out other sessions": "Logg ut andre økter",
+	"New password (min. {} characters) :": "Nytt passord (minimum {} tegn):",
+	"Other sessions": "Andre økter",
+	"Password (min. {} characters) :": "Passord (minimum {} tegn):",
+	"Password too long.": "Passordet er for langt.",
+	"Security": "Sikkerhet",
+	"This service does not confirm that your e-mail address is verified. Please sign up with another method, then bind this service in your profile.": "Denne tjenesten bekrefter ikke at e-postadressen din er verifisert. Registrer deg med en annen metode, og koble deretter denne tjenesten til i profilen din.",
+	"This username is not available. Please choose another one.": "Dette brukernavnet er ikke tilgjengelig. Velg et annet.",
+	"Your other sessions have been logged out.": "De andre øktene dine er logget ut.",
+	"The selection contains {} submissions, more than the {} allowed: narrow it with the filters.": "Utvalget inneholder {} innleveringer, flere enn de {} som er tillatt: begrens det med filtrene."
 }

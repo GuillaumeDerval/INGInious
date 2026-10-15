@@ -349,9 +349,23 @@ export async function sectionItems(c: Course, username: string | null, lang: str
 	return section.tasks.filter((id) => visible.has(id)).map((id) => taskItem(c, p, id, lang));
 }
 
+/**
+ * Plugin menu entries (`main_menu`, `course_menu`, `task_menu`) with an http(s) or
+ * relative link; entries with another scheme (`javascript:`, `data:`...) are dropped.
+ */
+export function safeLinks<T extends { href: string }>(items: T[]): T[] {
+	return items.filter(({ href }) => {
+		try {
+			return ['http:', 'https:'].includes(new URL(String(href), 'http://relative.invalid').protocol);
+		} catch {
+			return false;
+		}
+	});
+}
+
 /** Sidebar section holding the `main_menu` plugin entries (NAV-01/02/20); none without entries. */
 export async function mainMenu(): Promise<NavSection[]> {
-	const items = await plugins().callHook<object, NavItem>('main_menu', {});
+	const items = safeLinks(await plugins().callHook<object, NavItem>('main_menu', {}));
 	return items.length ? [{ items }] : [];
 }
 
@@ -363,7 +377,7 @@ export async function mainMenu(): Promise<NavSection[]> {
 export async function courseNav(c: Course, username: string | null, lang: string): Promise<NavSection[]> {
 	const items: NavItem[] = [
 		{ label: t('Tasks'), href: `/course/${c.id}` },
-		...(await plugins().callHook<object, NavItem | NavItem[]>('course_menu', { course: c, username })).flat()
+		...safeLinks((await plugins().callHook<object, NavItem | NavItem[]>('course_menu', { course: c, username })).flat())
 	];
 	if (isCourseStaff(c, username)) items.push({ label: t('Course administration'), href: `/admin/${c.id}` });
 	else if (await isRegistered(c, username)) {

@@ -7,13 +7,17 @@
  *
  * Behaviour (CSTU-13/18): submissions without grader archive (MCQ, crashes) are
  * fine, member names of grader archives are normalised (no `..`, no absolute
- * paths) and links/special members are dropped, audience descriptions cannot
- * create extra directories.
+ * paths), links/special members are dropped and modes are normalised (0644
+ * files, 0755 folders), audience descriptions cannot create extra directories.
+ * Grader archives are read with the limits of security/tgz.ts (a member beyond
+ * them is not exported, the rest of the submission is), and the submissions are
+ * read one at a time from the database cursor while the response is consumed.
  */
 import { pipeline, Readable } from 'node:stream';
-import { createGzip, gunzipSync } from 'node:zlib';
-import { extract, pack as tarPack, type Header, type Pack } from 'tar-stream';
+import { createGzip } from 'node:zlib';
+import { pack as tarPack, type Header, type Pack } from 'tar-stream';
 import { services } from '../app.js';
+import { tgzMembers } from '../security/tgz.js';
 import { dumpYaml } from '../courses/files.js';
 import { pyIsoformat } from '../db/index.js';
 import type { AudienceDoc } from '../db/types.js';
@@ -74,23 +78,23 @@ async function writeSubmission(pack: Pack, sub: Submission, base: string, simpli
 	await entry(pack, { name: `${base}submission.test`, mtime }, dumpYaml(JSON.parse(JSON.stringify(sub))));
 	if (sub.archive)
 		try {
-			const members = extract();
-			Readable.from([gunzipSync(await db.getFile(sub.archive))]).pipe(members);
-			await entry(pack, { name: `${base}archive`, type: 'directory', mtime });
-			for await (const m of members) {
-				const chunks: Uint8Array[] = [];
-				for await (const c of m) chunks.push(c as Uint8Array);
-				const { type, mode, mtime, uname, gname } = m.header,
-					name = safePath(m.header.name);
+			let folder = false;
+			for await (const { header, data } of tgzMembers(await db.getFile(sub.archive))) {
+				// The `archive` folder is only created for a readable archive.
+				if (!folder) await entry(pack, { name: `${base}archive`, type: 'directory', mtime });
+				folder = true;
+				const { type, mtime: time, uname, gname } = header,
+					name = safePath(header.name);
+				// Plain permissions only (never setuid/setgid/sticky or group/world-writable bits).
 				if (name && (type === 'file' || type === 'directory'))
 					await entry(
 						pack,
-						{ name: `${base}archive/${name}`, type, mode, mtime, uname, gname },
-						type === 'file' ? Buffer.concat(chunks) : undefined
+						{ name: `${base}archive/${name}`, type, mode: type === 'file' ? 0o644 : 0o755, mtime: time, uname, gname },
+						type === 'file' ? data : undefined
 					);
 			}
 		} catch {
-			// Unreadable grader archive: the rest of the submission is still exported.
+			// Unreadable or oversized grader archive: the rest of the submission is still exported.
 		}
 	for (const [pid, v] of Object.entries(await db.getInput(sub.input)))
 		if (v && typeof v === 'object' && 'filename' in v) {
@@ -104,12 +108,12 @@ async function writeSubmission(pack: Pack, sub: Submission, base: string, simpli
 }
 
 /**
- * Streams the gzipped tar of the submissions.
+ * Streams the gzipped tar of the submissions (read as they are written, e.g. from a database cursor).
  * @param folders base folders (e.g. ["taskid", "username", "submissiondateid"]; [] = files at the root).
  * @param audiences student -> audiences of the course (for `audience` folders).
  */
 export function archiveStream(
-	docs: Submission[],
+	docs: AsyncIterable<Submission> | Iterable<Submission>,
 	folders: string[],
 	simplify: boolean,
 	audiences: Record<string, AudienceDoc[]>
@@ -117,7 +121,7 @@ export function archiveStream(
 	const pack = tarPack();
 	(async () => {
 		const used = new Map<string, number>();
-		for (const sub of docs)
+		for await (const sub of docs)
 			for (const base of basePaths(sub, folders, audiences)) {
 				const n = used.set(base, (used.get(base) ?? -1) + 1).get(base)!;
 				await writeSubmission(pack, sub, base ? `${base}${n ? `-${n}` : ''}/` : '', simplify);

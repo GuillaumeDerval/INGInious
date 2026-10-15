@@ -4,7 +4,8 @@
  * course.yaml. Pages: /scoreboard/<courseid>[/<index>] (routes/scoreboard).
  *
  * Differences with legacy: the pages are restricted to registered students
- * and staff of the course, unknown
+ * and staff of the course, students only see the tasks that started for them
+ * (other tasks of a scoreboard are left out, names and scores), unknown
  * courses give 404 (legacy 500), `task_menu` matches whole task ids (legacy
  * did a substring test for string contents) and, since a `task_menu` entry is
  * a single link, a task used by several scoreboards links to the list.
@@ -17,7 +18,8 @@ import { requirePlugin } from '../index.js';
 import { services } from '../../app.js';
 import { courseIsOpenToUser, requireCourse } from '../../courses/access.js';
 import type { Course } from '../../courses/course.js';
-import { isRegistered } from '../../courses/members.js';
+import { userTaskList } from '../../courses/dispenser.js';
+import { isCourseStaff, isRegistered } from '../../courses/members.js';
 import { getTask, type Task } from '../../courses/task.js';
 import { attempt } from '../../attempt.js';
 import { forbidLti, requireUser, type GuardEvent } from '../../security/guards.js';
@@ -62,7 +64,7 @@ export function init(registry: PluginRegistry): void {
  * the course exists and the user is a registered student or staff member to
  * whom the course is open, with the access rule of the course page
  * (`courseIsOpenToUser` outside LTI, LTI sessions refused).
- * @returns the course and the page header data (`id`, translated `course` name).
+ * @returns the course, the username and the page header data (`id`, translated `course` name).
  */
 export async function requireCourseMember(event: GuardEvent & { params: { courseid: string } }, module = MODULE) {
 	requirePlugin(module);
@@ -71,7 +73,15 @@ export async function requireCourseMember(event: GuardEvent & { params: { course
 	const { username } = requireUser(event);
 	if (!(await isRegistered(course, username)) || (await courseIsOpenToUser(course, username, false)) !== true)
 		error(403, t('You are not registered to this course.'));
-	return { course, page: { id: course.id, course: course.tr(event.locals.lang, course.name) } };
+	return { course, username, page: { id: course.id, course: course.tr(event.locals.lang, course.name) } };
+}
+
+/**
+ * Tasks (among `ids`) whose id and name may be listed to a user: every task for the
+ * staff, the tasks that started for him otherwise (a contest lists none before its start).
+ */
+export function listedTasks(course: Course, ids: string[], username: string): string[] {
+	return isCourseStaff(course, username) ? ids : userTaskList(course.dispenser, ids, username);
 }
 
 /** Names of the scoreboards of a course (404 when there is none). */
@@ -88,19 +98,33 @@ export async function realnames(usernames: string[]): Promise<Map<string, string
 	return new Map(usernames.map((u) => [u, docs.find((d) => d.username === u)?.realname || u]));
 }
 
-/** SITE-13: ranking of scoreboard `index` (legacy algorithm, see the spec). */
-export async function scoreboard(course: Course, index: string, lang: string): Promise<Ranking & { name: string }> {
+/**
+ * SITE-13: ranking of scoreboard `index` (legacy algorithm, see the spec), restricted to
+ * the tasks listed to the viewer (`listedTasks`).
+ */
+export async function scoreboard(
+	course: Course,
+	index: string,
+	lang: string,
+	username: string
+): Promise<Ranking & { name: string }> {
 	const board = boards(course)[Number(index)];
 	if (!/^\d+$/.test(index) || !board || board.content === undefined || !board.name)
 		error(404, t('Invalid configuration'));
 	const coefs = coefficients(board.content);
-	const ids = Object.keys(coefs);
-	const tasks = ids.map((id) =>
-		attempt(
-			() => getTask(course, id),
-			() => error(404, t('Unknown task id {}', id))
-		)
+	// Every configured task must exist; the layout follows the configured board, whatever
+	// the number of tasks listed to the viewer.
+	const tasks = new Map(
+		Object.keys(coefs).map((id) => [
+			id,
+			attempt(
+				() => getTask(course, id),
+				() => error(404, t('Unknown task id {}', id))
+			)
+		])
 	);
+	const single = tasks.size === 1;
+	const ids = listedTasks(course, [...tasks.keys()], username);
 	const reverse = Boolean(board.reverse);
 	const subs = await services()
 		.db.c.submissions.find(
@@ -140,12 +164,17 @@ export async function scoreboard(course: Course, index: string, lang: string): P
 		// The rank only increases (and is shown) when (solved, total) changes.
 		const changed = previous !== (previous = `${r.solved}/${r.total}`);
 		const head = [{ v: changed ? ++rank : '' }, { v: r.names }];
-		if (ids.length === 1) return [...head, { v: r.total }];
+		if (single) return [...head, { v: r.total }];
 		return [...head, { v: r.solved }, { v: r.total }, ...ids.map((id) => ({ v: r.scores[id] ?? '' }))];
 	});
-	const header =
-		ids.length === 1
-			? ['', t('Student(s)'), t('Score')]
-			: ['', t('Student(s)'), t('Solved'), t('Total score'), ...tasks.map((task) => task.tr(lang, task.name))];
-	return { name: String(board.name), header, rows, emphasis: ids.length === 1 ? [2] : [2, 3] };
+	const header = single
+		? ['', t('Student(s)'), t('Score')]
+		: [
+				'',
+				t('Student(s)'),
+				t('Solved'),
+				t('Total score'),
+				...ids.map((id) => tasks.get(id)!.tr(lang, tasks.get(id)!.name))
+			];
+	return { name: String(board.name), header, rows, emphasis: single ? [2] : [2, 3] };
 }

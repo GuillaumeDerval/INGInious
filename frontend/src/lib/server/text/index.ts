@@ -18,6 +18,12 @@
  * small LRU cache, except LTI-rewritten ones (the links carry the session token).
  * Time-dependent sources (`hidden-until`) are cached per minute of `now`: a block is
  * revealed at most one minute late, never early.
+ * Bounds: the work of one render is capped by the source size and the `vm` timeout,
+ * which interrupts any synchronous code (parsing, regex backtracking, sanitizing), so
+ * a render never blocks the process longer than RENDER_TIMEOUT_MS, and the cache makes
+ * a slow text pay it once. Rendering is not moved to a worker thread: it would not be
+ * bounded better, and `t()` must use the catalog of the current request, which a worker
+ * cannot see. Grader feedback is also truncated when stored (submissions/manager.ts).
  */
 import vm from 'node:vm';
 import { createHash } from 'node:crypto';

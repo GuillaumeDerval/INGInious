@@ -324,8 +324,9 @@ test('CADM-06 task list: broken and missing tasks, legacy migration errors, craf
 	});
 	await page.goto(`/admin/${list}/tasks`);
 	await expect(page.getByText('Task one')).toBeVisible();
+	// An unloadable course answers like any course without rights (403) to non-superadmins.
 	const broken = course('tasklistbroken', { dispenser_data: { foo: 1 } });
-	expect((await page.goto(`/admin/${broken}/tasks`))?.status()).toBe(404);
+	expect((await page.goto(`/admin/${broken}/tasks`))?.status()).toBe(403);
 	await page.goto(`/admin/${c}/tasks`);
 	// Nested sections and a {taskid: rank} mapping are accepted.
 	expect(
@@ -537,11 +538,14 @@ test('CADM-10 task editor: server validation errors are shown in their tab', asy
 			])
 		).text
 	).toContain('Invalid problem: p');
-	expect((await post({ ...base, environment_type: 'gpu' })).text).toContain(
-		'Invalid data: Environment type gpu is unknown'
-	);
+	// CADM-11: only the environments announced by the backend (or the current one) are accepted.
+	for (const [values, env] of [
+		[{ ...base, environment_type: 'gpu' }, 'gpu/default'],
+		[{ ...base, environment_id: 'not-announced' }, 'docker/not-announced']
+	] as const)
+		expect((await post(values)).text).toMatch(new RegExp(`Invalid data: Grading environment (&quot;|\\\\?")${env}`));
 	const mcq = {
-		values: { ...base, environment_type: 'mcq' },
+		values: { ...base, environment_type: 'mcq', environment_id: 'mcq' },
 		problems: [{ id: 'f', type: 'file', allowed_exts: ['.py'] }]
 	};
 	expect((await act(page, url, { task: JSON.stringify(mcq) })).text).toContain('Task saved.');
@@ -566,11 +570,15 @@ test('CADM-11 task editor loads legacy and SSH environments', async ({ page, log
 	await expect(page.getByRole('heading', { name: 'ssh1' })).toBeVisible();
 	await page.getByRole('tab', { name: 'Grading environment' }).click();
 	await expect(page.getByLabel('Grading environment type')).toHaveValue('docker-ssh');
+	// No GPU agent: the NVIDIA environment is not announced by the backend and is refused.
 	await page.getByLabel('Grading environment type').selectOption('nvidia');
 	await page.getByLabel('Memory limit (in megabytes)').fill('128');
 	await page.getByRole('button', { name: 'Save changes' }).click();
+	await expect(page.getByText('Invalid data: Grading environment "nvidia/default"').first()).toBeVisible();
+	await page.getByLabel('Grading environment type').selectOption('docker');
+	await page.getByRole('button', { name: 'Save changes' }).click();
 	await expect(page.getByText('Task saved.')).toBeVisible();
-	expect(yaml(c, 'ssh1', 'task.yaml').environment_type).toBe('nvidia');
+	expect(yaml(c, 'ssh1', 'task.yaml').environment_type).toBe('docker');
 });
 
 test('CADM-12 a problem of an unknown type is shown without editor and refused', async ({ page, loginAs }) => {

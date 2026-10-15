@@ -1,12 +1,14 @@
 /**
  * Tests of the bundled auth plugins (AUTH-15/16/17) with mocked providers:
  * `fetch` is stubbed for the OAuth endpoints, the LDAP client is faked and the
- * SAML response validation is stubbed.
+ * SAML response validation is stubbed (the request-id cache and the assertion
+ * replay record are real, on a throw-away database).
  */
-import { describe, it, expect, beforeAll, afterEach, vi } from 'vitest';
-import { SAML } from '@node-saml/node-saml';
+import { describe, it, expect, beforeAll, afterAll, afterEach, vi } from 'vitest';
+import { SAML, type CacheProvider } from '@node-saml/node-saml';
 import { setServices, type Services } from '../app.js';
 import { buildConfig, type PluginConfig } from '../config.js';
+import { createTestDatabase, type TestDatabase } from '../testing/db.js';
 import { PluginRegistry } from '../plugins/index.js';
 import { authMethods, type AuthStorage } from './external.js';
 import { getJson } from './oauth.js';
@@ -72,13 +74,16 @@ async function oauth(id: string, routes: Record<string, unknown>) {
 	return { link, result: await method.callback(storage, { url: callback, form: null }), storage, method };
 }
 
+let t: TestDatabase;
 beforeAll(async () => {
+	t = await createTestDatabase();
 	setServices({
 		config: buildConfig({
 			backend: 'tcp://x:1',
 			session_parameters: { secret_key: 'k' },
 			base_url: 'https://inginious.example'
-		})
+		}),
+		db: t.database
 	} as Services);
 	const plugin = (module: { init: (r: PluginRegistry, o: PluginConfig) => void }, options: Record<string, unknown>) =>
 		module.init(registry, { plugin_module: 'x', ...options });
@@ -125,6 +130,7 @@ beforeAll(async () => {
 		security: { wantAssertionsSigned: false, wantMessagesSigned: true }
 	});
 });
+afterAll(() => t.drop());
 afterEach(() => {
 	vi.unstubAllGlobals();
 	vi.restoreAllMocks();
@@ -171,19 +177,24 @@ describe('OAuth providers', () => {
 		expect(other.method.name).toBe('Gmail');
 	});
 
-	it('Facebook and LinkedIn read their profile endpoints', async () => {
+	it('Facebook and LinkedIn read their profile endpoints and report unverified addresses', async () => {
 		const fb = await oauth('fb', {
 			'https://graph.facebook.com/v': TOKEN,
 			'https://graph.facebook.com/me': { id: 'f1', name: 'F', email: 'f@x.org' }
 		});
-		expect(fb.result).toEqual({ id: 'f1', realname: 'F', email: 'f@x.org' });
+		// The Graph API never reports whether the address is verified.
+		expect(fb.result).toEqual({ id: 'f1', realname: 'F', email: 'f@x.org', emailVerified: false });
 		expect(fb.link.searchParams.get('scope')).toBe('public_profile email');
-		const li = await oauth('li', {
-			'https://www.linkedin.com/oauth/v2/accessToken': TOKEN,
-			'https://api.linkedin.com/v2/userinfo': { sub: 'l1', name: 'L', email: 'l@x.org' }
-		});
-		expect(li.result).toEqual({ id: 'l1', realname: 'L', email: 'l@x.org' });
+		const linkedin = (info: object) =>
+			oauth('li', {
+				'https://www.linkedin.com/oauth/v2/accessToken': TOKEN,
+				'https://api.linkedin.com/v2/userinfo': { sub: 'l1', name: 'L', email: 'l@x.org', ...info }
+			});
+		const li = await linkedin({ email_verified: true });
+		expect(li.result).toEqual({ id: 'l1', realname: 'L', email: 'l@x.org', emailVerified: true });
 		expect(li.method.imlink).toBe('/li.png');
+		expect((await linkedin({ email_verified: false })).result).toMatchObject({ emailVerified: false });
+		expect((await linkedin({})).result).toMatchObject({ emailVerified: false });
 	});
 
 	it('rejects callbacks without code or with a forged state, and HTTP errors', async () => {
@@ -230,7 +241,8 @@ describe('LDAP', () => {
 		expect(await login('ldap', { login: 'alice', password: '  ' })).toBe('Empty password');
 		expect(await login('ldap', { login: 'alice' })).toBe('Empty password');
 		expect(await login('ldap', { login: 'alice', password: 'wrong' })).toBe('Cannot contact host');
-		expect(await login('ldaps', { login: 'alice', password: 'wrong' })).toBe('Incorrect password');
+		// Wrong password and unknown login: the same answer.
+		expect(await login('ldaps', { login: 'alice', password: 'wrong' })).toBe('Invalid login/password');
 		ldapServer.entries = [{ dn: 'uid=alice,o=test', displayName: 'A' }];
 		expect(await login('ldaps', { login: 'alice', password: 'right' })).toBe(
 			"Can't get field email from your LDAP server"
@@ -240,7 +252,7 @@ describe('LDAP', () => {
 			"Can't get field displayName from your LDAP server"
 		);
 		ldapServer.entries = [];
-		expect(await login('ldaps', { login: 'bob', password: 'right' })).toBe('Unknown user');
+		expect(await login('ldaps', { login: 'bob', password: 'right' })).toBe('Invalid login/password');
 		ldapServer.connect = false;
 		expect(await login('ldaptls', { login: 'bob', password: 'right' })).toBe('Cannot contact host');
 		expect(ldapServer.tls).toBe(1);
@@ -248,6 +260,14 @@ describe('LDAP', () => {
 		expect(await authMethods.get('ldap')!.callback({}, { url, form: null })).toBe('Empty password');
 	});
 });
+
+/** A posted SAML response with a RelayState. */
+const relayForm = (relay: string) => {
+	const f = new FormData();
+	f.set('SAMLResponse', 'xml');
+	f.set('RelayState', relay);
+	return f;
+};
 
 describe('SAML', () => {
 	it('redirects to the IdP with an opaque RelayState and publishes metadata', async () => {
@@ -261,6 +281,38 @@ describe('SAML', () => {
 		expect(authMethods.get('saml3')!.metadata!(url)).toContain('/auth/callback/saml3');
 	});
 
+	it('accepts a response only for the request of the session, and each assertion once', async () => {
+		const method = authMethods.get('saml')!;
+		const storage: AuthStorage = {};
+		const link = new URL(await method.authLink(storage, url));
+		expect(link.searchParams.get('SAMLRequest')).toBeTruthy();
+		const request = storage.request as { key: string; value: string };
+		expect(request.key).toMatch(/^_/);
+		const looked: (string | null)[] = [];
+		const assertion = { Assertion: { $: { ID: `_a${Date.now()}` } } };
+		vi.spyOn(SAML.prototype, 'validatePostResponseAsync').mockImplementation(async function (this: SAML) {
+			// What node-saml does with ValidateInResponseTo.always: look the InResponseTo up, then forget it.
+			const cache = (this as unknown as { cacheProvider: CacheProvider }).cacheProvider;
+			looked.push(await cache.getAsync(request.key), await cache.getAsync('_another_request'));
+			await cache.removeAsync(request.key);
+			return {
+				profile: { issuer: 'idp', 'urn:uid': 'u1', getAssertion: () => assertion } as never,
+				loggedOut: false
+			};
+		});
+		const form = new FormData();
+		form.set('SAMLResponse', 'xml');
+		form.set('RelayState', storage.relay as string);
+		expect(await method.callback(storage, { url, form })).toMatchObject({ id: 'u1' });
+		expect(looked).toEqual([request.value, null]);
+		expect(storage.request).toBeUndefined();
+		// The same assertion again (replay), or an assertion without id: refused.
+		expect(await method.callback({ relay: 'r' }, { url, form: relayForm('r') })).toBeNull();
+		assertion.Assertion.$.ID = '';
+		expect(await method.callback({ relay: 'r' }, { url, form: relayForm('r') })).toBeNull();
+		expect(await t.database.db.collection('saml_assertions').countDocuments()).toBe(1);
+	});
+
 	it('maps the assertion attributes and checks the RelayState', async () => {
 		const method = authMethods.get('saml')!;
 		const form = (relay: string) => {
@@ -271,6 +323,7 @@ describe('SAML', () => {
 		};
 		const validate = vi.spyOn(SAML.prototype, 'validatePostResponseAsync').mockResolvedValue({
 			profile: {
+				getAssertion: () => ({ Assertion: { $: { ID: `_m${Date.now()}` } } }),
 				issuer: 'idp',
 				'urn:uid': ['u1'],
 				'urn:cn': 'Name',
@@ -288,6 +341,9 @@ describe('SAML', () => {
 		expect(await method.callback({}, { url, form: form('r') })).toBeNull();
 		expect(await method.callback({ relay: 'r' }, { url, form: null })).toBeNull();
 		expect(await authMethods.get('saml2')!.callback({ relay: 'r' }, { url, form: form('r') })).toBeNull();
+		// An assertion without id cannot be recorded: refused.
+		validate.mockResolvedValue({ profile: { issuer: 'idp' } as never, loggedOut: false });
+		expect(await method.callback({ relay: 'r' }, { url, form: form('r') })).toBeNull();
 		validate.mockResolvedValue({ profile: null, loggedOut: false });
 		expect(await method.callback({ relay: 'r' }, { url, form: form('r') })).toBeNull();
 	});

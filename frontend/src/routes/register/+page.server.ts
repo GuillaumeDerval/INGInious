@@ -36,6 +36,7 @@ export const load: PageServerLoad = async (event) => {
 	const user = token ? await resetUser(token) : null;
 	return {
 		tos: tosLinks(),
+		passwordMinLength: services().config.passwordMinLength,
 		activate,
 		reset: user && { token: token!, realname: user.realname, username: user.username },
 		invalidReset: !!token && !user

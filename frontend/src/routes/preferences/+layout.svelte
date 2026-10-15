@@ -1,12 +1,13 @@
 <!--
 @component
-Preferences layout (AUTH-11/12/13): page title and tabs above the current
-preferences page: "My profile", "Sign-in methods" and, set apart in red,
+Preferences layout (AUTH-04/11/12/13): page title and tabs above the current
+preferences page: "My profile", "Sign-in methods", "Security" and, set apart in red,
 "Delete my account" (only when deletion is allowed).
 -->
 <script lang="ts">
 	import UserIcon from '@lucide/svelte/icons/user-round';
 	import KeyIcon from '@lucide/svelte/icons/key-round';
+	import ShieldIcon from '@lucide/svelte/icons/shield-check';
 	import TrashIcon from '@lucide/svelte/icons/trash-2';
 	import { page } from '$app/state';
 	import { t } from '#lib/i18n/index.js';
@@ -17,6 +18,7 @@ preferences page: "My profile", "Sign-in methods" and, set apart in red,
 	const tabs = $derived([
 		{ href: '/preferences/profile', label: t('My profile'), Icon: UserIcon, danger: false },
 		{ href: '/preferences/bindings', label: t('Sign-in methods'), Icon: KeyIcon, danger: false },
+		{ href: '/preferences/security', label: t('Security'), Icon: ShieldIcon, danger: false },
 		...(data.allowDeletion
 			? [{ href: '/preferences/delete', label: t('Delete my account'), Icon: TrashIcon, danger: true }]
 			: [])

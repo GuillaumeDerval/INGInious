@@ -2,7 +2,8 @@
 @component
 Task list administration page (CADM-06..09, reference page of docs/design-system.md):
 legacy task migration banner, layout (dispenser) choice as described radio cards and WebDAV credentials side by
-side (copyable, password masked), then the course structure editor.
+side (copyable, password masked; a button generates the password when the admin has none yet), then the course
+structure editor.
 -->
 <script lang="ts">
 	import {
@@ -16,6 +17,7 @@ side (copyable, password masked), then the course structure editor.
 		t,
 		toastEnhance
 	} from '#lib/components/course-admin/kit.js';
+	import KeyIcon from '@lucide/svelte/icons/key-round';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
@@ -82,7 +84,13 @@ side (copyable, password masked), then the course structure editor.
 				<div class="grid gap-3 sm:grid-cols-2">
 					<div class="sm:col-span-2"><CopyField label="URL" value={data.webdav.url} /></div>
 					<CopyField label={t('Username')} value={data.webdav.username} />
-					<CopyField label={t('Password')} value={data.webdav.password} secret />
+					{#if data.webdav.password}
+						<CopyField label={t('Password')} value={data.webdav.password} secret />
+					{:else}
+						<form method="POST" action="?/webdav" class="self-end" use:enhance={toastEnhance()}>
+							<button class="btn preset-tonal btn-sm"><KeyIcon />{t('Generate secret')}</button>
+						</form>
+					{/if}
 				</div>
 				<p class="mt-auto border-t border-surface-200-800 pt-4 text-xs text-surface-600-400 max-lg:mt-4">
 					{t('Any WebDAV client (Finder, Windows Explorer, Cyberduck...) can edit the task files in bulk.')}

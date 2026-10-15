@@ -100,7 +100,7 @@ test('AUTH-07 CORE-05 a visitor registers, activates the account by mail and sig
 	const email = `${name}@X.Org`;
 	await page.goto('/register');
 	const form = page.locator('form[action="?/register"]');
-	const fill = async (username: string, mail: string, p1 = 'secret123', p2 = p1) => {
+	const fill = async (username: string, mail: string, p1 = 'secret1234', p2 = p1) => {
 		await form.getByLabel(/Username/).fill(username);
 		await form.getByLabel(/Complete name/).fill('Auth Reg');
 		await form.getByLabel(/Email address/).fill(mail);
@@ -110,10 +110,10 @@ test('AUTH-07 CORE-05 a visitor registers, activates the account by mail and sig
 	};
 	await fill('ab!', email);
 	await expect(page.getByText('Invalid username format.')).toBeVisible();
-	await fill(name, email, 'secret123', 'other123');
+	await fill(name, email, 'secret1234', 'other123');
 	await expect(page.getByText("Passwords don't match !").last()).toBeVisible();
 	await fill('e2e_student1', email);
-	await expect(page.getByText('This username is already taken !')).toBeVisible();
+	await expect(page.getByText('This username is not available. Please choose another one.')).toBeVisible();
 	await fill(name, email);
 	await expect(page.getByText('You are succesfully registered.')).toBeVisible();
 	const user = (await userDoc(name))!;
@@ -124,7 +124,7 @@ test('AUTH-07 CORE-05 a visitor registers, activates the account by mail and sig
 	expect(mail.subject).toBe('Welcome on INGInious');
 	const link = /http\S+register\?activate=\S+/.exec(mail.text)![0];
 	expect(link).toContain(user.activate);
-	await signin(page, name, 'secret123');
+	await signin(page, name, 'secret1234');
 	await expect(page.getByText('Invalid login/password')).toBeVisible();
 	await page.goto(link);
 	await page.getByRole('button', { name: 'Activate my account' }).click();
@@ -132,7 +132,7 @@ test('AUTH-07 CORE-05 a visitor registers, activates the account by mail and sig
 	await page.goto(link);
 	await page.getByRole('button', { name: 'Activate my account' }).click();
 	await expect(page.getByText('Invalid activation hash.')).toBeVisible();
-	await signin(page, name, 'secret123');
+	await signin(page, name, 'secret1234');
 	await expect(page).toHaveURL(/\/mycourses/);
 	// Logged-in users cannot register.
 	expect((await page.request.get('/register')).status()).toBe(403);
@@ -145,8 +145,8 @@ test('AUTH-07 an e-mail address already in use is not revealed', async ({ page }
 	await form.getByLabel(/Username/).fill(`auth_n${uid()}`);
 	await form.getByLabel(/Complete name/).fill('Someone');
 	await form.getByLabel(/Email address/).fill(existing.email);
-	await form.getByLabel(/^Password/).fill('secret123');
-	await form.getByLabel(/Confirm password/).fill('secret123');
+	await form.getByLabel(/^Password/).fill('secret1234');
+	await form.getByLabel(/Confirm password/).fill('secret1234');
 	await form.getByRole('button', { name: 'Sign up' }).click();
 	await expect(page.getByText('You are succesfully registered.')).toBeVisible();
 	expect((await lastMail(existing.email)).text).toContain('/register#lostpasswd');
@@ -259,8 +259,8 @@ test('AUTH-11 an external account chooses its username (and a password) first', 
 	await expect(page.getByText('Username already taken')).toBeVisible();
 	const name = `auth_x${uid()}`;
 	await page.getByLabel('Username :').fill(name);
-	await page.getByLabel(/New password/).fill('secret123');
-	await page.getByLabel(/Confirm new password/).fill('secret123');
+	await page.getByLabel(/New password/).fill('secret1234');
+	await page.getByLabel(/Confirm new password/).fill('secret1234');
 	await page.getByRole('button', { name: 'Save my profile' }).click();
 	await expect(page.getByText('Profile updated.')).toBeVisible();
 	await expect(page.getByLabel('Username :')).toBeDisabled();

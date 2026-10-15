@@ -242,7 +242,10 @@ describe('guards', () => {
 	it('requireCourseStaff and requireCourseAdmin', async () => {
 		expect(await status(() => a.requireCourseStaff(ev(null), 'fx'))).toMatch(/^\/signin/);
 		expect(await status(() => a.requireCourseStaff(ev('bob'), 'fx'))).toBe(403);
-		expect(await status(() => a.requireCourseStaff(ev('tutor1'), 'nope'))).toBe(404);
+		// CADM-02: unknown and foreign courses answer the same to non-superadmins.
+		expect(await status(() => a.requireCourseStaff(ev('tutor1'), 'nope'))).toBe(403);
+		expect(await status(() => a.requireCourseStaff(ev(null), 'nope'))).toMatch(/^\/signin/);
+		expect(await status(() => a.requireCourseStaff(ev('root'), 'nope'))).toBe(404);
 		expect(await a.requireCourseStaff(ev('tutor1'), 'fx')).toMatchObject({
 			staff: true,
 			admin: false

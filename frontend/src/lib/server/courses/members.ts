@@ -54,6 +54,16 @@ export async function isRegistered(course: Course, username: string | null | und
 	return isCourseStaff(course, username) || !!(await db().courses.findOne({ _id: course.id, students: username }));
 }
 
+/**
+ * True for the users related to a course: staff, registered students and authors of a
+ * submission of the course (unregistered students keep their history). CSTU-09: course
+ * staff only see the identity (real name, e-mail) and the progress of these users.
+ */
+export async function isCourseUser(course: Course, username: string): Promise<boolean> {
+	if (await isRegistered(course, username)) return true;
+	return !!(await db().submissions.findOne({ courseid: course.id, username }, { projection: { _id: 1 } }));
+}
+
 /** Registered students (+ staff when `withStaff`), legacy `get_course_registered_users`. */
 export async function registeredUsers(course: Course, withStaff = true): Promise<string[]> {
 	const students = (await db().courses.findOne({ _id: course.id }))?.students ?? [];

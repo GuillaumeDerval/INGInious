@@ -7,6 +7,7 @@ import { mkdtempSync, writeFileSync, utimesSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { randomBytes } from 'node:crypto';
+import { MongoServerError, ObjectId } from 'mongodb';
 import { setupAuth, fakeEvent, run, type AuthEnv } from '../testing/auth.js';
 import { hashPassword } from './passwords.js';
 import {
@@ -20,7 +21,7 @@ import {
 	startAuth,
 	type AuthMethod
 } from './external.js';
-import { requireSession, saveProfile, sessionAccount } from './profile.js';
+import { closeOtherSessions, requireSession, saveProfile, sessionAccount } from './profile.js';
 import { staticPage, tosLinks } from './static-pages.js';
 
 let env: AuthEnv;
@@ -126,6 +127,30 @@ describe('bindUser (legacy bind_user cases)', () => {
 		expect(await bind({ id: '', realname: 'X', email: 'a@x.org' })).toContain("Couldn't fetch");
 		expect(await bind({ id: 'p5', realname: ' ', email: `${uid()}@x.org` })).toContain("Couldn't fetch");
 		expect(await bind({ id: 'p5', realname: 'X', email: u.email })).toContain('already exists');
+	});
+
+	it('never creates an account from an unverified e-mail address, but signs in and binds', async () => {
+		const unverified = (id: string, email: string) => ({ id, realname: 'X', email, emailVerified: false });
+		const email = `${uid()}@x.org`;
+		expect(await bindUser(env.sessions.create(), 'fb', unverified('f1', email))).toBe(
+			'This service does not confirm that your e-mail address is verified. Please sign up with another method, then bind this service in your profile.'
+		);
+		expect(await users().findOne({ email })).toBeNull();
+		const u = await user();
+		expect(await bindUser(sessionOf(u), 'fb', unverified('f2', email))).toBeNull();
+		const anonymous = env.sessions.create();
+		expect(await bindUser(anonymous, 'fb', unverified('f2', email))).toBeNull();
+		expect(anonymous.doc.username).toBe(u.username);
+	});
+
+	it('gives the existing-address answer when the address was taken concurrently (unique index)', async () => {
+		const insert = vi
+			.spyOn(users(), 'insertOne')
+			.mockRejectedValueOnce(new MongoServerError({ message: 'E11000 duplicate key', code: 11000 }));
+		expect(
+			await bindUser(env.sessions.create(), 'ext', { id: uid(), realname: 'X', email: `${uid()}@x.org` })
+		).toContain('already exists');
+		insert.mockRestore();
 	});
 });
 
@@ -245,31 +270,82 @@ describe('profile', () => {
 			((await saveProfile(session, form(extra))) as { data: { message: string } }).data.message;
 		expect(await msg({ realname: ' ' })).toBe('Name is too short.');
 		expect(await msg({ timezone: 'Mars/Base' })).toBe('Incorrect timezone.');
-		expect(await msg({ passwd: '12345', passwd2: '12345' })).toBe('Password too short.');
-		expect(await msg({ passwd: '123456', passwd2: '1234567' })).toBe("Passwords don't match !");
-		expect(await msg({ passwd: '123456', passwd2: '123456', oldpasswd: 'wrong' })).toBe('Incorrect old password.');
-		expect(await msg({ passwd: '123456', passwd2: '123456' })).toBe('Incorrect old password.');
+		expect(await msg({ passwd: '123456789', passwd2: '123456789' })).toBe('Password too short.');
+		expect(await msg({ passwd: '1234567890', passwd2: '12345678901' })).toBe("Passwords don't match !");
+		const valid = { passwd: '1234567890', passwd2: '1234567890' };
+		expect(await msg({ ...valid, oldpasswd: 'wrong' })).toBe('Incorrect old password.');
+		expect(await msg(valid)).toBe('Incorrect old password.');
+		expect(await msg({ ...valid, oldpasswd: 'x'.repeat(1025) })).toBe('Incorrect old password.');
 		expect(await msg({}, env.sessions.create())).toBe('Incorrect email.');
 	});
 
-	it('changes the password, closes other sessions and clears reset tokens', async () => {
+	it('changes the password, closes other sessions, rotates the session id and clears reset tokens', async () => {
 		const u = await user({ reset: 'tok' });
-		await env.database.c.sessions.insertOne({
-			_id: new (await import('mongodb')).ObjectId(),
-			username: u.username
-		} as never);
+		await env.database.c.sessions.insertOne({ _id: new ObjectId(), username: u.username } as never);
 		const session = sessionOf(u);
+		env.sessions.markDirty(session);
+		await env.sessions.commit(session);
+		const oldId = session.doc._id;
 		expect(
-			await saveProfile(session, form({ passwd: 'newpass1', passwd2: 'newpass1', oldpasswd: 'secret123' }))
+			await saveProfile(session, form({ passwd: 'newpass123', passwd2: 'newpass123', oldpasswd: 'secret123' }))
 		).toEqual({ message: 'Profile updated.' });
 		const doc = (await users().findOne({ username: u.username }))!;
 		expect(doc.password).not.toBe(u.password);
 		expect(doc.reset).toBeUndefined();
+		expect(session.doc._id.equals(oldId)).toBe(false);
+		expect(session.doc.loggedin).toBe(true);
 		expect(await env.database.c.sessions.countDocuments({ username: u.username })).toBe(0);
 		env.configure({ allow_registration: false });
 		await saveProfile(session, form({ passwd: 'ignored1', passwd2: 'ignored1' }));
 		expect((await users().findOne({ username: u.username }))!.password).toBe(doc.password);
 		env.configure();
+	});
+
+	it('throttles old-password checks per account, like sign-in', async () => {
+		const u = await user();
+		const change = (oldpasswd: string, client = 'c1') =>
+			saveProfile(sessionOf(u), form({ passwd: 'newpass123', passwd2: 'newpass123', oldpasswd }), client);
+		for (let i = 0; i < 20; i++) await change('wrong', `c${i}`);
+		expect(await change('secret123', 'other')).toMatchObject({
+			data: { message: 'Too many requests, please retry later.' }
+		});
+		expect((await users().findOne({ username: u.username }))!.password).toBe(u.password);
+	});
+
+	it('logs out the other sessions of the account only', async () => {
+		const u = await user();
+		const other = await user();
+		const sessions = env.database.c.sessions;
+		const [mine, theirs] = [new ObjectId(), new ObjectId()];
+		await sessions.insertMany([
+			{ _id: mine, username: u.username },
+			{ _id: theirs, username: other.username }
+		] as never);
+		const current = sessionOf(u);
+		await sessions.insertOne({ ...current.doc } as never);
+		await closeOtherSessions(current);
+		expect(await sessions.countDocuments({ _id: { $in: [mine, theirs, current.doc._id] } })).toBe(2);
+		expect(await sessions.findOne({ _id: mine })).toBeNull();
+		// Accounts without username: designated by the e-mail address too.
+		const [a, b] = [await user({ username: '' }), await user({ username: '' })];
+		const ids = [new ObjectId(), new ObjectId()];
+		await sessions.insertMany([a, b].map((x, i) => ({ _id: ids[i], username: '', email: x.email })) as never);
+		await closeOtherSessions(sessionOf(a));
+		expect(await sessions.countDocuments({ _id: { $in: ids } })).toBe(1);
+		expect(await sessions.findOne({ _id: ids[1] })).not.toBeNull();
+	});
+
+	it('refuses a username chosen concurrently by another account (unique index)', async () => {
+		const u = await user({ username: '', password: undefined });
+		const update = vi
+			.spyOn(users(), 'updateOne')
+			.mockRejectedValueOnce(new MongoServerError({ message: 'E11000 duplicate key', code: 11000 }));
+		expect(await saveProfile(sessionOf(u), form({ username: uid() }))).toMatchObject({
+			data: { message: 'Username already taken' }
+		});
+		update.mockRejectedValueOnce(new Error('down'));
+		await expect(saveProfile(sessionOf(u), form({ username: uid() }))).rejects.toThrow('down');
+		update.mockRestore();
 	});
 
 	it('lets an external account choose its username and a password at once', async () => {
@@ -281,7 +357,7 @@ describe('profile', () => {
 		expect(await msg('ab')).toBe('Invalid username format.');
 		expect(await msg(taken.username)).toBe('Username already taken');
 		const name = uid();
-		expect(await saveProfile(session, form({ username: name, passwd: 'secret12', passwd2: 'secret12' }))).toEqual({
+		expect(await saveProfile(session, form({ username: name, passwd: 'secret1234', passwd2: 'secret1234' }))).toEqual({
 			message: 'Profile updated.'
 		});
 		expect((await users().findOne({ username: name }))!.password).toMatch(/^argon2id-/);

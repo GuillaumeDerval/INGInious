@@ -9,7 +9,7 @@
  * loaded), a failure while reading a grade is just a failed attempt (legacy killed
  * its publisher thread), entries that can never succeed (launch without the AGS
  * `score` scope or line item) are dropped at once, grades are clipped and every
- * HTTP call has a timeout.
+ * HTTP call goes through `ltiFetch` (public https endpoints only, timeout).
  *
  * Group submissions (TASK-16) keep the legacy behaviour: the submission only carries
  * the submitter's LMS identifiers (LIS sourcedid / 1.3 launch), so every member is
@@ -26,12 +26,11 @@ import type { LisOutcomeDoc, LtiGradeDoc } from '../db/types.js';
 import type { DoneEvent } from '../submissions/manager.js';
 import { launchClient, signTool } from './lti13.js';
 import { authorizationHeader } from './oauth1.js';
+import { ltiFetch } from './outbound.js';
 
 /** Attempts per entry and delay between two passes over the queues (ms). */
 export const MAX_ATTEMPTS = 6;
 const RETRY_DELAY = 500;
-/** Timeout of every outbound request (ms). */
-const TIMEOUT = 10_000;
 const SCORE_SCOPE = 'https://purl.imsglobal.org/spec/lti-ags/scope/score';
 const AGS_CLAIM = 'https://purl.imsglobal.org/spec/lti-ags/claim/endpoint';
 
@@ -53,12 +52,7 @@ const sendLis: Sender<LisOutcomeDoc> = async (d, grade) => {
 		'Content-Type': 'application/xml',
 		Authorization: authorizationHeader(d.outcome_service_url, d.outcome_consumer_key, secret, body)
 	};
-	const res = await fetch(d.outcome_service_url, {
-		method: 'POST',
-		headers,
-		body,
-		signal: AbortSignal.timeout(TIMEOUT)
-	});
+	const res = await ltiFetch(d.outcome_service_url, { method: 'POST', headers, body });
 	return /<(\w+:)?imsx_codeMajor>\s*success\s*</.test(await res.text());
 };
 
@@ -85,11 +79,7 @@ export const sendAgs: Sender<LtiGradeDoc> = async (d, grade) => {
 		client_assertion: assertion,
 		scope: ags.scope.join(' ')
 	};
-	const tokenRes = await fetch(client.auth_token_url, {
-		method: 'POST',
-		body: new URLSearchParams(form),
-		signal: AbortSignal.timeout(TIMEOUT)
-	});
+	const tokenRes = await ltiFetch(client.auth_token_url, { method: 'POST', body: new URLSearchParams(form) });
 	if (!tokenRes.ok) return false;
 	const { access_token: token } = (await tokenRes.json()) as { access_token: string };
 	const url = new URL(ags.lineitem);
@@ -107,9 +97,7 @@ export const sendAgs: Sender<LtiGradeDoc> = async (d, grade) => {
 		Accept: 'application/json',
 		'Content-Type': 'application/vnd.ims.lis.v1.score+json'
 	};
-	return (
-		await fetch(url, { method: 'POST', headers, body: JSON.stringify(score), signal: AbortSignal.timeout(TIMEOUT) })
-	).ok;
+	return (await ltiFetch(url, { method: 'POST', headers, body: JSON.stringify(score) })).ok;
 };
 
 /** One attempt for an entry: deleted when sent, dropped or out of attempts, else counted. @returns true when retried later. */

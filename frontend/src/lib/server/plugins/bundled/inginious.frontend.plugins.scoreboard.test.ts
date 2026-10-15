@@ -24,6 +24,16 @@ beforeAll(async () => {
 		{ name: 'SB', admins: ['admin1'], scoreboard: boards },
 		{ a: { ...MCQ_TASK, name: 'Task A' }, b: { ...MCQ_TASK, name: 'Task B' }, c: MCQ_TASK, d: MCQ_TASK }
 	);
+	env.course(
+		'sbv',
+		{
+			name: 'SBV',
+			admins: ['admin1'],
+			scoreboard: boards,
+			dispenser_data: { toc: [{ title: 'S', tasks_list: ['a', 'b'] }], config: { a: { accessibility: true } } }
+		},
+		{ a: { ...MCQ_TASK, name: 'Task A' }, b: { ...MCQ_TASK, name: 'Task B' } }
+	);
 	env.course('none', { name: 'None' });
 	env.course('closed', { name: 'Closed', admins: ['admin1'], accessible: false, scoreboard: boards });
 	registry = resetPlugins();
@@ -93,7 +103,7 @@ describe('SITE-13 scoreboard plugin', () => {
 			const e = event('/', { user: user(username), params: { courseid } });
 			return { e, check: () => sb.requireCourseMember(e as never, module) };
 		};
-		expect((await member('alice').check()).page).toEqual({ id: 'sb', course: 'SB' });
+		expect(await member('alice').check()).toMatchObject({ username: 'alice', page: { id: 'sb', course: 'SB' } });
 		expect(await status(member('admin1').check)).toBe(200);
 		expect(await status(member('zed').check)).toBe(403);
 		expect(await status(member('alice', 'nope').check)).toBe(404);
@@ -107,7 +117,7 @@ describe('SITE-13 scoreboard plugin', () => {
 		expect(await status(() => sb.scoreboardNames(getCourse('none')))).toBe(404);
 	});
 	it('ranks single-task boards (best score, ties share the rank)', async () => {
-		const r = await sb.scoreboard(getCourse('sb'), '0', 'en');
+		const r = await sb.scoreboard(getCourse('sb'), '0', 'en', 'admin1');
 		expect(r.header).toEqual(['', 'Student(s)', 'Score']);
 		expect(r.rows.map((row) => row.map((c) => c.v))).toEqual([
 			[1, 'bob,carl', 20],
@@ -117,14 +127,14 @@ describe('SITE-13 scoreboard plugin', () => {
 		expect(r.emphasis).toEqual([2]);
 	});
 	it('ranks multi-task and weighted reverse boards', async () => {
-		const both = await sb.scoreboard(getCourse('sb'), '1', 'en');
+		const both = await sb.scoreboard(getCourse('sb'), '1', 'en', 'admin1');
 		expect(both.header).toEqual(['', 'Student(s)', 'Solved', 'Total score', 'Task A', 'Task B']);
 		expect(both.rows.map((row) => row.map((c) => c.v))).toEqual([
 			[1, 'bob,carl', 2, 21, 20, 1],
 			[2, 'Alice', 2, 13, 10, 3],
 			['', 'dan', 2, 13, 10, 3]
 		]);
-		const w = await sb.scoreboard(getCourse('sb'), '2', 'en');
+		const w = await sb.scoreboard(getCourse('sb'), '2', 'en', 'admin1');
 		// reverse XOR negative coefficient: a keeps the min (5), b the max (3).
 		expect(w.rows.map((row) => row.slice(1, 4).map((c) => c.v))).toEqual([
 			['Alice', 2, 7],
@@ -132,8 +142,32 @@ describe('SITE-13 scoreboard plugin', () => {
 			['bob,carl', 2, 39]
 		]);
 	});
+	it('lists to students only the tasks that started for them', async () => {
+		const sub = (taskid: string, score: number) =>
+			({
+				courseid: 'sbv',
+				taskid,
+				username: ['alice'],
+				custom: { score },
+				result: 'success',
+				status: 'done',
+				submitted_on: new Date(),
+				input: null,
+				grade: 0
+			}) as never;
+		await env.db.c.submissions.insertMany([sub('a', 4), sub('b', 7)]);
+		const cells = (r: sb.Ranking) => r.rows.map((row) => row.map((c) => c.v));
+		const student = await sb.scoreboard(getCourse('sbv'), '1', 'en', 'alice');
+		expect(student.header).toEqual(['', 'Student(s)', 'Solved', 'Total score', 'Task A']);
+		expect(cells(student)).toEqual([[1, 'Alice', 1, 4, 4]]);
+		const staff = await sb.scoreboard(getCourse('sbv'), '1', 'en', 'admin1');
+		expect(staff.header).toEqual(['', 'Student(s)', 'Solved', 'Total score', 'Task A', 'Task B']);
+		expect(cells(staff)).toEqual([[1, 'Alice', 2, 11, 4, 7]]);
+		expect(sb.listedTasks(getCourse('sb'), ['a', 'b'], 'alice')).toEqual([]);
+	});
 	it('answers 404 for invalid configurations', async () => {
 		for (const index of ['3', '4', '9', 'x'])
-			expect(await status(() => sb.scoreboard(getCourse('sb'), index, 'en'))).toBe(404);
+			for (const viewer of ['admin1', 'alice'])
+				expect(await status(() => sb.scoreboard(getCourse('sb'), index, 'en', viewer))).toBe(404);
 	});
 });

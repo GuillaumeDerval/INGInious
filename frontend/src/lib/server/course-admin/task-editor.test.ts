@@ -102,6 +102,8 @@ describe('readTask / requireTaskAdmin', () => {
 });
 
 describe('saveEditor', () => {
+	beforeAll(() => Object.assign(services(), { backend: { environments: { mcq: ['mcq'], docker: ['default'] } } }));
+	afterAll(() => Object.assign(services(), { backend: undefined }));
 	it('merges the values into task.yaml (unknown keys kept, typed values)', async () => {
 		const problems = [
 			{
@@ -192,8 +194,28 @@ describe('saveEditor', () => {
 			])
 		).toBe('Invalid problem: a');
 		expect(await save({}, [{ id: 'a', type: 'code', language: 'c++' }])).toBe('Invalid data: Invalid language c++');
-		expect(await save({ environment_type: 'bogus' })).toBe('Invalid data: Environment type bogus is unknown');
+		expect(await save({ environment_type: 'bogus' })).toBe('Invalid data: Grading environment "bogus/mcq"');
+		expect(await save({ environment_type: 'docker', environment_id: 'missing' })).toBe(
+			'Invalid data: Grading environment "docker/missing"'
+		);
 		expect(readFileSync(join(env.dir, 'fx', 'mcq1', 'task.yaml'), 'utf8')).toBe(before);
+	});
+	it('accepts the current environment of the task even when the backend does not announce it (CADM-11)', async () => {
+		writeFileSync(
+			join(env.dir, 'fx', 'future', 'task.yaml'),
+			'name: F\nenvironment_type: docker\nenvironment_id: gone\nenvironment_parameters: {limits: {time: 1}}\n'
+		);
+		const values = {
+			...base,
+			environment_type: 'docker',
+			environment_id: 'gone',
+			environment_parameters: { limits: { time: 15, memory: 256 } }
+		};
+		expect(await saveEditor(getCourse('fx'), 'future', { values, problems: [] })).toBeNull();
+		expect(yaml('future').environment_id).toBe('gone');
+		expect(
+			await saveEditor(getCourse('fx'), 'future', { values: { ...values, environment_id: 'other' }, problems: [] })
+		).toBe('Invalid data: Grading environment "docker/other"');
 	});
 	it('saves tasks that had no problems key', async () => {
 		writeFileSync(join(env.dir, 'fx', 'future', 'task.yaml'), 'name: F\nauthor: [A, B]\nenvironment_type: mcq\n');

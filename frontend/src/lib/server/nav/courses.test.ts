@@ -274,6 +274,12 @@ describe('sidebar sections', () => {
 		expect(await nav.mainMenu()).toEqual([]);
 		plugins().addHook('main_menu', () => ({ label: 'Upcoming Tasks', href: '/coming_tasks' }));
 		expect(await nav.mainMenu()).toEqual([{ items: [{ label: 'Upcoming Tasks', href: '/coming_tasks' }] }]);
+		// Only http(s) and relative links are kept.
+		plugins().addHook('main_menu', () => ({ label: 'Script', href: 'javascript:alert(1)' }));
+		plugins().addHook('main_menu', () => ({ label: 'Site', href: 'https://inginious.org' }));
+		expect((await nav.mainMenu())[0].items.map((i) => i.label)).toEqual(['Upcoming Tasks', 'Site']);
+		plugins().addHook('course_menu', () => [{ label: 'Data', href: 'data:text/html,x' }]);
+		expect((await nav.courseNav(course('nav_open'), null, 'en'))[0].items.map((i) => i.label)).toEqual(['Tasks']);
 	});
 
 	it('NAV-09 builds the course section for staff, students and visitors', async () => {

@@ -7,7 +7,9 @@
  * was committed even when a later check failed, and a passwordless account
  * setting username + password got a 500), the account is found by the same key
  * on load and save, `session.tos_signed` reflects the checkbox,
- * and a password change closes the other sessions and pending reset tokens.
+ * a password change closes the other sessions and pending reset tokens and
+ * gives the current session a new id, and old-password checks are throttled
+ * like sign-in. "Log out other sessions" closes every other session of the account.
  */
 import { redirect } from '@sveltejs/kit';
 import { t, LANGUAGES } from '#lib/i18n/index.js';
@@ -15,8 +17,9 @@ import { services } from '../app.js';
 import type { UserDoc } from '../db/types.js';
 import { signinUrl, type GuardEvent } from '../security/guards.js';
 import type { Session } from './session.js';
-import { USERNAME_RE, failure, passwordError } from './accounts.js';
+import { PASSWORD_MAX_LENGTH, USERNAME_RE, failure, isDuplicate, passwordError } from './accounts.js';
 import { hashPassword, verifyPassword } from './passwords.js';
+import { authThrottle } from './rate-limit.js';
 
 /** Code indentation choices (legacy INDENTATION_TYPES keys). */
 export const INDENTATIONS = ['2', '3', '4', 'tabs'];
@@ -46,8 +49,32 @@ export function sessionAccount(session: Session): Promise<UserDoc | null> {
 const validZone = (zone: string) =>
 	Intl.supportedValuesOf('timeZone').includes(zone) || ['UTC', 'Etc/UTC'].includes(zone);
 
-/** Validates and saves the profile, then updates the session. */
-export async function saveProfile(session: Session, f: ProfileForm) {
+/**
+ * Closes every session of the account of `session` except `session` itself. An account
+ * without username (AUTH-11) is designated by its e-mail address too.
+ */
+export async function closeOtherSessions(session: Session): Promise<void> {
+	const { username, email } = session.doc;
+	await services().db.c.sessions.deleteMany({
+		...(username ? { username } : { username: '', email }),
+		_id: { $ne: session.doc._id }
+	});
+}
+
+/** True when `password` is the current password of `user`; failures are throttled like sign-in. */
+async function checkOldPassword(user: UserDoc, password: string, client: string): Promise<boolean | null> {
+	const account = `local:${user.username}`;
+	if (authThrottle.blocked(client, account)) return null;
+	const valid = password.length <= PASSWORD_MAX_LENGTH && (await verifyPassword(user.password!, password));
+	if (!valid) authThrottle.failed(client, account);
+	return valid;
+}
+
+/**
+ * Validates and saves the profile, then updates the session.
+ * @param client client identifier for rate limiting (IP address).
+ */
+export async function saveProfile(session: Session, f: ProfileForm, client = '') {
 	const { config, db, sessions } = services();
 	const user = await sessionAccount(session);
 	if (!user) return failure(t('Incorrect email.'));
@@ -60,8 +87,11 @@ export async function saveProfile(session: Session, f: ProfileForm) {
 	if (config.allowRegistration && f.passwd) {
 		const invalid = passwordError(f.passwd, f.passwd2 ?? '');
 		if (invalid) return failure(invalid);
-		if (user.password && !(await verifyPassword(user.password, f.oldpasswd ?? '')))
-			return failure(t('Incorrect old password.'));
+		if (user.password) {
+			const valid = await checkOldPassword(user, f.oldpasswd ?? '', client);
+			if (valid === null) return failure(t('Too many requests, please retry later.'));
+			if (!valid) return failure(t('Incorrect old password.'));
+		}
 		set.password = await hashPassword(f.passwd);
 	}
 	if (!f.realname.trim()) return failure(t('Name is too short.'));
@@ -74,9 +104,18 @@ export async function saveProfile(session: Session, f: ProfileForm) {
 		code_indentation: INDENTATIONS.includes(f.code_indentation) ? f.code_indentation : '4'
 	});
 	if (config.isTosDefined) set.tos_accepted = f.tos;
-	await db.c.users.updateOne({ _id: user._id }, set.password ? { $set: set, $unset: { reset: '' } } : { $set: set });
-	if (set.password && user.username)
-		await db.c.sessions.deleteMany({ username: user.username, _id: { $ne: session.doc._id } });
+	try {
+		await db.c.users.updateOne({ _id: user._id }, set.password ? { $set: set, $unset: { reset: '' } } : { $set: set });
+	} catch (e) {
+		// The unique index refuses a username chosen concurrently by another account.
+		if (isDuplicate(e)) return failure(t('Username already taken'));
+		throw e;
+	}
+	if (set.password) {
+		// A new password ends every other session (found with the former username) and the current one gets a new id.
+		await sessions.rotate(session);
+		await closeOtherSessions(session);
+	}
 	const { username = user.username, realname, timezone, code_indentation } = set;
 	Object.assign(session.doc, {
 		username,

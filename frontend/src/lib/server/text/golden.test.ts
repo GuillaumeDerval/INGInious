@@ -64,11 +64,12 @@ const DEVIATIONS: Record<string, { reason: string; html: string }> = {
 	},
 	footnote: {
 		reason:
-			'footnote ids come from rst-compiler (footnotedef-N / footnoteref-N instead of footnote-N / footnote-reference-N)',
+			'footnote ids come from rst-compiler (footnotedef-N / footnoteref-N instead of footnote-N / footnote-reference-N); ' +
+			'the sanitizer prefixes ids and in-document links with "rt-"',
 		html:
-			'<p>Text<a class="footnote-reference" href="#footnotedef-1" id="footnoteref-1">[1]</a>.</p>' +
-			'<table class="docutils footnote" id="footnotedef-1" frame="void" rules="none"><colgroup><col class="label" /><col /></colgroup>' +
-			'<tbody valign="top"><tr><td class="label"><a class="fn-backref" href="#footnoteref-1">[1]</a></td><td>Note.</td></tr></tbody></table>'
+			'<p>Text<a class="footnote-reference" href="#rt-footnotedef-1" id="rt-footnoteref-1">[1]</a>.</p>' +
+			'<table class="docutils footnote" id="rt-footnotedef-1" frame="void" rules="none"><colgroup><col class="label" /><col /></colgroup>' +
+			'<tbody valign="top"><tr><td class="label"><a class="fn-backref" href="#rt-footnoteref-1">[1]</a></td><td>Note.</td></tr></tbody></table>'
 	}
 };
 

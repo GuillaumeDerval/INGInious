@@ -4,6 +4,8 @@
  *  - Basic authentication with the username and the API key (AUTH-19),
  *    compared in constant time; only course admins and superadmins of the
  *    course are accepted (no lazy key creation, no Digest);
+ *  - Basic credentials travel in clear text: plain-http requests are refused
+ *    (403) unless they come to localhost (development) or `webdav_allow_http` is set;
  *  - the path is normalised BEFORE the course is chosen and every file access
  *    goes through `safeJoin`, so that every access stays inside the chosen
  *    course folder (`/A/../A2/` resolves to `A2`, symlinks cannot escape);
@@ -26,6 +28,7 @@ import { buildTask } from '../courses/task.js';
 import { cleanRelativePath, safeJoin } from '../security/paths.js';
 import { attempt } from '../attempt.js';
 import { authThrottle, clientAddress } from '../auth/rate-limit.js';
+import { externalUrl } from '../lti/common.js';
 
 /** URL prefix of the WebDAV tree. */
 export const DAV_PREFIX = '/dav';
@@ -39,6 +42,15 @@ const XML = { 'Content-Type': 'application/xml; charset=utf-8' };
 const segments = (path: string) => cleanRelativePath(path).split('/').filter(Boolean);
 /** Absolute path of segments of the DAV tree, confined (symlinks included) to the course folder `parts[0]`. */
 const abs = (parts: string[]) => safeJoin(safeJoin(services().config.tasksDirectory, parts[0]), ...parts.slice(1));
+/** Development hosts where plain http is accepted. */
+const LOCAL_HOSTS = new Set(['localhost', '127.0.0.1', '[::1]']);
+
+/** True when credentials may be sent on this request: https (as seen behind the proxy), localhost or `webdav_allow_http`. */
+function secureEnough(event: RequestEvent): boolean {
+	const url = externalUrl(event);
+	return url.protocol === 'https:' || LOCAL_HOSTS.has(url.hostname) || services().config.webdavAllowHttp;
+}
+
 /** Course roots and course descriptors cannot be deleted, moved, copied or replaced by a move. */
 const isProtected = (parts: string[]) => parts.length < 2 || (parts.length === 2 && parts[1] === 'course.yaml');
 
@@ -98,6 +110,10 @@ export async function handleDav(event: RequestEvent, path: string): Promise<Resp
 	);
 	const course = rel && findCourse(rel[0] ?? '');
 	if (!rel || !course) return reply(404);
+	if (!secureEnough(event))
+		return reply(403, 'WebDAV requires HTTPS: Basic credentials are not accepted over plain HTTP.', {
+			'Content-Type': 'text/plain; charset=utf-8'
+		});
 	if (!(await allowed(course, event))) return reply(401, null, { 'WWW-Authenticate': `Basic realm="${course.id}"` });
 	const file = abs(rel);
 	const st = existsSync(file) ? statSync(file) : null;

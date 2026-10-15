@@ -1,21 +1,35 @@
 /**
  * Job queue status (NAV-17): snapshot of the running and waiting grading
- * jobs (refreshed every 10 s by the backend client). Superadmins and the
- * admins of the job's course may kill a job (POST only, unknown jobs refused).
+ * jobs (refreshed every 10 s by the backend client). Every job is listed, so
+ * that everybody sees how busy the graders are, but the course/task and the
+ * launcher (usernames) are only shown to superadmins and to the staff of the
+ * job's course: other rows keep their timing and have `info`/`launcher` null.
+ * Superadmins and the admins of the job's course may kill a job (POST only,
+ * unknown jobs refused).
  */
 import { fail } from '@sveltejs/kit';
 import { t } from '#lib/i18n/index.js';
 import { services } from '#lib/server/app.js';
-import { isCourseAdmin } from '#lib/server/courses/members.js';
+import { isCourseAdmin, isCourseStaff } from '#lib/server/courses/members.js';
 import { findCourse } from '#lib/server/courses/course.js';
 import { requireUser } from '#lib/server/security/guards.js';
 import type { CurrentUser } from '../../app.d.ts';
 import type { Actions, PageServerLoad } from './$types';
 
-/** Superadmin, or admin of the course of a job whose info is "<courseid>/<taskid>". */
-function killable(info: string, user: CurrentUser): boolean {
+/** Rights of `user` on a job whose info is "<courseid>/<taskid>": see its details, kill it. */
+function rights(info: string, user: CurrentUser): { visible: boolean; kill: boolean } {
+	if (user.superadmin) return { visible: true, kill: true };
 	const course = findCourse(info.split('/')[0]);
-	return user.superadmin || (!!course && isCourseAdmin(course, user.username));
+	return {
+		visible: !!course && isCourseStaff(course, user.username),
+		kill: !!course && isCourseAdmin(course, user.username)
+	};
+}
+
+/** Job details shown to the user: info and launcher, or nulls when the job is not theirs to see. */
+function details(info: string, launcher: string, user: CurrentUser) {
+	const { visible, kill } = rights(info, user);
+	return visible ? { info, launcher, kill } : { info: null, launcher: null, kill };
 }
 
 /**
@@ -29,18 +43,14 @@ function snapshot(user: CurrentUser) {
 		running: (q?.running ?? []).map(([id, , agent, info, launcher, start, max]) => ({
 			id,
 			agent,
-			info: info!,
-			launcher,
+			...details(info!, launcher, user),
 			start: start * 1000,
-			end: max < 0 ? null : (start + max) * 1000,
-			kill: killable(info!, user)
+			end: max < 0 ? null : (start + max) * 1000
 		})),
 		waiting: (q?.waiting ?? []).map(([id, , info, launcher, max]) => ({
 			id,
-			info: info!,
-			launcher,
-			max: max < 0 ? null : max,
-			kill: killable(info!, user)
+			...details(info!, launcher, user),
+			max: max < 0 ? null : max
 		}))
 	};
 }

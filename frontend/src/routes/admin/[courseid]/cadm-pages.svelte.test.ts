@@ -76,6 +76,8 @@ describe('course administration pages', () => {
 		await expect.element(page.getByLabelText('Password', { exact: true })).toHaveValue('k3y');
 		await expect.element(page.getByRole('button', { name: 'Migrate tasks' })).toBeVisible();
 		await expect.element(page.getByText('Combinatory tests')).toBeVisible();
+		render(Tasks, { data: { ...data, webdav: { ...data.webdav, password: null } } } as never);
+		await expect.element(page.getByRole('button', { name: 'Generate secret' })).toBeVisible();
 		render(Tasks, { data: { ...data, kind: 'toc', legacy: false, webdav: null } } as never);
 		await expect.element(page.getByRole('button', { name: 'Add section' }).last()).toBeVisible();
 	});

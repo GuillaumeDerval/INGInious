@@ -118,7 +118,7 @@ fr, he, nl, nb_NO, pt, vi), `IS_TOS_DEFINED` (`app.py:115`), `SESSION_USE_SIGNER
 | `cookie_domain` | string | `None` | `SESSION_COOKIE_DOMAIN` | Yes. |
 | `cookie_path` | string | `None` (-> `/`) | `SESSION_COOKIE_PATH` | Yes. |
 | `httponly` | bool | `true` | `SESSION_COOKIE_HTTPONLY` | Yes (verified: `httponly: false` removes the flag). |
-| `secure` | bool | `false` | `SESSION_COOKIE_SECURE` | Yes (verified `Secure` flag). |
+| `secure` | bool | `false` | `SESSION_COOKIE_SECURE` | Yes (verified `Secure` flag). The rewrite defaults to `true` on https deployments (§8). |
 | `samesite` | string | `"Lax"` | `SESSION_COOKIE_SAMESITE` | Yes in the new app: the configured value (`Lax`, `Strict` or `None`) is emitted on the session cookie, `SameSite=Lax` by default. |
 
 `smtp` (`app.py:89-100`, Flask-Mail, see CORE-05):
@@ -178,7 +178,25 @@ exists in the tree (importing it would crash startup).
 |---|---|---|---|
 | `base_url` | string | — | Public URL of the application (e.g. `https://inginious.example.org`), used to build the links sent by e-mail (activation, password reset) and the OAuth/SAML callback URLs. When absent, the deployment origin is used (`APP_ORIGIN` environment variable — also baked as SvelteKit `paths.origin` when the app is built with it — or `ORIGIN`; adapter-node 6 itself no longer reads `ORIGIN`: behind a proxy the request origin comes from `PROTOCOL_HEADER`/`HOST_HEADER`); the request origin is only used for `localhost`/`127.0.0.1`/`[::1]` development hosts. Otherwise the action is refused with a generic message and the error `Cannot build links for e-mails: set base_url ...` is logged: the `Host` header is never trusted. |
 | `reverse-proxy-config` | dict | `{}` | Now applied by the rewrite (all deployment modes). `enable: true` makes the app trust `X-Forwarded-Proto`/`X-Forwarded-Host` (LTI signature URLs) and `X-Forwarded-For` for the client IP used by the rate limits: the address `x-for` hops from the right (default 1 = the address added by the proxy). Both spellings `x-for` and `x_for` are accepted. Leave it disabled when the app is reachable without the proxy, otherwise clients can choose their IP. |
+| `password_min_length` | int | `10` | Minimum length of every new password: registration, password reset, profile password change and accounts created by a superadmin (legacy: 6). Existing passwords keep working. Every password (also at sign-in) is limited to 1024 characters, refused before hashing. |
+| `session_parameters.max_lifetime` | int (seconds) | `604800` (7 days) | Absolute lifetime of a session, counted from the sign-in (the session id is renewed at sign-in and on password change), whatever the activity; the sliding `timeout` still applies within it. `0` disables the limit. Stored sessions are not changed: the creation time is the timestamp of the session ObjectId. |
+| `session_parameters.secure` | bool | `true` when the public URL (`base_url`, else `ORIGIN`/`APP_ORIGIN`) is https, else decided per request | Changed default (legacy: always `false`): without an explicit value the session cookie gets the `Secure` flag on https deployments, and otherwise on every request that came over https (behind a proxy: `PROTOCOL_HEADER`). An explicit `secure: false` (or `true`) is kept as is. |
+| `webdav_allow_http` | bool | `false` | WebDAV sends the API key in clear text (Basic auth): requests over plain http are refused with 403 ("WebDAV requires HTTPS...") unless they target `localhost`/`127.0.0.1`/`[::1]` (development) or this key is `true`. The scheme seen by the client counts (`X-Forwarded-Proto` when `reverse-proxy-config.enable`). |
+| `lti_allow_private_urls` | bool | `false` | Requests made to LTI platforms (LTI 1.1 outcome service, LTI 1.3 key set, access token and score URLs) must use https and resolve to public addresses, with a 10 s timeout and no redirects. `true` also allows http and loopback/private addresses (development and tests with local platforms). |
+| `lti_frame_ancestors` | list of origins | `[]` | Extra origins allowed to frame the LTI pages (`frame-ancestors` of the CSP), on top of the configured LTI 1.3 platforms and the LTI 1.1 consumer of the session. Needed when an LMS serves its pages from other hosts than its configured URLs, e.g. `https://*.instructure.com` for Canvas. |
 
 Rate limits (in memory, per process, 15-minute windows): 20 failed authentications per account and 100 per
-client IP, for local sign-in, the REST API login, form-based (LDAP) sign-in and WebDAV Basic auth; 100 failed
-`/external` API keys per client IP; 10 registration/reset mails per client IP.
+client IP, for local sign-in, the REST API login, form-based (LDAP) sign-in, WebDAV Basic auth and the old
+password of the profile page; 100 failed `/external` API keys per client IP; 10 registration/reset mails per
+client IP and 3 per recipient address.
+
+Other rewrite behaviours of the accounts (no configuration key):
+* usernames and e-mail addresses are unique: indexes `username_unique` and `email_unique` (unique, partial:
+  non-empty strings only, next to the legacy non-unique ones) are created at start-up; when the database already
+  holds duplicates, the index is not created, a warning is logged and the application starts anyway;
+* SAML responses must answer the AuthnRequest of the same browser session (`InResponseTo`, unsolicited
+  IdP-initiated responses are refused) and each assertion is accepted once: its id is kept 24 hours in the
+  `saml_assertions` collection (TTL index on `expires`);
+* Facebook does not report whether the e-mail address is verified and LinkedIn only through `email_verified`:
+  an unverified address never creates an account (an existing bound account can still sign in, and the identity
+  can be bound from the profile).

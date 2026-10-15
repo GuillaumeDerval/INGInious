@@ -6,7 +6,8 @@
  *    registrations shadowing another platform being refused (`registrationConflict`);
  *  - LTI sessions (LTI-03): `startLtiSession`, `requireLti`, `sessionToken`, `ltiUrl`;
  *  - login through account bindings and binding itself (LTI-04), with short-lived
- *    signed bind tokens (never the raw session id).
+ *    signed bind tokens (never the raw session id);
+ *  - `ltiOrigins`: the LMS origins that may frame the LTI pages (CSP).
  *
  * LMS roles are stored in the session but never grant rights (like legacy):
  * staff rights only come from the bound INGInious account.
@@ -108,6 +109,43 @@ export function toolConfig(course: Course | null): ToolConfig {
 		}
 	for (const [iss, list] of Object.entries(services().config.ltiConfig)) for (const c of clientsOf(list)) add(iss, c);
 	return out;
+}
+
+/** `scheme://host[:port]` of an http(s) URL, null for anything else. */
+export function originOf(url: unknown): string | null {
+	try {
+		const { protocol, origin } = new URL(String(url));
+		return protocol === 'https:' || protocol === 'http:' ? origin : null;
+	} catch {
+		return null;
+	}
+}
+
+/**
+ * CSP sources of the LMS pages that may frame the LTI pages and receive their forms
+ * (deep-linking response): the configured LTI 1.3 platforms (issuer and authorization
+ * endpoint of the global and course registrations), the `lti_frame_ancestors`
+ * configuration entries (platforms whose pages live on other hosts, e.g.
+ * `https://*.instructure.com`) and the consumer of an LTI 1.1 session (instance and
+ * outcome service URLs of its launch). LTI 1.1 consumers are only known by their key:
+ * when the launch named no URL (or before the session exists, on the launch URL itself),
+ * any https origin is accepted.
+ * @param lti LTI data of the request session; @param path request path.
+ */
+export function ltiOrigins(lti: LtiData | null | undefined, path: string): string[] {
+	const { config } = services();
+	const out = new Set<string | null>(([] as unknown[]).concat(config.raw.lti_frame_ancestors ?? []).map(String));
+	for (const cfg of [config.ltiConfig, ...[...listCourses().values()].map((c) => c.ltiConfig)])
+		for (const [iss, list] of Object.entries(cfg)) {
+			out.add(originOf(iss));
+			for (const c of clientsOf(list)) out.add(originOf(c?.auth_login_url));
+		}
+	if (lti?.version !== '1.3' && path.startsWith('/lti/')) {
+		const consumer = [originOf(lti?.tool_url), originOf(lti?.outcome_service_url)].filter(Boolean);
+		for (const origin of consumer.length ? consumer : ['https:']) out.add(origin);
+	}
+	out.delete(null);
+	return [...out] as string[];
 }
 
 /** Registration of `iss`: by client id, else the only one, else the `default` one. */

@@ -264,7 +264,7 @@ test('TASK-19 RST and Markdown constructs missing from the golden examples', asy
 	const random = await page
 		.locator('input[name^="@random_"]')
 		.evaluateAll((els) => els.map((e) => (e as HTMLInputElement).value));
-	await expect(card('random_rst').locator('.rnd')).toHaveText(`${random[0]}|${random.join(',')}`);
+	await expect(card('random_rst').locator('.rt-rnd')).toHaveText(`${random[0]}|${random.join(',')}`);
 	await expect(card('field_list').locator('table.field-list')).toBeVisible();
 	await expect(card('attribution').locator('.attribution')).toContainText('Somebody');
 	await expect(card('table_directive').locator('caption')).toHaveText('Caption');
@@ -281,13 +281,13 @@ test('TASK-19 RST and Markdown constructs missing from the golden examples', asy
 		await expect(card(id)).toContainText(id.slice(13).toUpperCase());
 	await expect(card('hidden_until_invalid')).toContainText('Unknown date format');
 	await expect(card('code_empty')).toContainText('Content block expected');
-	await expect(card('image_options').locator('img.thumb')).toHaveAttribute('alt', 'tiny');
+	await expect(card('image_options').locator('img.rt-thumb')).toHaveAttribute('alt', 'tiny');
 	await expect(card('image_bad_data').locator('img')).not.toHaveAttribute('src');
 	await expect(card('figure_legend').locator('.legend')).toHaveText('The legend.');
 	await expect(card('substitution_image').locator('img')).toHaveAttribute('src', 'logo.png');
 	await expect(card('substitution_raw').locator('br')).toHaveCount(1);
 	await expect(card('footnote_twice').locator('a.footnote-reference')).toHaveCount(2);
-	await expect(card('custom_roles').locator('span.custom')).toHaveText('styled');
+	await expect(card('custom_roles').locator('span.rt-custom')).toHaveText('styled');
 	await expect(card('unknown_role').locator('.problematic')).toBeVisible();
 	await expect(card('unknown_role')).toContainText('Unknown interpreted text role');
 	await expect(card('rubric')).toContainText('A rubric');
@@ -298,7 +298,7 @@ test('TASK-19 RST and Markdown constructs missing from the golden examples', asy
 	await expect(card('header_only_tables').locator('tbody')).toHaveCount(0);
 	await expect(card('list_table_plain_rows').locator('tr')).toHaveCount(2);
 	await expect(card('role_without_name')).toContainText('Text.');
-	await expect(card('compound_literal').locator('.compound.extra')).toContainText('Compound body.');
+	await expect(card('compound_literal').locator('.compound.rt-extra')).toContainText('Compound body.');
 	await expect(card('compound_literal').locator('code.literal')).toBeVisible();
 	await expect(card('compound_literal').locator('span.target')).toHaveText('inline target');
 	await expect(card('img_without_src').locator('img')).toHaveAttribute('alt', 'no source');
@@ -308,7 +308,7 @@ test('TASK-19 RST and Markdown constructs missing from the golden examples', asy
 	await expect(card('fallback_hidden')).toContainText('Parsing failed');
 	await expect(card('fallback_hidden')).not.toContainText('SECRET-IN-FALLBACK');
 	await open(page, 'md_extra');
-	await expect(card('random_md').locator('.rnd')).toHaveText(
+	await expect(card('random_md').locator('.rt-rnd')).toHaveText(
 		await page.locator('input[name="@random_1"]').inputValue()
 	);
 	await expect(card('dollar_space').locator('.katex')).toHaveCount(3);

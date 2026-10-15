@@ -5,7 +5,7 @@
  */
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { test, expect, installCourse } from '../fixtures.js';
+import { test, expect, installCourse, withDb } from '../fixtures.js';
 import { useApp, appUrl } from '../auth/helpers.js';
 import { E2E } from '../setup-data.js';
 
@@ -19,16 +19,26 @@ test.beforeAll(() => {
 test.describe('API key', () => {
 	useApp(8, { webdav_host: `${appUrl(8)}/dav` });
 
-	test('AUTH-19 the API key is generated once, shown as WebDAV password and accepted by WebDAV', async ({
+	test('AUTH-19 the API key is generated once on request, shown as WebDAV password and accepted by WebDAV', async ({
 		loginAs,
 		request
 	}) => {
+		// Only this test uses the API key of superadmin.
+		await withDb((db) => db.collection('users').updateOne({ username: 'superadmin' }, { $unset: { apikey: '' } }));
 		const page = await loginAs('superadmin');
 		await page.goto(`/admin/${COURSE}/tasks`);
 		const password = page.getByLabel('Password', { exact: true });
 		await expect(page.getByText('WebDAV access')).toBeVisible();
 		await expect(page.getByLabel('Username', { exact: true })).toHaveValue('superadmin');
+		// CADM-06: viewing the page does not create the key, the button does.
+		await expect(password).toHaveCount(0);
+		const stored = () =>
+			withDb(async (db) => (await db.collection('users').findOne({ username: 'superadmin' }))?.apikey);
+		expect(await stored()).toBeUndefined();
+		await page.getByRole('button', { name: 'Generate secret' }).click();
+		await expect(password).toBeAttached();
 		const key = await password.inputValue();
+		expect(await stored()).toBe(key);
 		expect(key).toMatch(/^[0-9a-f]{80}$/);
 		await page.reload();
 		await expect(password).toHaveValue(key);

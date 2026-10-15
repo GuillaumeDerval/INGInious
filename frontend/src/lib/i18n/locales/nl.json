@@ -825,5 +825,16 @@
 	"Show all ({})": "Alles tonen ({})",
 	"Unregister the {} matching students": "De {} gevonden studenten uitschrijven",
 	"{} results": "{} resultaten",
-	"{} students": "{} studenten"
+	"{} students": "{} studenten",
+	"Log out of this account on every other browser and device. This one stays logged in.": "Meldt dit account af op alle andere browsers en apparaten. Deze blijft aangemeld.",
+	"Log out other sessions": "Andere sessies afmelden",
+	"New password (min. {} characters) :": "Nieuw paswoord (min. {} tekens):",
+	"Other sessions": "Andere sessies",
+	"Password (min. {} characters) :": "Paswoord (min. {} tekens):",
+	"Password too long.": "Paswoord te lang.",
+	"Security": "Beveiliging",
+	"This service does not confirm that your e-mail address is verified. Please sign up with another method, then bind this service in your profile.": "Deze dienst bevestigt niet dat uw e-mailadres geverifieerd is. Registreer u met een andere methode en koppel deze dienst daarna in uw profiel.",
+	"This username is not available. Please choose another one.": "Deze gebruikersnaam is niet beschikbaar. Kies een andere.",
+	"Your other sessions have been logged out.": "Uw andere sessies zijn afgemeld.",
+	"The selection contains {} submissions, more than the {} allowed: narrow it with the filters.": "De selectie bevat {} inzendingen, meer dan de toegestane {}: verfijn ze met de filters."
 }

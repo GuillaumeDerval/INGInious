@@ -7,8 +7,11 @@
  * accepted. Differences: invalid dates give the "Invalid dates" message
  * instead of a 500, and a user filter containing only unknown users falls
  * back to the default (registered users) instead of selecting everything.
+ * Bounds: a page of the submissions table has at most MAX_LIMIT rows, the statistics count at
+ * most `exportCap(CSV_FACTOR)` submissions, and the exports and the bulk replay refuse
+ * selections larger than the export limit (`exportLimitError`).
  */
-import { ObjectId, type Filter } from 'mongodb';
+import { ObjectId, type Filter, type FindCursor } from 'mongodb';
 import { z } from 'zod';
 import { t } from '#lib/i18n/index.js';
 import { services } from '../app.js';
@@ -19,7 +22,7 @@ import type { SubmissionDoc } from '../db/types.js';
 import { displayResult } from '../submissions/feedback.js';
 import { findSubmission, type Submission } from '../submissions/manager.js';
 import { parseDate } from '../text/dates.js';
-import { dictCsv } from './csv.js';
+import { dictCsvStream } from './csv.js';
 import { pageSlice } from '../pagination.js';
 import { loadTasks } from '../courses/task.js';
 import { taskName, userInfos, userOptions } from './people.js';
@@ -41,6 +44,9 @@ const int = (fallback: number | null) =>
 		z.number().nullable()
 	);
 const flag = z.preprocess((v) => v !== undefined, z.boolean());
+
+/** Largest page of the submissions table, and number of submissions counted by default by the statistics. */
+export const MAX_LIMIT = 500;
 const str = z.preprocess((v) => String(one(v) ?? ''), z.string());
 
 /** Query parameters of the submissions and statistics pages (CSTU-11/17). */
@@ -190,22 +196,58 @@ export async function selection(course: Course, q: Query, evals = false) {
 	return { filter, evalIds, error: after === false || before === false ? t('Invalid dates') : null };
 }
 
-/** Submissions of a filter in the order chosen by the query (`projection` excludes fields). */
-const sorted = (filter: Filter<SubmissionDoc>, q: Query, projection?: Record<string, 0>) =>
+/** Fields read (1) or skipped (0) in submission documents. */
+type Projection = Record<string, 0 | 1>;
+
+/** Submissions of a filter in the order chosen by the query. */
+const sorted = (filter: Filter<SubmissionDoc>, q: Query, projection?: Projection) =>
 	db()
 		.submissions.find(filter, { projection })
 		.sort({ [q.sort_by]: q.order === 1 ? 1 : -1 });
 
-/** Every submission of the selection (no pagination), sorted like the listing. */
-export async function selectedSubmissions(course: Course, q: Query) {
+/** Default maximum number of submissions of one archive download or bulk replay (CSTU-13/14). */
+export const EXPORT_LIMIT = 10_000;
+
+/** The CSV export (CSTU-12) reads a few small fields and is streamed: it allows this many times more. */
+export const CSV_FACTOR = 20;
+
+/** Largest number of submissions read at once: `factor` times the export limit (config or EXPORT_LIMIT). */
+export function exportCap(factor = 1): number {
+	return (Number(services().config.raw.submissions_export_limit) || EXPORT_LIMIT) * factor;
+}
+
+/**
+ * CSTU-12/13/14: the error message when `count` submissions exceed `factor` times the export
+ * limit (`submissions_export_limit` in configuration.yaml, else EXPORT_LIMIT), else null.
+ * Larger selections are refused rather than truncated, so that an export never silently
+ * misses submissions: the staff narrows the selection with the filters.
+ */
+export function exportLimitError(count: number, factor = 1): string | null {
+	const limit = exportCap(factor);
+	return count > limit
+		? t('The selection contains {} submissions, more than the {} allowed: narrow it with the filters.', count, limit)
+		: null;
+}
+
+/**
+ * Every submission of the selection (no pagination) as a cursor sorted like the listing (read one
+ * document at a time), and `tooMany`, the `exportLimitError` of the selection: read the cursor only when null.
+ * @param projection fields to read (default: whole documents).
+ * @param factor of the export limit (CSV_FACTOR for the CSV export).
+ */
+export async function selectedSubmissions(course: Course, q: Query, projection?: Projection, factor = 1) {
 	const sel = await selection(course, q, true);
-	return { ...sel, docs: (await sorted(sel.filter, q).toArray()) as Submission[] };
+	const tooMany = exportLimitError(await db().submissions.countDocuments(sel.filter), factor);
+	return { ...sel, tooMany, docs: sorted(sel.filter, q, projection) as unknown as FindCursor<Submission> };
 }
 
 /** Statuses of graded submissions (the ones that can be replayed or downloaded). */
 export const GRADED: SubmissionDoc['status'][] = ['done', 'error'];
 
-/** CSTU-13/14: the graded submissions of the course among `ids` (unknown, foreign or waiting ones are dropped). */
+/**
+ * CSTU-13/14: the graded submissions of the course among `ids` (unknown, foreign or waiting ones are dropped);
+ * callers check the number of ids with `exportLimitError` first.
+ */
 export async function pickSubmissions(course: Course, ids: unknown[], status = GRADED): Promise<Submission[]> {
 	const docs = await Promise.all(
 		ids.map((id) => findSubmission(String(id), { courseid: course.id, status: { $in: status } }))
@@ -257,7 +299,9 @@ export async function evaluationIds(course: Course, docs: Pick<SubmissionDoc, 't
 export async function listSubmissions(course: Course, q: Query, lang: string) {
 	const sel = await selection(course, q);
 	const count = await db().submissions.countDocuments(sel.filter);
-	const { page, pages, skip, limit } = pageSlice(count, q.page, q.limit && q.limit > 0 ? q.limit : 50);
+	const size = Math.min(q.limit && q.limit > 0 ? q.limit : 50, MAX_LIMIT);
+	const { page, pages, skip, limit } = pageSlice(count, q.page, size);
+	// Rows only show these fields: the large ones (input, outputs, feedback) are never read.
 	const docs = await sorted(sel.filter, q, { input: 0, stdout: 0, stderr: 0, text: 0, problems: 0, custom: 0 })
 		.skip(skip)
 		.limit(limit)
@@ -282,23 +326,49 @@ export async function listSubmissions(course: Course, q: Query, lang: string) {
 	return { rows, count, page, pages, error: sel.error };
 }
 
-/** CSTU-12: CSV of the whole selection with an explicit column list (never the input or the archive). */
-export async function submissionsCsv(course: Course, q: Query): Promise<string> {
-	const { docs, evalIds } = await selectedSubmissions(course, q);
-	const row = ({ taskid, status, result, grade, submitted_on, last_replay, tests, username, _id }: Submission) => [
-		String(_id),
-		{
-			courseid: course.id,
-			taskid,
-			username: username.join(','),
-			submitted_on,
-			last_replay,
-			status,
-			result,
-			grade,
-			eval: evalIds.has(String(_id)),
-			tests: tests ?? {}
-		}
-	];
-	return dictCsv(Object.fromEntries(docs.map(row)));
+/** Fields of the submissions read by the CSV export. */
+export const CSV_FIELDS: Projection = Object.fromEntries(
+	'taskid status result grade submitted_on last_replay tests username'.split(' ').map((k) => [k, 1])
+);
+
+/**
+ * CSTU-12: CSV of a selection with an explicit column list (never the input or the archive),
+ * streamed: the `tests[<tag>]` columns are first collected by the database.
+ * @param selection `selectedSubmissions` read with the CSV_FIELDS projection.
+ */
+export async function submissionsCsv(
+	course: Course,
+	{ filter, docs, evalIds }: Pick<Awaited<ReturnType<typeof selectedSubmissions>>, 'filter' | 'docs' | 'evalIds'>
+): Promise<ReadableStream> {
+	const tags = await db()
+		.submissions.aggregate<{ _id: string }>([
+			{ $match: filter },
+			{ $project: { tests: { $objectToArray: { $ifNull: ['$tests', {}] } } } },
+			{ $unwind: '$tests' },
+			{ $group: { _id: '$tests.k' } }
+		])
+		.toArray();
+	const keys = 'courseid taskid username submitted_on last_replay status result grade eval'.split(' ');
+	const row = ({ taskid, status, result, grade, submitted_on, last_replay, tests, username, _id }: Submission) =>
+		[
+			String(_id),
+			{
+				courseid: course.id,
+				taskid,
+				username: username.join(','),
+				submitted_on,
+				last_replay,
+				status,
+				result,
+				grade,
+				eval: evalIds.has(String(_id)),
+				tests: tests ?? {}
+			}
+		] as [string, Record<string, unknown>];
+	return dictCsvStream(
+		[...keys, ...tags.map((tag) => `tests[${tag._id}]`)],
+		(async function* () {
+			for await (const doc of docs) yield row(doc);
+		})()
+	);
 }

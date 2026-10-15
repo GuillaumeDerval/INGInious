@@ -170,11 +170,45 @@ describe('checkDispenserData (CADM-07/09)', () => {
 		});
 		expect(res).toEqual({
 			data: {
-				toc: [{ title: 'S', tasks_list: ['a', 'b'] }],
+				toc: [{ title: 'S', config: {}, tasks_list: ['a', 'b'] }],
 				config: { a: { weight: 2 }, b: {} },
 				imported: true
 			}
 		});
+	});
+	it('stores only the keys of the course.yaml format', () => {
+		const res = d.checkDispenserData(toc, {
+			toc: [
+				{
+					title: 'S',
+					extra: 1,
+					config: { closed: true, hidden_if_empty: false, other: 'x' },
+					sections_list: [{ title: 'T', id: 'x', config: { other: 1 }, tasks_list: { a: 0, constructor: 1 } }]
+				}
+			],
+			config: {
+				a: { weight: 2, submission_limit: { amount: 2, period: 3, other: 1 }, other: 'x' },
+				constructor: 'not an object'
+			},
+			other: { any: 'thing' }
+		});
+		expect(res).toEqual({
+			data: {
+				toc: [
+					{
+						title: 'S',
+						config: { closed: true, hidden_if_empty: false },
+						sections_list: [{ title: 'T', config: {}, tasks_list: ['a', 'constructor'] }]
+					}
+				],
+				config: { a: { weight: 2, submission_limit: { amount: 2, period: 3 } }, constructor: {} },
+				imported: true
+			}
+		});
+		expect(d.parseDispenser('toc', (res as { data: unknown }).data).toc[0].sections![0].tasks).toEqual([
+			'a',
+			'constructor'
+		]);
 	});
 	it('reports errors', () => {
 		expect(d.checkDispenserData(toc, { toc: [{ title: '', tasks_list: [] }] })).toEqual({

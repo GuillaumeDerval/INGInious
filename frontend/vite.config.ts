@@ -25,22 +25,27 @@ export default defineConfig({
 			// which can exempt the LTI/SAML endpoints that receive signed cross-site POSTs.
 			csrf: { trustedOrigins: ['*'] },
 			// Content-Security-Policy (architecture §4.8): SvelteKit adds nonces to its own
-			// scripts; nothing else may run. Inline styles are needed by CodeMirror/KaTeX,
-			// https images by task statements, frames by the optional webterm.
+			// scripts; nothing else may run. Inline styles are needed by CodeMirror/KaTeX.
+			// Hosts only known at run time (configuration.yaml) are added by the request
+			// pipeline (lib/server/request.ts `completeCsp`): the Sentry ingest host to
+			// `connect-src`, the webterm to `frame-src`, the LMS origins to `frame-ancestors`
+			// and `form-action` on LTI pages, identity providers to `form-action` on sign-in pages.
 			csp: {
 				mode: 'auto',
 				directives: {
 					'default-src': ['self'],
 					'script-src': ['self'],
 					'style-src': ['self', 'unsafe-inline'],
+					// Course and task texts may show images of any https site (documented RST
+					// `image` directive with remote URLs) and embed data: images.
 					'img-src': ['self', 'data:', 'https:'],
 					'font-src': ['self', 'data:'],
-					// https: lets the optional Sentry reporting (CORE-06) reach its ingest host.
-					'connect-src': ['self', 'https:'],
-					'frame-src': ['self', 'https:'],
+					'connect-src': ['self'],
+					'frame-src': ['self'],
+					'frame-ancestors': ['self'],
 					'object-src': ['none'],
 					'base-uri': ['self'],
-					'form-action': ['self', 'https:']
+					'form-action': ['self']
 				}
 			},
 			adapter: adapter({ out: process.env.BUILD_OUT ?? 'build' })

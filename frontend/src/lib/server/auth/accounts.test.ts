@@ -4,7 +4,7 @@
  */
 import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 import { createHash, randomBytes } from 'node:crypto';
-import { ObjectId } from 'mongodb';
+import { MongoServerError, ObjectId } from 'mongodb';
 import { z } from 'zod';
 import { setupAuth, type AuthEnv } from '../testing/auth.js';
 import { hashPassword } from './passwords.js';
@@ -36,8 +36,8 @@ async function mailTo(address: string): Promise<string> {
 const newForm = (name: string) => ({
 	username: name,
 	realname: 'R',
-	passwd: 'secret123',
-	passwd2: 'secret123',
+	passwd: 'secret1234',
+	passwd2: 'secret1234',
 	tos: true
 });
 
@@ -69,10 +69,16 @@ describe('validation helpers', () => {
 		for (const bad of ['bad', 'a@b', 'a@b.c', 'a@@b.org']) expect(accounts.sanitizeEmail(bad)).toBeNull();
 	});
 
-	it('checks new passwords', () => {
-		expect(accounts.passwordError('12345', '12345')).toBe('Password too short.');
-		expect(accounts.passwordError('123456', '1234567')).toBe("Passwords don't match !");
+	it('checks new passwords: configurable minimum length (10 by default), maximum 1024', () => {
+		expect(accounts.passwordError('123456789', '123456789')).toBe('Password too short.');
+		expect(accounts.passwordError('1234567890', '12345678901')).toBe("Passwords don't match !");
+		expect(accounts.passwordError('1234567890', '1234567890')).toBeNull();
+		const long = 'x'.repeat(1025);
+		expect(accounts.passwordError(long, long)).toBe('Password too long.');
+		expect(accounts.passwordError('x'.repeat(1024), 'x'.repeat(1024))).toBeNull();
+		env.configure({ password_min_length: 6 });
 		expect(accounts.passwordError('123456', '123456')).toBeNull();
+		env.configure();
 	});
 
 	it('parses forms with zod and answers 400 otherwise', async () => {
@@ -89,7 +95,8 @@ describe('validation helpers', () => {
 		expect(await accounts.newUserDoc({ ...f, username: '' })).toBe('Invalid username format.');
 		expect(await accounts.newUserDoc({ ...f, realname: ' ' })).toBe('Name is too short.');
 		expect(await accounts.newUserDoc({ ...f, email: 'bad' })).toBe('Invalid email format.');
-		expect(await accounts.newUserDoc({ ...f, password: '12345' })).toBe('Password too short.');
+		expect(await accounts.newUserDoc({ ...f, password: '123456789' })).toBe('Password too short.');
+		expect(await accounts.newUserDoc({ ...f, password: 'x'.repeat(1025) })).toBe('Password too long.');
 		expect(await accounts.newUserDoc({ ...f, tos: true })).toEqual({
 			username: 'jdoe',
 			realname: 'John',
@@ -105,7 +112,7 @@ describe('validation helpers', () => {
 		const external = { ...f, username: '', bindings: { gh: ['1', {}] }, language: 'fr', timezone: 'UTC' };
 		expect(await accounts.newUserDoc(external)).toMatchObject({ username: '', language: 'fr', timezone: 'UTC' });
 		env.configure({ terms_page: 't', privacy_page: 'p' });
-		expect(await accounts.newUserDoc({ ...f, tos: true, password: 'secret1' })).toMatchObject({
+		expect(await accounts.newUserDoc({ ...f, tos: true, password: 'secret1234' })).toMatchObject({
 			tos_accepted: true,
 			password: expect.stringMatching(/^argon2id-/)
 		});
@@ -162,6 +169,17 @@ describe('authenticate / connectUser', () => {
 		}
 	});
 
+	it('refuses over-long passwords without hashing them, as failures', async () => {
+		const u = await user();
+		const verify = vi.spyOn(await import('./passwords.js'), 'verifyPassword');
+		const client = uid();
+		expect(await accounts.authenticate(u.username, 'x'.repeat(1025), client)).toBeNull();
+		expect(verify).not.toHaveBeenCalled();
+		verify.mockRestore();
+		for (let i = 0; i < 99; i++) await accounts.authenticate(`long${i}`, 'x'.repeat(1025), client);
+		expect(await accounts.authenticate((await user()).username, 'secret123', client)).toBeNull();
+	});
+
 	it('refuses pending accounts, passwordless accounts and unknown users', async () => {
 		const pending = await user({ activate: 'x' });
 		const external = await user({ password: undefined });
@@ -214,8 +232,8 @@ describe('registration and activation', () => {
 		username: name,
 		realname: 'Reg',
 		email: `${name}@X.org`,
-		passwd: 'secret123',
-		passwd2: 'secret123',
+		passwd: 'secret1234',
+		passwd2: 'secret1234',
 		tos: false,
 		...extra
 	});
@@ -229,8 +247,37 @@ describe('registration and activation', () => {
 		env.configure({ terms_page: 't', privacy_page: 'p' });
 		expect(await msg({})).toBe('Please accept the Terms of Service and Data Privacy');
 		env.configure();
+	});
+
+	it('answers a taken username generically, only after the rate limit', async () => {
 		const taken = await user();
-		expect(await msg({ username: taken.username })).toBe('This username is already taken !');
+		const client = uid();
+		const answer = async () =>
+			(
+				(await accounts.register(form(taken.username, { email: `${uid()}@x.org` }), 'en', url, client)) as {
+					data: { message: string };
+				}
+			).data.message;
+		for (let i = 0; i < 10; i++)
+			expect(await answer()).toBe('This username is not available. Please choose another one.');
+		expect(await answer()).toBe('Too many requests, please retry later.');
+	});
+
+	it('handles accounts created concurrently with the same username or e-mail (unique indexes)', async () => {
+		const taken = await user();
+		expect(await accounts.insertUser({ ...taken, email: `${uid()}@x.org` } as never)).toBe(false);
+		expect(await accounts.insertUser({ ...taken, username: uid() } as never)).toBe(false);
+		const insert = vi
+			.spyOn(users(), 'insertOne')
+			.mockRejectedValueOnce(new MongoServerError({ message: 'E11000 duplicate key', code: 11000 }));
+		expect(await accounts.register(form(uid()), 'en', url, uid())).toMatchObject({
+			data: { message: 'This username is not available. Please choose another one.' }
+		});
+		insert.mockRejectedValueOnce(new Error('down'));
+		await expect(accounts.insertUser({ ...taken, username: uid(), email: `${uid()}@x.org` } as never)).rejects.toThrow(
+			'down'
+		);
+		insert.mockRestore();
 	});
 
 	it('creates the account, mails the activation link and activates once', async () => {
@@ -279,9 +326,18 @@ describe('registration and activation', () => {
 		env.configure();
 	});
 
-	it('limits the number of mails per client', async () => {
+	it('limits the number of mails per client and per address', async () => {
+		const address = `${uid()}@x.org`;
+		for (let i = 0; i < 3; i++) expect(await accounts.requestReset(address, url, uid())).not.toHaveProperty('status');
+		// From any client, and also for registrations to that address.
+		expect(await accounts.requestReset(address.toUpperCase(), url, uid())).toMatchObject({
+			data: { message: 'Too many requests, please retry later.' }
+		});
+		expect(await accounts.register(form(uid(), { email: address }), 'en', url, uid())).toMatchObject({
+			status: 400
+		});
 		const client = uid();
-		for (let i = 0; i < 10; i++) await accounts.requestReset('nobody@x.org', url, client);
+		for (let i = 0; i < 10; i++) await accounts.requestReset(`${uid()}@x.org`, url, client);
 		expect(await accounts.register(form(uid()), 'en', url, client)).toMatchObject({
 			data: { message: 'Too many requests, please retry later.' }
 		});
@@ -317,21 +373,21 @@ describe('password reset', () => {
 		expect(await accounts.resetUser(reset!)).toMatchObject({ username: u.username });
 		expect(await accounts.resetUser('bogus')).toBeNull();
 
-		expect(await accounts.resetPassword('bogus', 'newpass1', 'newpass1')).toMatchObject({
+		expect(await accounts.resetPassword('bogus', 'newpass123', 'newpass123')).toMatchObject({
 			data: { message: 'Invalid reset hash.', reset: null }
 		});
 		expect(await accounts.resetPassword(reset!, '123', '123')).toMatchObject({
 			data: { message: 'Password too short.', reset: { token: reset, username: u.username } }
 		});
 		await env.database.c.sessions.insertOne({ _id: new ObjectId(), username: u.username } as never);
-		expect(await accounts.resetPassword(reset!, 'newpass1', 'newpass1')).toEqual({
+		expect(await accounts.resetPassword(reset!, 'newpass123', 'newpass123')).toEqual({
 			message: 'Your password has been successfully changed.'
 		});
 		const doc = (await users().findOne({ username: u.username }))!;
 		expect(doc.reset).toBeUndefined();
 		expect(doc.activate).toBeUndefined();
 		expect(await env.database.c.sessions.countDocuments({ username: u.username })).toBe(0);
-		expect(await accounts.authenticate(u.username, 'newpass1')).not.toBeNull();
+		expect(await accounts.authenticate(u.username, 'newpass123')).not.toBeNull();
 	});
 });
 

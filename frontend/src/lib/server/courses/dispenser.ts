@@ -301,12 +301,49 @@ export function orderedTasks(d: Dispenser, existing: string[]): string[] {
 	return sectionTasks(d.toc).filter((t) => set.has(t));
 }
 
+/** Section options stored in `config`: `closed`, `hidden_if_empty` (toc, contest) and `amount` (combinatory test). */
+const SECTION_OPTIONS = ['closed', 'hidden_if_empty', 'amount'];
+/** Per-task settings stored in `dispenser_data.config.<taskid>` (legacy config item ids). */
+const TASK_SETTINGS = [
+	'weight',
+	'no_stored_submissions',
+	'evaluation_mode',
+	'group_submission',
+	'categories',
+	'submission_limit',
+	'accessibility'
+];
+
+/** The entries of `keys` present in `value` (an empty object when it is not an object). */
+const pick = (value: unknown, keys: string[]): Record<string, unknown> =>
+	value && typeof value === 'object'
+		? Object.fromEntries(keys.filter((k) => Object.hasOwn(value, k)).map((k) => [k, (value as never)[k]]))
+		: {};
+
+/** Stored form of a parsed section (legacy `to_structure` plus its options): other posted keys are dropped. */
+function storedSection(s: TocSection): Record<string, unknown> {
+	const config = pick(s.config, SECTION_OPTIONS);
+	return s.sections
+		? { title: s.title, config, sections_list: s.sections.map(storedSection) }
+		: { title: s.title, config, tasks_list: s.tasks };
+}
+
+/** Stored form of the settings of a task: only the known settings (and limit fields) are kept. */
+function storedTaskConfig(raw: unknown): Record<string, unknown> {
+	const entry = pick(raw, TASK_SETTINGS);
+	if (entry.submission_limit && typeof entry.submission_limit === 'object')
+		entry.submission_limit = pick(entry.submission_limit, ['amount', 'period']);
+	return entry;
+}
+
 /**
  * Validates dispenser data posted by the admin structure editor (legacy
  * `check_dispenser_data`, CADM-07/09): structure, settings of the toc tasks
  * (entries of tasks outside the toc are dropped, missing ones set to `{}`),
  * `imported` flag kept, combinatory `amount`s cast to int, contest settings
- * wrapped back.
+ * wrapped back. Only the keys of the course.yaml format are stored (sections:
+ * `title`, `config`, `tasks_list`/`sections_list`; toc level: `toc`, `config`,
+ * `imported`; known section options and task settings).
  * @returns the data to store in `dispenser_data`, or the error message.
  */
 export function checkDispenserData(
@@ -315,20 +352,20 @@ export function checkDispenserData(
 ): { data: Record<string, unknown> } | { error: string } {
 	try {
 		const toc = parseSections(posted.toc ?? {});
-		const tocTasks = sectionTasks(toc);
-		const raw = (posted.config ?? {}) as Record<string, Record<string, unknown>>;
-		const config = Object.fromEntries(tocTasks.map((t) => [t, raw[t] ?? {}]));
+		const raw = (posted.config ?? {}) as Record<string, unknown>;
+		const config = Object.fromEntries(
+			sectionTasks(toc).map((t) => [t, storedTaskConfig(Object.hasOwn(raw, t) ? raw[t] : {})])
+		);
 		validateConfigs(Object.entries(config), current.kind !== 'combinatory_test');
 		// A structure without toc is stored with an empty one (a toc-less descriptor would be unloadable).
 		const data: Record<string, unknown> = {
-			...posted,
-			toc: Array.isArray(posted.toc) ? posted.toc : [],
+			toc: toc.map(storedSection),
 			config,
 			imported: Boolean(posted.imported) || Boolean(current.data.imported)
 		};
 		if (current.kind === 'combinatory_test')
 			for (const section of data.toc as Record<string, Record<string, unknown>>[]) {
-				section.config = { ...section.config, amount: pyInt(section.config?.amount ?? 0) };
+				section.config = { ...section.config, amount: pyInt(section.config.amount ?? 0) };
 			}
 		return {
 			data: current.kind === 'contest' ? { toc_data: data, contest_settings: current.contest } : data

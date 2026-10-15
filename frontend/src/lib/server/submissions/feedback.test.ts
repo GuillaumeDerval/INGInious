@@ -92,9 +92,10 @@ describe('feedback', () => {
 	});
 
 	it('TASK-21 truncates long strings of the debug dump', () => {
-		expect(f.debugDump({ a: 'x'.repeat(1001), b: { c: 'y' } })).toEqual({
+		expect(f.debugDump({ a: 'x'.repeat(1001), b: { c: 'y' }, ssh_host: 'h', ssh_password: 'secret' })).toEqual({
 			a: `${'x'.repeat(1000)} <truncated>`,
-			b: { c: 'y' }
+			b: { c: 'y' },
+			ssh_host: 'h'
 		});
 	});
 
@@ -103,7 +104,12 @@ describe('feedback', () => {
 		plugins().addHook('feedback_title', (a: { title: string }) => ({ ...a, title: `${a.title}!` }));
 		const input = await env.db.putInput({ code: 'x', upload: { filename: 'a.txt', value: Buffer.from('abc') } });
 		const done = sub({ input, tests: { skill_hidden: true } });
-		const student = await f.submissionToJson(done, course, { staff: false, admin: false }, { replace: true });
+		const student = await f.submissionToJson(
+			done,
+			course,
+			{ staff: false, admin: false, username: 'alice' },
+			{ replace: true }
+		);
 		expect(student).toMatchObject({
 			status: 'done',
 			result: 'failed',
@@ -116,7 +122,7 @@ describe('feedback', () => {
 		const admin = await f.submissionToJson(
 			done,
 			course,
-			{ staff: true, admin: true },
+			{ staff: true, admin: true, username: 'root' },
 			{ replace: false, reloading: true }
 		);
 		expect(admin.tests).toEqual({ skill_hidden: true });
@@ -125,7 +131,7 @@ describe('feedback', () => {
 		const waiting = await f.submissionToJson(
 			sub({ status: 'waiting', ssh_host: 'h', ssh_port: 22, ssh_user: 'u', ssh_password: 'p' }),
 			course,
-			{ staff: false, admin: false },
+			{ staff: false, admin: false, username: 'alice' },
 			{ replace: false }
 		);
 		expect(waiting).toMatchObject({
@@ -135,17 +141,31 @@ describe('feedback', () => {
 			ssh: { host: 'h', port: 22, user: 'u', password: 'p' }
 		});
 		expect(waiting.text).toContain('SSH server active');
+		// TASK-12: the SSH access is only sent to the user who launched the debug job; never in the debug dump.
+		const debugJob = sub({ status: 'waiting', ssh_host: 'h', ssh_port: 22, ssh_user: 'u', ssh_password: 'p' });
+		const other = await f.submissionToJson(
+			debugJob,
+			course,
+			{ staff: true, admin: true, username: 'root' },
+			{
+				replace: false
+			}
+		);
+		expect(other).not.toHaveProperty('ssh');
+		expect(other.text).not.toContain('SSH server active');
+		expect(other.debug).toMatchObject({ ssh_host: 'h', ssh_user: 'u' });
+		expect(other.debug).not.toHaveProperty('ssh_password');
 		const queued = await f.submissionToJson(
 			sub({ status: 'waiting', result: undefined, grade: undefined as never }),
 			course,
-			{ staff: false, admin: false },
+			{ staff: false, admin: false, username: 'alice' },
 			{ replace: false }
 		);
 		expect(queued).toMatchObject({ grade: 0, text: expect.stringContaining('has been sent') });
 		const crashed = await f.submissionToJson(
 			sub({ status: 'error', result: undefined }),
 			course,
-			{ staff: false, admin: false },
+			{ staff: false, admin: false, username: 'alice' },
 			{ replace: false }
 		);
 		expect(crashed.result).toBe('crash');

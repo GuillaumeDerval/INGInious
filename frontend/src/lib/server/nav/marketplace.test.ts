@@ -3,7 +3,7 @@
  * localisation, import (mocked git) and the form action.
  */
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, lstatSync, mkdirSync, readFileSync, symlinkSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { isRedirect } from '@sveltejs/kit';
 import { setupNav, type NavEnv } from '../../../../tests/fixtures/nav/setup.js';
@@ -90,6 +90,26 @@ describe('import', () => {
 			task_dispenser: 'toc',
 			dispenser_data: { config: {}, toc: [{ title: 'A', tasks_list: ['t1'] }] }
 		});
+	});
+
+	it('NAV-18 removes the symbolic links of the cloned repository', async () => {
+		git.impl = (args) => {
+			const dir = args[args.length - 1];
+			mkdirSync(join(dir, 'task', 'sub'), { recursive: true });
+			writeFileSync(join(dir, 'task', 'task.yaml'), 'name: T\n');
+			symlinkSync('/etc/hosts', join(dir, 'course.yaml'));
+			symlinkSync('../task.yaml', join(dir, 'task', 'sub', 'link'));
+			symlinkSync('/nonexistent', join(dir, 'task', 'dangling'));
+			symlinkSync('/etc', join(dir, 'etc'));
+		};
+		expect(await importCourse(DEMO, 'navmkt5', 'superadmin')).toBeNull();
+		const dir = join(env.dir, 'navmkt5');
+		for (const link of ['task/sub/link', 'task/dangling', 'etc'])
+			expect(lstatSync(join(dir, link), { throwIfNoEntry: false })).toBeUndefined();
+		expect(readFileSync(join(dir, 'task', 'task.yaml'), 'utf8')).toBe('name: T\n');
+		// course.yaml was a link: it is replaced by a regular file with the defaults.
+		expect(lstatSync(join(dir, 'course.yaml')).isFile()).toBe(true);
+		expect(parseYaml(readFileSync(join(dir, 'course.yaml'), 'utf8'))).toMatchObject({ name: 'navmkt5' });
 	});
 
 	it('NAV-18 starts from scratch without a valid course.yaml', async () => {

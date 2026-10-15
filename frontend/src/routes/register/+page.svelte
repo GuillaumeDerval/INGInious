@@ -40,7 +40,7 @@ posted to its action; all in centred cards (AuthCard).
 	<AuthCard title={t('Set new password for {} [{}]', reset.realname, reset.username)} icon={KeyIcon}>
 		<form method="POST" action="?/resetpasswd" class="space-y-4" use:enhance={toastEnhance()}>
 			<input type="hidden" name="reset" value={reset.token} />
-			<PasswordFields />
+			<PasswordFields minLength={data.passwordMinLength} />
 			<button class="btn w-full preset-filled-primary-500">{t('Set new password')}</button>
 		</form>
 	</AuthCard>
@@ -56,7 +56,7 @@ posted to its action; all in centred cards (AuthCard).
 					{#snippet children(a)}<input {...a} class="input" name={field.name} type={field.type} required />{/snippet}
 				</FormField>
 			{/each}
-			<PasswordFields />
+			<PasswordFields minLength={data.passwordMinLength} />
 			{#if data.tos}<TosCheckbox links={data.tos} />{/if}
 			<button class="btn w-full preset-filled-primary-500">{t('Sign up')}</button>
 		</form>

@@ -825,7 +825,7 @@ test('CSTU-17 statistics: weighted ratios, hourly range, limits, invalid dates, 
 	await expect(page.getByRole('heading', { name: /submissions selected/ })).toBeVisible();
 });
 
-test('CSTU-17 statistics show "> 0" for tiny tag ratios', async ({ page, loginAs }) => {
+test('CSTU-17 statistics count the most recent `limit` submissions, 500 by default', async ({ page, loginAs }) => {
 	const c = await course('statstiny');
 	const input = await withDb((db) => gridfs(db, BSON.serialize({ answer: '1' })));
 	await withDb((db) =>
@@ -844,6 +844,9 @@ test('CSTU-17 statistics show "> 0" for tiny tag ratios', async ({ page, loginAs
 		)
 	);
 	await loginAs('e2e_tutor');
+	await page.goto(`/admin/${c}/stats`);
+	// 1001 submissions: the 500 most recent are counted by default, all of them with a larger limit.
+	await expect(page.getByText('Number of submissions').locator('..')).toContainText('500');
 	await page.goto(`/admin/${c}/stats?limit=2000`);
-	await expect(page.getByText('> 0').first()).toBeVisible();
+	await expect(page.getByText('Number of submissions').locator('..')).toContainText('1001');
 });

@@ -273,7 +273,7 @@ describe('completeJob', () => {
 	it('TASK-09 turns a too large result into an error and ignores deleted submissions', async () => {
 		await submit('code_python', { code: 'x' });
 		const job = env.backend.last;
-		job.cb.onDone(result(['success', 'x'.repeat(17 * 1024 * 1024)]));
+		job.cb.onDone(result(['success', 'x'], { state: 'x'.repeat(17 * 1024 * 1024) }));
 		await flush();
 		await new Promise((r) => setTimeout(r, 300));
 		expect((await subs())[0]).toMatchObject({
@@ -283,6 +283,32 @@ describe('completeJob', () => {
 		});
 		expect((await userTask('alice', 'code_python'))?.tried).toBe(0);
 		await m.completeJob(new ObjectId(), result(['success', '']), true, course);
+	});
+
+	it('TASK-09 truncates the stored feedback, problem feedbacks and outputs', async () => {
+		await submit('code_python', { code: 'x' });
+		const { TRUNCATED, RESULT_LIMITS: L } = m;
+		const big = 'y'.repeat(L.output + 10);
+		const problems = Object.fromEntries(
+			[...'abcdef'].map((p) => [p, ['failed', 'z'.repeat(L.text + 1)] as [string, string]])
+		);
+		env.backend.last.cb.onDone(
+			result(['failed', 'x'.repeat(L.text + 1)], {
+				problems: { ...problems, ok: ['success', 'short'], odd: 'raw' as never },
+				stdout: big,
+				stderr: 'small'
+			})
+		);
+		await flush();
+		const sub = (await subs())[0];
+		expect([sub.status, sub.text!.length, sub.text!.endsWith(TRUNCATED)]).toEqual(['done', L.text, true]);
+		expect([sub.stdout!.length, sub.stdout!.endsWith(TRUNCATED), sub.stderr]).toEqual([L.output, true, 'small']);
+		const lengths = Object.values(sub.problems!).map((p) => String((p as string[])[1]).length);
+		// Each problem feedback is cut to the text limit, all of them to the problems limit (in order).
+		expect(lengths.slice(0, 5)).toEqual([L.text, L.text, L.text, L.text, L.text]);
+		expect(lengths[5]).toBe(TRUNCATED.length);
+		expect(sub.problems!.ok).toEqual(['success', TRUNCATED]);
+		expect(sub.problems!.odd).toBe('raw');
 	});
 
 	it('TASK-12 stores the SSH credentials of a running job and removes them at the end', async () => {
@@ -299,11 +325,13 @@ describe('completeJob', () => {
 });
 
 describe('kill, find, delete', () => {
-	it("TASK-11 kills only one's own waiting submission with a job", async () => {
+	it("TASK-11 kills only one's own waiting submission with a job, of the given course and task", async () => {
 		const { id } = await submit('outcomes', { mode: 'sleep' });
-		expect(await m.killSubmission(String(id), 'bob')).toBe(false);
-		expect(await m.killSubmission('bad', 'alice')).toBe(false);
-		expect(await m.killSubmission(String(id), 'alice')).toBe(true);
+		expect(await m.killSubmission(String(id), 'bob', 'task_showcase', 'outcomes')).toBe(false);
+		expect(await m.killSubmission('bad', 'alice', 'task_showcase', 'outcomes')).toBe(false);
+		expect(await m.killSubmission(String(id), 'alice', 'other', 'outcomes')).toBe(false);
+		expect(await m.killSubmission(String(id), 'alice', 'task_showcase', 'mcq_single')).toBe(false);
+		expect(await m.killSubmission(String(id), 'alice', 'task_showcase', 'outcomes')).toBe(true);
 		expect(env.backend.killed).toEqual([env.backend.last.id]);
 	});
 

@@ -52,6 +52,14 @@ describe('csv', () => {
 			'id,a,b,d,l,sub[x]\r\nu1,,1,,[],2\r\nu2,y,,1970-01-01T00:00:00.000Z,,\r\n'
 		);
 	});
+	it('CSTU-12 streams the same CSV as dictCsv, in chunks', async () => {
+		const data = Object.fromEntries(Array.from({ length: 2500 }, (_, i) => [`u${i}`, { b: i, sub: { x: -i } }]));
+		const rows = (async function* () {
+			yield* Object.entries(data);
+		})();
+		const stream = csv.dictCsvStream(['sub[x]', 'b'], rows);
+		expect(await new Response(stream).text()).toBe(csv.dictCsv(data));
+	});
 	it('parses CSV files', () => {
 		expect(csv.parseCsv('a,"b ""q"", c"\r\n\r\nx,y\nlast,"multi\nline"')).toEqual([
 			['a', 'b "q", c'],
@@ -480,6 +488,9 @@ describe('query', () => {
 			stat: 'pond_stat',
 			date_after: ''
 		});
+		// The limit is kept as asked: each use caps it (table page, statistics).
+		expect(qry.parseQuery(new URLSearchParams('limit=100000')).limit).toBe(100000);
+		expect(qry.parseQuery(new URLSearchParams('limit=20')).limit).toBe(20);
 		expect(qry.parseIso('2026-10-14 05:31:00+0200')).toEqual(new Date('2026-10-14T03:31:00Z'));
 		expect(qry.parseIso('2026-10-14T05:31')).toEqual(new Date('2026-10-14T05:31:00Z'));
 		expect(qry.parseIso('2026-10-14')).toEqual(new Date('2026-10-14T00:00:00Z'));
@@ -547,7 +558,7 @@ describe('query', () => {
 		]);
 		expect((await run('limit=2&page=9')).page).toBe(2);
 		expect((await run('eval=on')).rows[0].eval).toBe(true);
-		const text = await qry.submissionsCsv(course(), qry.parseQuery(new URLSearchParams('')));
+		const text = await csvText(qry.parseQuery(new URLSearchParams('')));
 		expect(text.split('\r\n')[0]).toBe(
 			'id,courseid,eval,grade,last_replay,result,status,submitted_on,taskid,tests[*auto-tag-1],tests[good],tests[misc],tests[org1],username'
 		);
@@ -592,15 +603,23 @@ async function untar(stream: ReadableStream): Promise<Record<string, string | nu
 		const chunks: Uint8Array[] = [];
 		for await (const c of e) chunks.push(c as Uint8Array);
 		out[e.header.name] = e.header.type === 'directory' ? null : Buffer.concat(chunks).toString();
+		modes[e.header.name] = e.header.mode ?? 0;
 	}
 	return out;
 }
 
+/** The submissions CSV of a query, as text. */
+const csvText = async (q: qry.Query) =>
+	new Response(await qry.submissionsCsv(course(), await qry.selectedSubmissions(course(), q, qry.CSV_FIELDS))).text();
+
+/** Modes of the members read by the last `untar` calls. */
+const modes: Record<string, number> = {};
+
 /** Builds a grader archive with a normal file, a directory and malicious members. */
 async function graderArchive(): Promise<Uint8Array> {
 	const p = pack();
-	p.entry({ name: 'answer.txt' }, 'answer=42');
-	p.entry({ name: 'dir', type: 'directory' });
+	p.entry({ name: 'answer.txt', mode: 0o4777 }, 'answer=42');
+	p.entry({ name: 'dir', type: 'directory', mode: 0o7777 });
 	p.entry({ name: '../evil.txt' }, 'evil');
 	p.entry({ name: '/abs/x.txt' }, 'abs');
 	p.entry({ name: 'link', type: 'symlink', linkname: '/etc/passwd' });
@@ -653,6 +672,8 @@ describe('archive', () => {
 			'uploaded_files/upload.tar.gz'
 		]);
 		expect(a[`${base}/archive/answer.txt`]).toBe('answer=42');
+		// Normalised permissions.
+		expect([modes[`${base}/archive/answer.txt`], modes[`${base}/archive/dir`]]).toEqual([0o644, 0o755]);
 		expect(Object.keys(a).some((k) => k.startsWith('answer/cstu_bob/2026-10-14'))).toBe(true);
 		expect(parse(a[`${base}/submission.test`]!)).toMatchObject({
 			_id: String(i1),
@@ -670,6 +691,12 @@ describe('archive', () => {
 		expect(String(docs[1]._id)).toBe(String(i2));
 		const dup = await untar(archiveStream([docs[1], docs[1]], ['taskid'], false, {}));
 		expect(Object.keys(dup)).toEqual(['answer/submission.test', 'answer-1/submission.test']);
+		// A failing source (database cursor) aborts the download.
+		const failing = (async function* () {
+			yield* [];
+			throw new Error('cursor lost');
+		})();
+		await expect(untar(archiveStream(failing, [], false, {}))).rejects.toThrow();
 	});
 });
 
@@ -770,7 +797,7 @@ describe('edge cases', () => {
 				{ label: 'short', tone: 'warning' }
 			]
 		});
-		expect(await qry.submissionsCsv(course(), q)).toContain('tests[misc]');
+		expect(await csvText(q)).toContain('tests[misc]');
 		const { docs } = await qry.selectedSubmissions(course(), q);
 		const files = gunzipSync(Buffer.from(await new Response(archiveStream(docs, [], true, {})).arrayBuffer())).toString(
 			'latin1'

@@ -872,5 +872,16 @@
 	"Show all ({})": "Εμφάνιση όλων ({})",
 	"Unregister the {} matching students": "Διαγραφή των {} φοιτητών που ταιριάζουν",
 	"{} results": "{} αποτελέσματα",
-	"{} students": "{} φοιτητές"
+	"{} students": "{} φοιτητές",
+	"Log out of this account on every other browser and device. This one stays logged in.": "Αποσύνδεση αυτού του λογαριασμού από κάθε άλλο πρόγραμμα περιήγησης και συσκευή. Αυτή η σύνδεση παραμένει ενεργή.",
+	"Log out other sessions": "Αποσύνδεση άλλων συνεδριών",
+	"New password (min. {} characters) :": "Νέος κωδικός πρόσβασης (τουλάχιστον {} χαρακτήρες) :",
+	"Other sessions": "Άλλες συνεδρίες",
+	"Password (min. {} characters) :": "Κωδικός πρόσβασης (τουλάχιστον {} χαρακτήρες) :",
+	"Password too long.": "Ο κωδικός πρόσβασης είναι πολύ μεγάλος.",
+	"Security": "Ασφάλεια",
+	"This service does not confirm that your e-mail address is verified. Please sign up with another method, then bind this service in your profile.": "Αυτή η υπηρεσία δεν επιβεβαιώνει ότι η διεύθυνση email σας είναι επαληθευμένη. Εγγραφείτε με άλλη μέθοδο και, στη συνέχεια, συνδέστε αυτή την υπηρεσία στο προφίλ σας.",
+	"This username is not available. Please choose another one.": "Αυτό το όνομα χρήστη δεν είναι διαθέσιμο. Επιλέξτε κάποιο άλλο.",
+	"Your other sessions have been logged out.": "Οι άλλες συνεδρίες σας αποσυνδέθηκαν.",
+	"The selection contains {} submissions, more than the {} allowed: narrow it with the filters.": "Η επιλογή περιέχει {} υποβολές, περισσότερες από τις {} που επιτρέπονται: περιορίστε την με τα φίλτρα."
 }
