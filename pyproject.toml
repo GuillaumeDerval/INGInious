@@ -24,7 +24,6 @@ license = {text = "AGPL 3"}
 classifiers = [ # https://pypi.org/classifiers/
     "Programming Language :: Python :: 3",
     "Programming Language :: JavaScript",
-    "Framework :: Flask",
     "Framework :: Pytest",
     "Framework :: Setuptools Plugin",
     "Framework :: Sphinx",
@@ -40,42 +39,23 @@ classifiers = [ # https://pypi.org/classifiers/
 
 dependencies = [
     "docker==7.1.0",
-    "docutils==0.21.2",
-    "Flask==3.0.2",
-    "Flask-Mail==0.10.0",
-    "itsdangerous==2.2.0",
-    "Jinja2==3.1.5",
-    "lti==0.9.5",
-    "PyLTI1p3==2.0.0",
-    "MarkupSafe==3.0.2",
-    "mongoengine==0.29.1",
     "msgpack==1.2.1",
-    "natsort==8.4.0",
     "psutil==6.1.1",
     "pymongo==4.11",
     "python-dotenv==1.1.1",
-    "pytidylib==0.3.2",
     "PyYAML==6.0.2",
     "pyzmq==27.1.0",
-    "requests==2.31.0",
-    "requests-oauthlib==2.0.0",
     "sh==2.2.1",
-    "watchdog==6.0.0",
-    "Werkzeug==3.0.1",
-    "WsgiDAV==4.3.3",
     "zipstream==1.1.4",
-    "pytidylib==0.3.2",
-    "argon2-cffi == 23.1.0",
     "tzlocal == 5.3.1"
 ]
 
 
 [project.optional-dependencies]
-ldap = ["ldap3==2.9.1"]
-saml2 = ["python3-saml==1.16.0"]
 test = [
     "pytest == 8.3.4",
-    "coverage == 7.6.9"
+    "coverage == 7.6.9",
+    "Jinja2==3.1.5"
 ]
 doc = [
     "ipython==8.12.3",
@@ -86,18 +66,15 @@ doc = [
 ]
 
 
+# The web frontend (SvelteKit, `frontend/`) and its command-line tools (inginious-autotest,
+# inginious-test-task, inginious-setup) are a Node.js package: see frontend/README.md.
 [project.scripts]  # in windows scripts need a terminal. If launched from gui it will open one. To prevent this : use [project.gui-scripts] instead
 inginious-agent-docker = "inginious.scripts.agent_docker:main"
 inginious-agent-mcq = "inginious.scripts.agent_mcq:main"
 inginious-backend = "inginious.scripts.backend:main"
-inginious-webapp = "inginious.scripts.webapp:main"
-inginious-webdav = "inginious.scripts.webdav:main"
-inginious-install = "inginious.scripts.install:main"
-inginious-autotest = "inginious.scripts.autotest:main"
 inginious-synchronize = "inginious.scripts.sync.synchronize:main"
 inginious-container-update = "inginious.scripts.container_update:main"
 inginious-database-update = "inginious.scripts.database_update:main"
-inginious-test-task = "inginious.scripts.task_tester.task_tester:main"
 inginious-submission-anonymizer = "inginious.scripts.task_tester.submission_anonymizer:main"
 
 
